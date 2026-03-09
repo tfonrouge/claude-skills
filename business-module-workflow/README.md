@@ -12,13 +12,14 @@ When you start or refactor a software module, this skill guides Claude through p
 
 | Step | Artifact | Purpose |
 |------|----------|---------|
-| 0 | Module Kickoff | Confirm scope, owner, integration surface |
+| 0 | `BRIEF.md` | Confirm scope, owner, integration surface |
 | 1 | `SPECIFICATION.md` | What the module does |
 | 2 | `FLOWCHART.md` + `.html` | How it flows (Mermaid diagrams, browser-ready) |
 | 3 | `API_CONTRACT.md` | How it connects to other modules |
 | 4 | `IMPLEMENTATION_PLAN.md` | How it will be built |
 | 5 | `TEST_PLAN.md` | How it will be verified |
 | 6 | `TRACEABILITY_MATRIX.md` | Living progress tracker |
+| 6b | `GANTT.html` | Print-ready timeline snapshot (regenerate every sprint) |
 
 Every step includes **Claude Code prompt patterns**, a **Definition of Done checklist**, and human sign-off requirements. The skill also handles **refactoring existing modules** via a dedicated guide that covers backward compatibility, breaking changes, regression baselines, and migration planning.
 
@@ -109,6 +110,18 @@ python scripts/render_flowchart.py module-descriptor/<ModuleName>/FLOWCHART.md
 Open the resulting `FLOWCHART.html` in any browser — no plugins required.
 > Claude handles this automatically if you ask it to render the flowchart.
 
+### Rendering the Gantt chart
+
+After updating `TRACEABILITY_MATRIX.md` each sprint, render a print-ready timeline snapshot:
+
+```bash
+python scripts/render_flowchart.py module-descriptor/<ModuleName>/TRACEABILITY_MATRIX.md --output module-descriptor/<ModuleName>/GANTT.html
+```
+
+Open `GANTT.html` in any browser and use **File → Print** to produce a PDF or paper copy.
+The same script handles both — no extra tooling needed.
+> Claude handles this automatically if you ask it to render the Gantt chart.
+
 ---
 
 ## What's inside
@@ -118,7 +131,7 @@ skills/business-module-workflow/
 ├── README.md                         # This file
 ├── SKILL.md                          # Main skill — steps 0–6, prompt patterns, DoD checklists
 ├── scripts/
-│   └── render_flowchart.py           # Converts FLOWCHART.md → self-contained HTML
+│   └── render_flowchart.py           # Converts FLOWCHART.md → FLOWCHART.html and TRACEABILITY_MATRIX.md → GANTT.html
 └── references/
     ├── refactor-guide.md             # Full refactoring guide — overrides each step for existing modules
     ├── example-prompts.md            # Copy-paste Claude Code prompt library for every step
