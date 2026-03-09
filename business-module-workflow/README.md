@@ -19,7 +19,7 @@ When you start or refactor a software module, this skill guides Claude through p
 | 4 | `IMPLEMENTATION_PLAN.md` | How it will be built |
 | 5 | `TEST_PLAN.md` | How it will be verified |
 | 6 | `TRACEABILITY_MATRIX.md` | Living progress tracker |
-| 6b | `GANTT.html` | Print-ready timeline snapshot (regenerate every sprint) |
+| 6b | `GANTT.html` | Visual Gantt chart only — extracted from TRACEABILITY_MATRIX.md (regenerate every sprint) |
 
 Every step includes **Claude Code prompt patterns**, a **Definition of Done checklist**, and human sign-off requirements. The skill also handles **refactoring existing modules** via a dedicated guide that covers backward compatibility, breaking changes, regression baselines, and migration planning.
 
@@ -112,14 +112,15 @@ Open the resulting `FLOWCHART.html` in any browser — no plugins required.
 
 ### Rendering the Gantt chart
 
-After updating `TRACEABILITY_MATRIX.md` each sprint, render a print-ready timeline snapshot:
+After updating `TRACEABILITY_MATRIX.md` each sprint, render a focused, chart-only timeline snapshot:
 
 ```bash
-python scripts/render_flowchart.py module-descriptor/<ModuleName>/TRACEABILITY_MATRIX.md --output module-descriptor/<ModuleName>/GANTT.html
+python scripts/render_flowchart.py module-descriptor/<ModuleName>/TRACEABILITY_MATRIX.md \
+  --gantt-only \
+  --output module-descriptor/<ModuleName>/GANTT.html
 ```
 
-Open `GANTT.html` in any browser and use **File → Print** to produce a PDF or paper copy.
-The same script handles both — no extra tooling needed.
+The `--gantt-only` flag extracts just the Mermaid Gantt block — no tables, no prose — keeping `GANTT.html` compact and focused. Open it in any browser and use **File → Print** to produce a PDF or paper copy.
 > Claude handles this automatically if you ask it to render the Gantt chart.
 
 ---

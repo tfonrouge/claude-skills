@@ -31,7 +31,7 @@ software system. Each module produces a standard set of artifacts in a shared `m
 | 4 | `IMPLEMENTATION_PLAN.md` | How it will be built |
 | 5 | `TEST_PLAN.md` | How it will be verified |
 | 6 | `TRACEABILITY_MATRIX.md` | Living progress tracker (init here, update always) |
-| 6b | `GANTT.html` | Print-ready timeline snapshot (regenerate every sprint) |
+| 6b | `GANTT.html` | Visual Gantt chart only — generated from the Mermaid block in TRACEABILITY_MATRIX.md (regenerate every sprint) |
 
 > **TRACEABILITY_MATRIX.md is a living document.** Initialize it after Step 4 and update it
 > continuously as work progresses. It is never "done."
@@ -407,18 +407,18 @@ gantt
 ### Rendering GANTT.html
 
 `TRACEABILITY_MATRIX.md` is the **canonical editable source** — Claude and your team edit this.
-To produce a print-ready version anyone can open, share, or print without plugins, run:
+To produce a focused, chart-only HTML file showing just the Gantt timeline, run:
 
 ```bash
-python scripts/render_flowchart.py module-descriptor/<ModuleName>/TRACEABILITY_MATRIX.md --output module-descriptor/<ModuleName>/GANTT.html
+python scripts/render_flowchart.py module-descriptor/<ModuleName>/TRACEABILITY_MATRIX.md \
+  --gantt-only \
+  --output module-descriptor/<ModuleName>/GANTT.html
 ```
 
-This generates `GANTT.html` in the same directory. Open in any browser and use **File → Print**
-to produce a PDF or paper copy. Regenerate it every sprint after updating the `.md` source —
-the HTML is always disposable.
+This generates `GANTT.html` containing **only the Gantt chart** — no tables, no prose, no issue tracker — so it stays compact and focused as a timeline snapshot. Open it in any browser and use **File → Print** to produce a PDF or paper copy. Regenerate it every sprint after updating the Mermaid Gantt block in the `.md` source — the HTML is always disposable.
 
-> The same `render_flowchart.py` script used for `FLOWCHART.html` handles Gantt diagrams.
-> No new tooling required. If the script is missing, copy it from the skill's `scripts/` directory first.
+> The `--gantt-only` flag extracts only `gantt` diagram blocks from the markdown and discards all other content. If no Gantt diagram is found, the HTML will display a "no diagrams found" notice.
+> If the script is missing, copy it from the skill's `scripts/` directory first.
 
 ### Claude Code Prompt Pattern (initial generation)
 ```
@@ -429,7 +429,9 @@ Set all statuses to "Not Started".
 Include a Mermaid Gantt chart under the "Timeline" section using the
 phases and date estimates from IMPLEMENTATION_PLAN.md.
 Mark all tasks with no state (not started).
-Then render GANTT.html from it.
+Then render GANTT.html using:
+  python scripts/render_flowchart.py module-descriptor/[ModuleName]/TRACEABILITY_MATRIX.md \
+    --gantt-only --output module-descriptor/[ModuleName]/GANTT.html
 ```
 
 ### Claude Code Prompt Pattern (update)
@@ -440,7 +442,9 @@ Blockers discovered: [list].
 Adjust actuals vs estimates and flag any requirements at risk.
 Also update the Mermaid Gantt — mark completed tasks as "done",
 in-progress as "active", and blocked tasks as "crit".
-Then regenerate GANTT.html.
+Then regenerate GANTT.html using:
+  python scripts/render_flowchart.py module-descriptor/[ModuleName]/TRACEABILITY_MATRIX.md \
+    --gantt-only --output module-descriptor/[ModuleName]/GANTT.html
 ```
 
 ### Claude Code Prompt Pattern — Render to HTML only
@@ -448,7 +452,9 @@ Then regenerate GANTT.html.
 Render the Gantt chart from module-descriptor/[ModuleName]/TRACEABILITY_MATRIX.md
 to GANTT.html in the same directory.
 If scripts/render_flowchart.py does not exist in the project root,
-copy it from the skill's scripts/ directory first, then run it.
+copy it from the skill's scripts/ directory first, then run:
+  python scripts/render_flowchart.py module-descriptor/[ModuleName]/TRACEABILITY_MATRIX.md \
+    --gantt-only --output module-descriptor/[ModuleName]/GANTT.html
 ```
 
 ### Definition of Done
