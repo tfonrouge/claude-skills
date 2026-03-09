@@ -12,13 +12,14 @@ When you start or refactor a software module, this skill guides Claude through p
 
 | Step | Artifact | Purpose |
 |------|----------|---------|
-| 0 | Module Kickoff | Confirm scope, owner, integration surface |
+| 0 | `BRIEF.md` | Context, owner, justification |
 | 1 | `SPECIFICATION.md` | What the module does |
-| 2 | `Flow_Chart_Process.md` + `.html` | How it flows (Mermaid diagrams, browser-ready) |
-| 3 | `API_Contract.md` | How it connects to other modules |
-| 4 | `Module_Implementation_Plan.md` | How it will be built |
-| 5 | `Test_Routing_Map.md` | How it will be verified |
-| 6 | `Traceability_Matrix.md` | Living progress tracker |
+| 2 | `FLOWCHART.md` + `.html` | How it flows (Mermaid diagrams, browser-ready) |
+| 3 | `API_CONTRACT.md` | How it connects to other modules |
+| 4 | `IMPLEMENTATION_PLAN.md` | How it will be built |
+| 5 | `TEST_PLAN.md` | How it will be verified |
+| 6 | `TRACEABILITY_MATRIX.md` | Living progress tracker |
+| 6b | `GANTT.html` | Print-ready timeline snapshot (regenerate every sprint) |
 
 Every step includes **Claude Code prompt patterns**, a **Definition of Done checklist**, and human sign-off requirements. The skill also handles **refactoring existing modules** via a dedicated guide that covers backward compatibility, breaking changes, regression baselines, and migration planning.
 
@@ -26,7 +27,7 @@ Every step includes **Claude Code prompt patterns**, a **Definition of Done chec
 
 ## Why this workflow
 
-- **Claude Code works better with structure** — SPECIFICATION.md eliminates ambiguity, Flow_Chart_Process.md covers every branch, API_Contract.md prevents integration surprises
+- **Claude Code works better with structure** — SPECIFICATION.md eliminates ambiguity, FLOWCHART.md covers every branch, API_CONTRACT.md prevents integration surprises
 - **Errors are caught early** — a wrong requirement fixed in Step 1 costs nothing; the same error found after coding costs days
 - **Consistent across modules** — any team member can navigate any module instantly because every module looks the same
 - **Scales with your system** — as modules multiply, the standard structure compounds in value; Claude can reason across multiple modules when given their artifacts
@@ -98,16 +99,25 @@ I need to refactor the InventoryModule — it has performance issues and we need
 
 Claude will walk through the steps, generate each artifact, and prompt you for decisions and sign-offs at the right moments.
 
-### Rendering flowcharts
+### Rendering flowcharts and Gantt charts
 
-After `Flow_Chart_Process.md` is generated, render it to a browser-ready HTML file:
+After `FLOWCHART.md` is generated, render it to a browser-ready HTML file:
 
 ```bash
-python scripts/render_flowchart.py module-descriptor/<ModuleName>/Flow_Chart_Process.md
+python scripts/render_flowchart.py module-descriptor/<ModuleName>/FLOWCHART.md
 ```
 
-Open the resulting `Flow_Chart_Process.html` in any browser — no plugins required.
-> Claude handles this automatically if you ask it to render the flowchart.
+Open the resulting `FLOWCHART.html` in any browser — no plugins required.
+
+To render the Gantt chart from `TRACEABILITY_MATRIX.md`:
+
+```bash
+python scripts/render_flowchart.py module-descriptor/<ModuleName>/TRACEABILITY_MATRIX.md --output module-descriptor/<ModuleName>/GANTT.html
+```
+
+Open `GANTT.html` in any browser and use **File → Print** to produce a PDF. Regenerate every sprint.
+
+> Claude handles rendering automatically if you ask it to render the flowchart or Gantt chart.
 
 ---
 
@@ -118,7 +128,7 @@ skills/business-module-workflow/
 ├── README.md                         # This file
 ├── SKILL.md                          # Main skill — steps 0–6, prompt patterns, DoD checklists
 ├── scripts/
-│   └── render_flowchart.py           # Converts Flow_Chart_Process.md → self-contained HTML
+│   └── render_flowchart.py           # Converts FLOWCHART.md / TRACEABILITY_MATRIX.md → self-contained HTML
 └── references/
     ├── refactor-guide.md             # Full refactoring guide — overrides each step for existing modules
     ├── example-prompts.md            # Copy-paste Claude Code prompt library for every step
