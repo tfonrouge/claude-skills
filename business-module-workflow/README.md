@@ -2,7 +2,7 @@
 
 A Claude skill that gives you a structured, repeatable methodology for building any module in a large-scale business software system — ERP, CRM, WMS, SaaS platforms, internal tooling, and more — using **Claude Code as a development partner**.
 
-Part of the [`claude-skills`](https://github.com/tfonrouge/claude-skills) monorepo.
+Part of the [`claude-skills`](https://github.com/<your-username>/claude-skills) monorepo.
 
 ---
 
@@ -51,7 +51,7 @@ Clone the whole repo once and all skills are available.
 
 ```bash
 # Clone the monorepo
-git clone https://github.com/tfonrouge/claude-skills.git
+git clone https://github.com/<your-username>/claude-skills.git
 
 # Symlink or copy this skill into your personal Claude skills folder
 mkdir -p ~/.claude/skills
@@ -141,7 +141,7 @@ If you used symlinks during installation, all skills update automatically. If yo
 
 ## Contributing
 
-Issues and pull requests are welcome on the [monorepo](https://github.com/tfonrouge/claude-skills). If you've used this skill on a real system and found gaps — especially around specific module types, edge cases in the refactoring guide, or prompt patterns that work better — please open an issue or PR.
+Issues and pull requests are welcome on the [monorepo](https://github.com/<your-username>/claude-skills). If you've used this skill on a real system and found gaps — especially around specific module types, edge cases in the refactoring guide, or prompt patterns that work better — please open an issue or PR.
 
 ---
 

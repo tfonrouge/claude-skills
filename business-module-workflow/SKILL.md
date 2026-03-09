@@ -1,5 +1,7 @@
 ---
 name: business-module-workflow
+metadata:
+  version: 0.1.0
 description: >
   Structured workflow for building modules in large-scale business software systems using Claude Code
   as a development partner. Use this skill whenever a user mentions building, designing, planning, or
@@ -22,15 +24,16 @@ software system. Each module produces a standard set of artifacts in a shared `m
 
 | Step | Artifact | Purpose |
 |------|----------|---------|
-| 0 | Module Brief (kickoff) | Context, owner, justification |
+| 0 | `BRIEF.md` | Context, owner, justification |
 | 1 | `SPECIFICATION.md` | What the module does |
-| 2 | `Flow_Chart_Process.md` | How it flows (Mermaid diagrams) |
-| 3 | `API_Contract.md` | How it connects to other modules |
-| 4 | `Module_Implementation_Plan.md` | How it will be built |
-| 5 | `Test_Routing_Map.md` | How it will be verified |
-| 6 | `Traceability_Matrix.md` | Living progress tracker (init here, update always) |
+| 2 | `FLOWCHART.md` | How it flows (Mermaid diagrams) |
+| 3 | `API_CONTRACT.md` | How it connects to other modules |
+| 4 | `IMPLEMENTATION_PLAN.md` | How it will be built |
+| 5 | `TEST_PLAN.md` | How it will be verified |
+| 6 | `TRACEABILITY_MATRIX.md` | Living progress tracker (init here, update always) |
+| 6b | `GANTT.html` | Print-ready timeline snapshot (regenerate every sprint) |
 
-> **Traceability_Matrix.md is a living document.** Initialize it after Step 4 and update it
+> **TRACEABILITY_MATRIX.md is a living document.** Initialize it after Step 4 and update it
 > continuously as work progresses. It is never "done."
 
 ---
@@ -40,15 +43,15 @@ software system. Each module produces a standard set of artifacts in a shared `m
 ### Claude Code Efficiency Gains
 Claude Code performs significantly better when given structured context. Without artifacts, it guesses intent, invents data models, and makes integration assumptions that conflict with the rest of your system. With this workflow:
 - **SPECIFICATION.md** gives Claude a precise contract to code against — no ambiguity, no hallucinated business rules
-- **Flow_Chart_Process.md** lets Claude generate code that handles every branch, not just the happy path
-- **API_Contract.md** means Claude can write integration code that matches what the other module actually emits
-- **Test_Routing_Map.md** enables Claude to write tests that trace real requirements, not synthetic ones it invented
+- **FLOWCHART.md** lets Claude generate code that handles every branch, not just the happy path
+- **API_CONTRACT.md** means Claude can write integration code that matches what the other module actually emits
+- **TEST_PLAN.md** enables Claude to write tests that trace real requirements, not synthetic ones it invented
 
 The result: less back-and-forth correction, fewer "that's not what I meant" moments, and significantly more of Claude's context window spent on building rather than re-clarifying.
 
 ### Team Alignment & Onboarding
 Every artifact is a communication tool, not just documentation:
-- A new developer can read `SPECIFICATION.md` + `Flow_Chart_Process.md` and be productive on day one without needing a senior developer to explain the module
+- A new developer can read `SPECIFICATION.md` + `FLOWCHART.md` and be productive on day one without needing a senior developer to explain the module
 - Disagreements about scope get resolved at Step 1 (cheap) instead of Step 4 (expensive)
 - The standard directory structure means any team member can navigate any module instantly — no "where do I find X?" overhead
 
@@ -77,15 +80,15 @@ Without a standard, each module becomes a snowflake. The tenth module is as hard
 ### Stakeholder & Management Buy-In
 Each artifact maps cleanly to a stakeholder concern:
 - **SPECIFICATION.md** → business owner confirms scope before money is spent
-- **Module_Implementation_Plan.md** → management sees phases, timelines, and risks upfront
-- **Traceability_Matrix.md** → real-time progress visibility without status meetings
-- **Test_Routing_Map.md** → QA and compliance teams can verify coverage before sign-off
+- **IMPLEMENTATION_PLAN.md** → management sees phases, timelines, and risks upfront
+- **TRACEABILITY_MATRIX.md** → real-time progress visibility without status meetings
+- **TEST_PLAN.md** → QA and compliance teams can verify coverage before sign-off
 
 The workflow produces evidence of rigor — useful when justifying timelines, requesting resources, or demonstrating compliance to auditors.
 
 ---
 
-## Step 0: Module Kickoff
+## Step 0: BRIEF.md (Kickoff)
 
 > **Refactoring an existing module?** This workflow applies equally to refactors, but each step
 > has important differences. Read `references/refactor-guide.md` before proceeding — it overrides
@@ -117,8 +120,10 @@ Help me validate this scope is well-defined before we write the specification.
 
 ### Definition of Done
 - [ ] Directory created at `module-descriptor/<ModuleName>/`
-- [ ] All kickoff fields confirmed with business owner
+- [ ] `BRIEF.md` created and all kickoff fields populated
+- [ ] Business owner has reviewed and signed off on justification and scope
 - [ ] Integration surface identified at a high level
+- [ ] No unresolved ambiguities before proceeding to Step 1
 
 ---
 
@@ -157,7 +162,7 @@ Flag any ambiguities you find and ask me to resolve them before finalizing.
 
 ---
 
-## Step 2: Flow_Chart_Process.md
+## Step 2: FLOWCHART.md
 
 ### Purpose
 Visually map every path through the module using **Mermaid diagrams**.
@@ -169,16 +174,16 @@ Visually map every path through the module using **Mermaid diagrams**.
 4. **Integration Event Flow** — when/what this module sends to or receives from others
 5. **Role-Based View** — what each user role sees and can trigger
 
-### Rendering Flow_Chart_Process.md
+### Rendering FLOWCHART.md
 
 The `.md` file is the **canonical editable source** — Claude and your team edit this.
 To produce a browser-ready version anyone can open without plugins, run:
 
 ```bash
-python scripts/render_flowchart.py module-descriptor/<ModuleName>/Flow_Chart_Process.md
+python scripts/render_flowchart.py module-descriptor/<ModuleName>/FLOWCHART.md
 ```
 
-This generates `Flow_Chart_Process.html` in the same directory. Open it in any browser.
+This generates `FLOWCHART.html` in the same directory. Open it in any browser.
 Regenerate it whenever the `.md` source changes — the HTML is always disposable.
 
 > **Important — script bootstrap:** `render_flowchart.py` is bundled inside this skill at
@@ -204,7 +209,7 @@ Regenerate it whenever the `.md` source changes — the HTML is always disposabl
 
 ### Claude Code Prompt Pattern — Generate
 ```
-Based on SPECIFICATION.md for [ModuleName], generate Flow_Chart_Process.md.
+Based on SPECIFICATION.md for [ModuleName], generate FLOWCHART.md.
 Use Mermaid diagrams. I need:
 1. Happy path flowchart
 2. Decision tree with all branch conditions
@@ -216,7 +221,7 @@ Be exhaustive — more detail is better here.
 
 ### Claude Code Prompt Pattern — Render to HTML
 ```
-Render module-descriptor/[ModuleName]/Flow_Chart_Process.md to HTML.
+Render module-descriptor/[ModuleName]/FLOWCHART.md to HTML.
 If scripts/render_flowchart.py does not exist in the project root,
 copy it from the skill's scripts/ directory first, then run it.
 ```
@@ -229,7 +234,7 @@ copy it from the skill's scripts/ directory first, then run it.
 
 ---
 
-## Step 3: API_Contract.md
+## Step 3: API_CONTRACT.md
 
 ### Purpose
 Define the integration boundaries precisely so other modules can build against this one
@@ -256,8 +261,8 @@ independently. This is the **contract** — changes here require cross-team sign
 
 ### Claude Code Prompt Pattern
 ```
-Based on SPECIFICATION.md and Flow_Chart_Process.md for [ModuleName],
-generate API_Contract.md. This module integrates with: [list modules].
+Based on SPECIFICATION.md and FLOWCHART.md for [ModuleName],
+generate API_CONTRACT.md. This module integrates with: [list modules].
 Define all inbound and outbound interfaces. Flag any integration points
 that are underspecified and need cross-team clarification.
 ```
@@ -270,7 +275,7 @@ that are underspecified and need cross-team clarification.
 
 ---
 
-## Step 4: Module_Implementation_Plan.md
+## Step 4: IMPLEMENTATION_PLAN.md
 
 ### Purpose
 Break the specification into buildable phases with clear milestones, dependencies, and estimates.
@@ -296,8 +301,8 @@ Break the specification into buildable phases with clear milestones, dependencie
 
 ### Claude Code Prompt Pattern
 ```
-Based on SPECIFICATION.md, Flow_Chart_Process.md, and API_Contract.md for [ModuleName],
-generate Module_Implementation_Plan.md.
+Based on SPECIFICATION.md, FLOWCHART.md, and API_CONTRACT.md for [ModuleName],
+generate IMPLEMENTATION_PLAN.md.
 Our team has [N] developers. Preferred phase size is [1–2 week sprints / other].
 Known constraints: [list any].
 Flag dependencies on other modules' API contracts not yet finalized.
@@ -311,7 +316,7 @@ Flag dependencies on other modules' API contracts not yet finalized.
 
 ---
 
-## Step 5: Test_Routing_Map.md
+## Step 5: TEST_PLAN.md
 
 ### Purpose
 Document complete user journeys that validate the module end-to-end, tracing every path
@@ -339,9 +344,9 @@ in the flow chart against every requirement in the spec.
 
 ### Claude Code Prompt Pattern
 ```
-Based on all artifacts for [ModuleName], generate Test_Routing_Map.md.
+Based on all artifacts for [ModuleName], generate TEST_PLAN.md.
 Ensure every requirement in SPECIFICATION.md and every path in
-Flow_Chart_Process.md has at least one test. Flag any paths that are
+FLOWCHART.md has at least one test. Flag any paths that are
 difficult to test automatically vs. require manual QA.
 ```
 
@@ -353,7 +358,7 @@ difficult to test automatically vs. require manual QA.
 
 ---
 
-## Step 6: Traceability_Matrix.md (Living Document)
+## Step 6: TRACEABILITY_MATRIX.md (Living Document)
 
 ### Purpose
 Track progress across phases and link completed work to requirements.
@@ -364,6 +369,23 @@ Track progress across phases and link completed work to requirements.
 ## Module: [ModuleName]
 **Last Updated**: [date]
 **Overall Status**: [% complete]
+
+## Timeline (Gantt)
+
+```mermaid
+gantt
+  title [ModuleName] — Phase Progress
+  dateFormat YYYY-MM-DD
+  section Phase 1
+    [Task name]  :done,    p1a, YYYY-MM-DD, YYYY-MM-DD
+    [Task name]  :active,  p1b, YYYY-MM-DD, YYYY-MM-DD
+  section Phase 2
+    [Task name]  :         p2a, YYYY-MM-DD, YYYY-MM-DD
+    [Task name]  :         p2b, YYYY-MM-DD, YYYY-MM-DD
+```
+
+> Task states: `done` = completed, `active` = in progress, `crit` = blocked/at risk, *(none)* = not started.
+> Update this diagram every sprint alongside the tables below.
 
 ## Requirement Traceability
 | REQ-ID | Description | Phase | Status | Test ID | Notes |
@@ -382,24 +404,57 @@ Track progress across phases and link completed work to requirements.
 |-------|--------|-------|-------------------|
 ```
 
+### Rendering GANTT.html
+
+`TRACEABILITY_MATRIX.md` is the **canonical editable source** — Claude and your team edit this.
+To produce a print-ready version anyone can open, share, or print without plugins, run:
+
+```bash
+python scripts/render_flowchart.py module-descriptor/<ModuleName>/TRACEABILITY_MATRIX.md --output module-descriptor/<ModuleName>/GANTT.html
+```
+
+This generates `GANTT.html` in the same directory. Open in any browser and use **File → Print**
+to produce a PDF or paper copy. Regenerate it every sprint after updating the `.md` source —
+the HTML is always disposable.
+
+> The same `render_flowchart.py` script used for `FLOWCHART.html` handles Gantt diagrams.
+> No new tooling required. If the script is missing, copy it from the skill's `scripts/` directory first.
+
 ### Claude Code Prompt Pattern (initial generation)
 ```
-Generate an initial Traceability_Matrix.md for [ModuleName] based on
-Module_Implementation_Plan.md and SPECIFICATION.md.
+Generate an initial TRACEABILITY_MATRIX.md for [ModuleName] based on
+IMPLEMENTATION_PLAN.md and SPECIFICATION.md.
 Pre-populate REQ IDs from the spec and milestones from the plan.
 Set all statuses to "Not Started".
+Include a Mermaid Gantt chart under the "Timeline" section using the
+phases and date estimates from IMPLEMENTATION_PLAN.md.
+Mark all tasks with no state (not started).
+Then render GANTT.html from it.
 ```
 
 ### Claude Code Prompt Pattern (update)
 ```
-Update Traceability_Matrix.md for [ModuleName].
+Update TRACEABILITY_MATRIX.md for [ModuleName].
 Completed this sprint: [list items].
 Blockers discovered: [list].
 Adjust actuals vs estimates and flag any requirements at risk.
+Also update the Mermaid Gantt — mark completed tasks as "done",
+in-progress as "active", and blocked tasks as "crit".
+Then regenerate GANTT.html.
+```
+
+### Claude Code Prompt Pattern — Render to HTML only
+```
+Render the Gantt chart from module-descriptor/[ModuleName]/TRACEABILITY_MATRIX.md
+to GANTT.html in the same directory.
+If scripts/render_flowchart.py does not exist in the project root,
+copy it from the skill's scripts/ directory first, then run it.
 ```
 
 ### Definition of Done
-*This document is never "done" — it is complete when the module ships and all requirements show "Verified".*
+*This document is never "done" — it is complete when the module ships and all requirements show "Verified" and all Gantt tasks show "done".*
+
+> `GANTT.html` should be regenerated and attached to sprint review meetings as a progress snapshot.
 
 ---
 
@@ -408,12 +463,13 @@ Adjust actuals vs estimates and flag any requirements at risk.
 ```
 Step 0: Kickoff → confirm scope, create directory
 Step 1: SPECIFICATION.md → what the module does
-Step 2: Flow_Chart_Process.md → how it flows
-Step 3: API_Contract.md → how it connects (share with other teams)
-Step 4: Module_Implementation_Plan.md → how it will be built
-         └─ Initialize Traceability_Matrix.md here
-Step 5: Test_Routing_Map.md → how it will be verified
-Step 6: Traceability_Matrix.md → update continuously through development
+Step 2: FLOWCHART.md → how it flows
+Step 3: API_CONTRACT.md → how it connects (share with other teams)
+Step 4: IMPLEMENTATION_PLAN.md → how it will be built
+         └─ Initialize TRACEABILITY_MATRIX.md here
+Step 5: TEST_PLAN.md → how it will be verified
+Step 6: TRACEABILITY_MATRIX.md → update continuously through development
+         └─ Regenerate GANTT.html every sprint for print-ready timeline
 ```
 
 > See `references/example-prompts.md` for a full set of Claude Code prompts per module type.
