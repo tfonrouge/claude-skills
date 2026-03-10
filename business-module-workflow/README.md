@@ -1,6 +1,10 @@
 # business-module-workflow
 
-A Claude skill that gives you a structured, repeatable methodology for building any module in a large-scale business software system — ERP, CRM, WMS, SaaS platforms, internal tooling, and more — using **Claude Code as a development partner**.
+**v0.2.0**
+
+A Claude skill that gives you a structured, repeatable methodology for building software modules and inter-module features in large-scale business systems — ERP, CRM, WMS, SaaS platforms, internal tooling, and more — using **Claude Code as a development partner**.
+
+The skill operates in **two modes** depending on the scope of the work.
 
 Part of the [`claude-skills`](https://github.com/tfonrouge/claude-skills) monorepo.
 
@@ -8,7 +12,9 @@ Part of the [`claude-skills`](https://github.com/tfonrouge/claude-skills) monore
 
 ## What it does
 
-When you start or refactor a software module, this skill guides Claude through producing a standard set of artifacts in the right order:
+### Module Mode — full module from scratch
+
+When building a new module, Claude guides you through 7 artifacts in order:
 
 | Step | Artifact | Purpose |
 |------|----------|---------|
@@ -19,15 +25,34 @@ When you start or refactor a software module, this skill guides Claude through p
 | 4 | `IMPLEMENTATION_PLAN.md` | How it will be built |
 | 5 | `TEST_PLAN.md` | How it will be verified |
 | 6 | `TRACEABILITY_MATRIX.md` | Living progress tracker |
-| 6b | `GANTT.html` | Visual Gantt chart only — extracted from TRACEABILITY_MATRIX.md (regenerate every sprint) |
+| 6b | `GANTT.html` | Visual Gantt chart — extracted from TRACEABILITY_MATRIX.md (regenerate every sprint) |
 
-Every step includes **Claude Code prompt patterns**, a **Definition of Done checklist**, and human sign-off requirements. The skill also handles **refactoring existing modules** via a dedicated guide that covers backward compatibility, breaking changes, regression baselines, and migration planning.
+Artifacts go in: `module-descriptor/<ModuleName>/`
+
+### Bridge Mode — feature between existing modules *(new in v0.2.0)*
+
+When adding an entity or workflow that connects two or more existing modules — without building a full standalone module — Bridge Mode produces 5 scoped artifacts instead of the full set:
+
+| Step | Artifact | Purpose |
+|------|----------|---------|
+| B0 | `BRIEF.md` | Scope, actors, affected modules, explicit out-of-scope |
+| B1 | `ENTITY_DESCRIPTOR.md` | States, rules, data model + integration flow diagram |
+| B2 | `SERVICE_CONTRACTS.md` | API/service boundaries between touched modules |
+| B3 | `VIEW_MAP.md` | New views + delta description of modified existing views |
+| B4 | `IMPLEMENTATION_ORDER.md` | Flat checklist ordered by dependency layer |
+
+Artifacts go in: `module-descriptor/<FeatureName>(BRIDGE)/`
+
+The `(BRIDGE)` suffix makes the directory's purpose immediately identifiable when browsing the repo.
+
+Every step in both modes includes **Claude Code prompt patterns**, a **Definition of Done checklist**, and human sign-off requirements. The skill also handles **refactoring existing modules** via a dedicated guide.
 
 ---
 
 ## Why this workflow
 
 - **Claude Code works better with structure** — SPECIFICATION.md eliminates ambiguity, FLOWCHART.md covers every branch, API_CONTRACT.md prevents integration surprises
+- **Right-sized for the task** — Bridge Mode avoids over-engineering a feature that doesn't need a full module treatment
 - **Errors are caught early** — a wrong requirement fixed in Step 1 costs nothing; the same error found after coding costs days
 - **Consistent across modules** — any team member can navigate any module instantly because every module looks the same
 - **Scales with your system** — as modules multiply, the standard structure compounds in value; Claude can reason across multiple modules when given their artifacts
@@ -87,8 +112,9 @@ Organization owners can upload the `.skill` file once in **Organization Settings
 
 ## Usage
 
-Once installed, Claude automatically uses the skill when you mention building or refactoring a software module. You can also invoke it explicitly:
+Once installed, Claude automatically selects the right mode based on your request. You can also invoke it explicitly:
 
+**Module Mode:**
 ```
 Let's start a new module called BillingManagement for our SaaS platform.
 ```
@@ -97,7 +123,16 @@ Let's start a new module called BillingManagement for our SaaS platform.
 I need to refactor the InventoryModule — it has performance issues and we need to add multi-warehouse support.
 ```
 
-Claude will walk through the steps, generate each artifact, and prompt you for decisions and sign-offs at the right moments.
+**Bridge Mode:**
+```
+I need to implement PlanReparacion — a bridge feature between DocEdoFallaCavidad and OTrabTaller.
+```
+
+```
+I need to add functionality between the Inventory and Billing modules to handle partial shipments.
+```
+
+Claude will determine the appropriate mode, confirm it with you, and walk through the artifacts step by step.
 
 ### Rendering flowcharts
 
@@ -130,7 +165,7 @@ The `--gantt-only` flag extracts just the Mermaid Gantt block — no tables, no 
 ```
 skills/business-module-workflow/
 ├── README.md                         # This file
-├── SKILL.md                          # Main skill — steps 0–6, prompt patterns, DoD checklists
+├── SKILL.md                          # Main skill — mode selection, steps 0–6 (Module), B0–B4 (Bridge)
 ├── scripts/
 │   └── render_flowchart.py           # Converts FLOWCHART.md → FLOWCHART.html and TRACEABILITY_MATRIX.md → GANTT.html
 └── references/

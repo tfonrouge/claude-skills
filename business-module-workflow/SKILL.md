@@ -1,24 +1,67 @@
 ---
 name: business-module-workflow
 metadata:
-  version: 0.1.0
+  version: 0.2.0
 description: >
-  Structured workflow for building modules in large-scale business software systems using Claude Code
-  as a development partner. Use this skill whenever a user mentions building, designing, planning, or
-  implementing any software module with business logic — e.g. ERP, CRM, WMS, SaaS platform, internal
-  tooling, or enterprise application modules (e.g. "Maintenance Orders", "Import Management",
-  "Inventory", "Billing", "HR", "Customer Onboarding", "Approval Workflows").
-  Also trigger when users ask about module specifications, flow charts, API contracts, implementation
-  plans, test routing maps, traceability, or any structured multi-artifact module development process.
-  If the user says "let's build a module", "start a new module", "design a feature module", or asks
-  for help structuring a software component with business rules and integrations, use this skill
-  immediately — even if they haven't named a specific platform or system type.
+  Two-mode workflow for building business software with Claude Code. Use immediately when any of
+  these appear — even without an explicit request for a structured workflow.
+
+  MODULE MODE: Building a full module from scratch (ERP, CRM, WMS, SaaS, internal tooling).
+  Triggers: "new module", "build a module", "start a module", module specs, flow charts, API
+  contracts, implementation plans, traceability, or any multi-artifact module development process.
+
+  BRIDGE MODE: Adding a feature/entity that connects existing modules without building a standalone
+  module. Triggers: "functionality between X and Y", "bridge between modules", "new entity that
+  integrates with", "extend existing module", "connect X to Y", "puente entre módulos",
+  "funcionalidad entre entidades existentes", single entity + inter-module contracts + a few views.
+  Produces scoped artifacts in a directory with the (BRIDGE) suffix.
 ---
 
 # Business Module Workflow
 
-A repeatable, Claude Code–assisted methodology for building any module in a large-scale business
-software system. Each module produces a standard set of artifacts in a shared `module-descriptor/` directory.
+A repeatable, Claude Code–assisted methodology for building modules or inter-module features in a
+large-scale business software system.
+
+---
+
+## Mode Selection — Do This First
+
+Before starting any work, determine which mode applies and tell the user:
+
+### MODULE MODE
+Use when:
+- Building a new module from scratch with its own data model, routes, and UI
+- The module has no pre-existing architectural patterns to inherit
+- Scope spans multiple weeks / multiple developers
+
+→ Follow the full workflow below (Steps 0–6). Artifacts go in:
+```
+module-descriptor/<ModuleName>/
+```
+
+### BRIDGE MODE
+Use when:
+- Adding a feature, entity, or workflow that sits *between* two or more existing modules
+- The codebase architecture is already established (models, services, views patterns are known)
+- Scope is typically 1–2 developers, days to 1–2 weeks
+- The task is primarily: new entity + inter-module contracts + a few new/modified views
+
+→ Follow the **Bridge Mode workflow** (Section at bottom of this file). Artifacts go in:
+```
+module-descriptor/<FeatureName>(BRIDGE)/
+```
+The `(BRIDGE)` suffix makes the directory's purpose immediately identifiable when browsing the repo.
+
+### When in doubt, ask:
+```
+Claude Code prompt:
+"I need to implement [description]. Should this be a full module or a bridge feature?
+Summarize: how many new entities, new views, new routes, and which existing modules are touched."
+```
+Use the answer to pick the mode. If it's ≥3 new entities or ≥3 new route groups → MODULE MODE.
+Otherwise → BRIDGE MODE.
+
+---
 
 ## Overview of Artifacts
 
@@ -481,3 +524,272 @@ Step 6: TRACEABILITY_MATRIX.md → update continuously through development
 > See `references/example-prompts.md` for a full set of Claude Code prompts per module type.
 > See `references/business-module-checklist.md` for a printable per-module checklist.
 > See `references/refactor-guide.md` for step-by-step guidance when refactoring an existing module.
+
+---
+
+---
+
+# BRIDGE MODE — Scoped Feature Workflow
+
+Use this section when Mode Selection determined **BRIDGE MODE**. Do not run the full Steps 0–6 workflow.
+
+Bridge Mode produces 5 focused artifacts — no more. All artifacts live in:
+```
+module-descriptor/<FeatureName>(BRIDGE)/
+```
+
+## Bridge Artifacts Overview
+
+| Step | Artifact | Purpose |
+|------|----------|---------|
+| B0 | `BRIEF.md` | Scope, actors, affected modules, justification |
+| B1 | `ENTITY_DESCRIPTOR.md` | New entity/entities: states, rules, data model |
+| B2 | `SERVICE_CONTRACTS.md` | API / service boundaries between touched modules |
+| B3 | `VIEW_MAP.md` | New views + existing views to modify |
+| B4 | `IMPLEMENTATION_ORDER.md` | Flat execution order with checkboxes |
+
+> No FLOWCHART.md (use a single integration diagram inside ENTITY_DESCRIPTOR.md instead).
+> No TRACEABILITY_MATRIX.md — use IMPLEMENTATION_ORDER.md checkboxes for progress tracking.
+
+---
+
+## B0: BRIEF.md
+
+### Purpose
+Confirm scope and boundaries before any design work. Keep it short — this is a bridge, not a module.
+
+### Required Fields
+
+| Field | Description |
+|-------|-------------|
+| Feature Name | PascalCase, e.g. `PlanReparacion` |
+| Business Problem | One sentence: why this feature exists |
+| Affected Modules | List every existing module touched (read or write) |
+| New Entities | List new DB entities / models |
+| Out of Scope | Explicit list of what this feature does NOT do |
+| Owner | Who is accountable |
+| Target | Rough date or sprint |
+
+### Claude Code Prompt Pattern
+```
+I need to implement [FeatureName] — a bridge feature between [ModuleA] and [ModuleB].
+New entities involved: [list].
+Help me write a BRIEF.md that clearly defines scope and explicitly marks what is out of scope.
+Flag anything that sounds like scope creep.
+```
+
+### Definition of Done
+- [ ] All fields filled
+- [ ] Out of Scope section has ≥3 explicit exclusions
+- [ ] Affected modules confirmed with their tech leads
+- [ ] No ambiguities before proceeding to B1
+
+---
+
+## B1: ENTITY_DESCRIPTOR.md
+
+### Purpose
+Define the new entity (or entities) precisely: its states, transitions, business rules, and data model.
+Also includes a single integration flow diagram showing how data moves between affected modules.
+
+### Required Sections
+1. **Entity Overview** — one paragraph, what it represents in the domain
+2. **State Machine** — all states, transitions, and trigger conditions (Mermaid `stateDiagram-v2`)
+3. **Business Rules** — numbered, testable statements ("The system SHALL…")
+4. **Data Model** — fields, types, constraints, foreign keys to existing entities
+5. **Integration Flow** — sequence diagram showing data flow across affected modules (Mermaid `sequenceDiagram`)
+6. **Actor Matrix** — who can create / read / update / transition this entity
+
+### Claude Code Prompt Pattern
+```
+Based on BRIEF.md for [FeatureName], generate ENTITY_DESCRIPTOR.md.
+Existing modules involved: [list with their key entities/models].
+Known business rules: [paste any].
+I need:
+- A state machine diagram for [EntityName]
+- A sequence diagram showing the flow between [ModuleA] → [FeatureName] → [ModuleB]
+- Data model that fits our existing [ORM/schema pattern]
+Flag any rules that are ambiguous or conflict with existing module behavior.
+```
+
+### Definition of Done
+- [ ] State machine covers all states — including error/rejection states
+- [ ] Every transition has a named trigger condition
+- [ ] Data model lists FK relationships to existing tables
+- [ ] Integration sequence diagram includes all affected modules
+- [ ] Business rules are numbered and testable
+
+---
+
+## B2: SERVICE_CONTRACTS.md
+
+### Purpose
+Define the exact API / service boundaries between this feature and every module it touches.
+This is the document you share with other teams before writing a single line of integration code.
+
+### Required Sections
+1. **Contract Summary Table** — one row per integration point: direction, caller, method, purpose
+2. **Service / API Entries** — one entry per endpoint or service method (see format below)
+3. **Events Emitted** — any domain events this feature publishes
+4. **Events Consumed** — any domain events this feature listens to
+5. **Shared Entities / DTOs** — any data structures crossing module boundaries
+
+### Format for Each Contract Entry
+```markdown
+### [METHOD] [ServiceName].[methodName] / POST /api/[resource]
+- **Direction**: [FeatureName] → [ModuleName] | [ModuleName] → [FeatureName]
+- **Trigger**: when does this get called?
+- **Input**: (typed fields or JSON schema)
+- **Output**: (success shape + error shape)
+- **Side Effects**: state changes, events emitted
+- **Owner**: which team owns this contract
+```
+
+### Claude Code Prompt Pattern
+```
+Based on BRIEF.md and ENTITY_DESCRIPTOR.md for [FeatureName],
+generate SERVICE_CONTRACTS.md.
+Integration points are:
+- [FeatureName] reads from [ModuleA]: [what data]
+- [FeatureName] writes to [ModuleB]: [what data]
+- [FeatureName] triggers [action] in [ModuleC]
+Use our existing service pattern: [describe pattern, e.g. "repository + service layer, REST endpoints"].
+Flag any integration point that requires a breaking change to an existing module.
+```
+
+### Definition of Done
+- [ ] Every integration point from BRIEF.md has a contract entry
+- [ ] All affected module tech leads have reviewed
+- [ ] No breaking changes undocumented
+- [ ] Events section complete (even if empty — explicitly state "no events")
+
+---
+
+## B3: VIEW_MAP.md
+
+### Purpose
+Enumerate every UI change required: new views to create and existing views to modify.
+This scopes the frontend work precisely so nothing is missed or over-built.
+
+### Required Sections
+1. **New Views** — each new view/screen/component with its purpose and actor
+2. **Modified Views** — each existing view that changes, with a diff description
+3. **Navigation Changes** — new routes, menu entries, or permission guards
+4. **Shared Components** — any new reusable components introduced
+
+### Format for Each View Entry
+```markdown
+### [ViewName] — NEW | MODIFIED
+- **Type**: Page / Modal / Component / Section
+- **Route**: /path/to/view (if applicable)
+- **Actor**: which roles access this
+- **Purpose**: one sentence
+- **Key Elements**: list of main UI elements (table, form, status badge, action buttons…)
+- **Data Sources**: which service/API feeds this view
+- **Modifications** (if MODIFIED): describe what changes vs. current behavior
+```
+
+### Claude Code Prompt Pattern
+```
+Based on ENTITY_DESCRIPTOR.md and SERVICE_CONTRACTS.md for [FeatureName],
+generate VIEW_MAP.md.
+Existing views in affected modules: [list them].
+Our frontend pattern: [e.g. "Vue 3 + Quasar, one .vue file per view, views in /src/views/[Module]/"].
+For each modified view, describe only the delta — not a full rewrite.
+Flag any view change that could break existing functionality for other user roles.
+```
+
+### Definition of Done
+- [ ] Every state from the state machine has at least one view that displays it
+- [ ] Every actor from the actor matrix has at least one entry point
+- [ ] All modified views have explicit diff descriptions (not "update as needed")
+- [ ] Frontend lead has reviewed
+
+---
+
+## B4: IMPLEMENTATION_ORDER.md
+
+### Purpose
+Define the exact execution sequence for building the feature — a flat, ordered checklist.
+Not phases, not sprints — just the order that respects dependencies so nothing blocks.
+
+### Structure
+```markdown
+# Implementation Order — [FeatureName](BRIDGE)
+**Updated**: [date]
+**Status**: [X/N tasks complete]
+
+## Checklist
+
+### Layer 1 — Data
+- [ ] B4-01 · Create migration for [EntityName] table
+- [ ] B4-02 · Add FK [field] to [ExistingTable]
+- [ ] B4-03 · Create [EntityName] model / schema
+
+### Layer 2 — Business Logic
+- [ ] B4-04 · Implement [EntityName] service: create, transition states
+- [ ] B4-05 · Implement [specific rule] logic
+- [ ] B4-06 · Unit tests for state machine transitions
+
+### Layer 3 — Integration
+- [ ] B4-07 · Implement contract: [FeatureName] → [ModuleA].[method]
+- [ ] B4-08 · Implement contract: [ModuleB] → [FeatureName].[method]
+- [ ] B4-09 · Integration tests for contracts
+
+### Layer 4 — UI
+- [ ] B4-10 · Create view: [NewViewName]
+- [ ] B4-11 · Modify view: [ExistingViewName] (delta: [description])
+- [ ] B4-12 · Wire navigation / route guards
+
+### Layer 5 — Validation
+- [ ] B4-13 · End-to-end test: [happy path description]
+- [ ] B4-14 · End-to-end test: [rejection/error path]
+- [ ] B4-15 · Smoke test in staging with [affected module] team
+```
+
+### Claude Code Prompt Pattern (generate)
+```
+Based on all artifacts for [FeatureName](BRIDGE), generate IMPLEMENTATION_ORDER.md.
+Our stack: [e.g. "Node.js + Mongoose + Vue 3"].
+Order by dependency: data layer first, then business logic, then integration contracts,
+then UI, then validation. Number each task B4-NN.
+Flag any task that has an external dependency (another team, another module's deploy).
+```
+
+### Claude Code Prompt Pattern (update progress)
+```
+Update IMPLEMENTATION_ORDER.md for [FeatureName](BRIDGE).
+Mark as complete: [list task IDs].
+Blocked: [list task IDs + reason].
+Add any new tasks discovered: [describe].
+```
+
+### Definition of Done
+*This document is done when all checkboxes are checked and the feature is in production.*
+
+---
+
+## Bridge Mode — Full Workflow Summary
+
+```
+B0: BRIEF.md               → confirm scope, affected modules, out-of-scope
+B1: ENTITY_DESCRIPTOR.md   → states, rules, data model, integration flow diagram
+B2: SERVICE_CONTRACTS.md   → API/service boundaries (share with other teams before coding)
+B3: VIEW_MAP.md            → new views + existing views to modify
+B4: IMPLEMENTATION_ORDER.md → flat checklist ordered by dependency layer
+
+Directory: module-descriptor/<FeatureName>(BRIDGE)/
+```
+
+### Bridge Mode Claude Code Kickoff Prompt
+```
+I need to implement [FeatureName] — a bridge feature between [ModuleA] and [ModuleB].
+Context: [describe the business need in 2-3 sentences].
+Existing entities involved: [list].
+Architecture pattern: [describe your stack/patterns briefly].
+
+Start with B0: help me write BRIEF.md, confirm the scope is tight,
+and explicitly list what is out of scope. Then we'll proceed step by step.
+```
+
+> See `references/example-prompts.md` for additional Bridge Mode prompt examples per scenario type.
