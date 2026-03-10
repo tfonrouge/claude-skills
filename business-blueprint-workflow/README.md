@@ -1,6 +1,6 @@
-# business-module-workflow
+# business-blueprint-workflow
 
-**v0.2.0**
+**v0.3.0**
 
 A Claude skill that gives you a structured, repeatable methodology for building software modules and inter-module features in large-scale business systems — ERP, CRM, WMS, SaaS platforms, internal tooling, and more — using **Claude Code as a development partner**.
 
@@ -27,7 +27,7 @@ When building a new module, Claude guides you through 7 artifacts in order:
 | 6 | `TRACEABILITY_MATRIX.md` | Living progress tracker |
 | 6b | `GANTT.html` | Visual Gantt chart — extracted from TRACEABILITY_MATRIX.md (regenerate every sprint) |
 
-Artifacts go in: `module-descriptor/<ModuleName>/`
+Artifacts go in: `blueprints/<ModuleName>(MODULE)/`
 
 ### Bridge Mode — feature between existing modules *(new in v0.2.0)*
 
@@ -41,9 +41,9 @@ When adding an entity or workflow that connects two or more existing modules —
 | B3 | `VIEW_MAP.md` | New views + delta description of modified existing views |
 | B4 | `IMPLEMENTATION_ORDER.md` | Flat checklist ordered by dependency layer |
 
-Artifacts go in: `module-descriptor/<FeatureName>(BRIDGE)/`
+Artifacts go in: `blueprints/<FeatureName>(BRIDGE)/`
 
-The `(BRIDGE)` suffix makes the directory's purpose immediately identifiable when browsing the repo.
+The `(MODULE)` and `(BRIDGE)` suffixes make each directory's purpose immediately identifiable when browsing the repo.
 
 Every step in both modes includes **Claude Code prompt patterns**, a **Definition of Done checklist**, and human sign-off requirements. The skill also handles **refactoring existing modules** via a dedicated guide.
 
@@ -70,7 +70,7 @@ Every step in both modes includes **Claude Code prompt patterns**, a **Definitio
 
 ## Installation
 
-This skill lives in the `skills/business-module-workflow/` directory of the monorepo.
+This skill lives in the `skills/business-blueprint-workflow/` directory of the monorepo.
 Clone the whole repo once and all skills are available.
 
 ### Claude Code (personal — available across all your projects)
@@ -81,10 +81,10 @@ git clone https://github.com/tfonrouge/claude-skills.git
 
 # Symlink or copy this skill into your personal Claude skills folder
 mkdir -p ~/.claude/skills
-ln -s $(pwd)/claude-skills/skills/business-module-workflow ~/.claude/skills/business-module-workflow
+ln -s $(pwd)/claude-skills/skills/business-blueprint-workflow ~/.claude/skills/business-blueprint-workflow
 
 # Or copy instead of symlink (if you prefer)
-cp -r claude-skills/skills/business-module-workflow ~/.claude/skills/
+cp -r claude-skills/skills/business-blueprint-workflow ~/.claude/skills/
 ```
 
 > **Tip:** Using a symlink means `git pull` in the monorepo automatically updates the skill everywhere.
@@ -93,13 +93,13 @@ cp -r claude-skills/skills/business-module-workflow ~/.claude/skills/
 
 ```bash
 mkdir -p /path/to/your/project/.claude/skills
-ln -s /path/to/claude-skills/skills/business-module-workflow \
-      /path/to/your/project/.claude/skills/business-module-workflow
+ln -s /path/to/claude-skills/skills/business-blueprint-workflow \
+      /path/to/your/project/.claude/skills/business-blueprint-workflow
 ```
 
 ### Claude.ai (web interface)
 
-1. Download `business-module-workflow.skill` from the [Releases](../../releases) page
+1. Download `business-blueprint-workflow.skill` from the [Releases](../../releases) page
 2. Go to **claude.ai → Customize → Skills**
 3. Click **Upload skill** and select the `.skill` file
 4. Toggle it on
@@ -139,7 +139,7 @@ Claude will determine the appropriate mode, confirm it with you, and walk throug
 After `FLOWCHART.md` is generated, render it to a browser-ready HTML file:
 
 ```bash
-python scripts/render_flowchart.py module-descriptor/<ModuleName>/FLOWCHART.md
+python scripts/render_flowchart.py blueprints/<ModuleName>(MODULE)/FLOWCHART.md
 ```
 
 Open the resulting `FLOWCHART.html` in any browser — no plugins required.
@@ -150,9 +150,9 @@ Open the resulting `FLOWCHART.html` in any browser — no plugins required.
 After updating `TRACEABILITY_MATRIX.md` each sprint, render a focused, chart-only timeline snapshot:
 
 ```bash
-python scripts/render_flowchart.py module-descriptor/<ModuleName>/TRACEABILITY_MATRIX.md \
+python scripts/render_flowchart.py blueprints/<ModuleName>(MODULE)/TRACEABILITY_MATRIX.md \
   --gantt-only \
-  --output module-descriptor/<ModuleName>/GANTT.html
+  --output blueprints/<ModuleName>(MODULE)/GANTT.html
 ```
 
 The `--gantt-only` flag extracts just the Mermaid Gantt block — no tables, no prose — keeping `GANTT.html` compact and focused. Open it in any browser and use **File → Print** to produce a PDF or paper copy.
@@ -163,7 +163,7 @@ The `--gantt-only` flag extracts just the Mermaid Gantt block — no tables, no 
 ## What's inside
 
 ```
-skills/business-module-workflow/
+skills/business-blueprint-workflow/
 ├── README.md                         # This file
 ├── SKILL.md                          # Main skill — mode selection, steps 0–6 (Module), B0–B4 (Bridge)
 ├── scripts/

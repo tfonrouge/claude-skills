@@ -1,7 +1,7 @@
 ---
-name: business-module-workflow
+name: business-blueprint-workflow
 metadata:
-  version: 0.2.0
+  version: 0.3.0
 description: >
   Two-mode workflow for building business software with Claude Code. Use immediately when any of
   these appear — even without an explicit request for a structured workflow.
@@ -15,6 +15,7 @@ description: >
   integrates with", "extend existing module", "connect X to Y", "puente entre módulos",
   "funcionalidad entre entidades existentes", single entity + inter-module contracts + a few views.
   Produces scoped artifacts in a directory with the (BRIDGE) suffix.
+  Module Mode artifacts use the (MODULE) suffix. Both live under blueprints/.
 ---
 
 # Business Module Workflow
@@ -36,7 +37,7 @@ Use when:
 
 → Follow the full workflow below (Steps 0–6). Artifacts go in:
 ```
-module-descriptor/<ModuleName>/
+blueprints/<ModuleName>(MODULE)/
 ```
 
 ### BRIDGE MODE
@@ -48,7 +49,7 @@ Use when:
 
 → Follow the **Bridge Mode workflow** (Section at bottom of this file). Artifacts go in:
 ```
-module-descriptor/<FeatureName>(BRIDGE)/
+blueprints/<FeatureName>(BRIDGE)/
 ```
 The `(BRIDGE)` suffix makes the directory's purpose immediately identifiable when browsing the repo.
 
@@ -140,8 +141,8 @@ The workflow produces evidence of rigor — useful when justifying timelines, re
 ### Actions
 1. Create the directory:
    ```
-   module-descriptor/
-   └── <ModuleName>/
+   blueprints/
+   └── <ModuleName>(MODULE)/
    ```
 2. Confirm the following with the team before proceeding:
 
@@ -162,7 +163,7 @@ Help me validate this scope is well-defined before we write the specification.
 ```
 
 ### Definition of Done
-- [ ] Directory created at `module-descriptor/<ModuleName>/`
+- [ ] Directory created at `blueprints/<ModuleName>(MODULE)/`
 - [ ] `BRIEF.md` created and all kickoff fields populated
 - [ ] Business owner has reviewed and signed off on justification and scope
 - [ ] Integration surface identified at a high level
@@ -223,7 +224,7 @@ The `.md` file is the **canonical editable source** — Claude and your team edi
 To produce a browser-ready version anyone can open without plugins, run:
 
 ```bash
-python scripts/render_flowchart.py module-descriptor/<ModuleName>/FLOWCHART.md
+python scripts/render_flowchart.py blueprints/<ModuleName>(MODULE)/FLOWCHART.md
 ```
 
 This generates `FLOWCHART.html` in the same directory. Open it in any browser.
@@ -264,7 +265,7 @@ Be exhaustive — more detail is better here.
 
 ### Claude Code Prompt Pattern — Render to HTML
 ```
-Render module-descriptor/[ModuleName]/FLOWCHART.md to HTML.
+Render blueprints/[ModuleName](MODULE)/FLOWCHART.md to HTML.
 If scripts/render_flowchart.py does not exist in the project root,
 copy it from the skill's scripts/ directory first, then run it.
 ```
@@ -453,9 +454,9 @@ gantt
 To produce a focused, chart-only HTML file showing just the Gantt timeline, run:
 
 ```bash
-python scripts/render_flowchart.py module-descriptor/<ModuleName>/TRACEABILITY_MATRIX.md \
+python scripts/render_flowchart.py blueprints/<ModuleName>(MODULE)/TRACEABILITY_MATRIX.md \
   --gantt-only \
-  --output module-descriptor/<ModuleName>/GANTT.html
+  --output blueprints/<ModuleName>(MODULE)/GANTT.html
 ```
 
 This generates `GANTT.html` containing **only the Gantt chart** — no tables, no prose, no issue tracker — so it stays compact and focused as a timeline snapshot. Open it in any browser and use **File → Print** to produce a PDF or paper copy. Regenerate it every sprint after updating the Mermaid Gantt block in the `.md` source — the HTML is always disposable.
@@ -473,8 +474,8 @@ Include a Mermaid Gantt chart under the "Timeline" section using the
 phases and date estimates from IMPLEMENTATION_PLAN.md.
 Mark all tasks with no state (not started).
 Then render GANTT.html using:
-  python scripts/render_flowchart.py module-descriptor/[ModuleName]/TRACEABILITY_MATRIX.md \
-    --gantt-only --output module-descriptor/[ModuleName]/GANTT.html
+  python scripts/render_flowchart.py blueprints/[ModuleName](MODULE)/TRACEABILITY_MATRIX.md \
+    --gantt-only --output blueprints/[ModuleName](MODULE)/GANTT.html
 ```
 
 ### Claude Code Prompt Pattern (update)
@@ -486,18 +487,18 @@ Adjust actuals vs estimates and flag any requirements at risk.
 Also update the Mermaid Gantt — mark completed tasks as "done",
 in-progress as "active", and blocked tasks as "crit".
 Then regenerate GANTT.html using:
-  python scripts/render_flowchart.py module-descriptor/[ModuleName]/TRACEABILITY_MATRIX.md \
-    --gantt-only --output module-descriptor/[ModuleName]/GANTT.html
+  python scripts/render_flowchart.py blueprints/[ModuleName](MODULE)/TRACEABILITY_MATRIX.md \
+    --gantt-only --output blueprints/[ModuleName](MODULE)/GANTT.html
 ```
 
 ### Claude Code Prompt Pattern — Render to HTML only
 ```
-Render the Gantt chart from module-descriptor/[ModuleName]/TRACEABILITY_MATRIX.md
+Render the Gantt chart from blueprints/[ModuleName](MODULE)/TRACEABILITY_MATRIX.md
 to GANTT.html in the same directory.
 If scripts/render_flowchart.py does not exist in the project root,
 copy it from the skill's scripts/ directory first, then run:
-  python scripts/render_flowchart.py module-descriptor/[ModuleName]/TRACEABILITY_MATRIX.md \
-    --gantt-only --output module-descriptor/[ModuleName]/GANTT.html
+  python scripts/render_flowchart.py blueprints/[ModuleName](MODULE)/TRACEABILITY_MATRIX.md \
+    --gantt-only --output blueprints/[ModuleName](MODULE)/GANTT.html
 ```
 
 ### Definition of Done
@@ -535,7 +536,7 @@ Use this section when Mode Selection determined **BRIDGE MODE**. Do not run the 
 
 Bridge Mode produces 5 focused artifacts — no more. All artifacts live in:
 ```
-module-descriptor/<FeatureName>(BRIDGE)/
+blueprints/<FeatureName>(BRIDGE)/
 ```
 
 ## Bridge Artifacts Overview
@@ -778,7 +779,7 @@ B2: SERVICE_CONTRACTS.md   → API/service boundaries (share with other teams be
 B3: VIEW_MAP.md            → new views + existing views to modify
 B4: IMPLEMENTATION_ORDER.md → flat checklist ordered by dependency layer
 
-Directory: module-descriptor/<FeatureName>(BRIDGE)/
+Directory: blueprints/<FeatureName>(BRIDGE)/
 ```
 
 ### Bridge Mode Claude Code Kickoff Prompt
