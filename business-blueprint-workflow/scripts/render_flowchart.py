@@ -257,6 +257,38 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       font-size: 0.88em;
     }}
 
+    .code-block {{
+      position: relative;
+      margin: 0;
+      background: #1e1f2e;
+      border-top: 1px solid #e2e4ef;
+    }}
+
+    .code-lang {{
+      display: block;
+      padding: 6px 16px 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9899b0;
+      background: #161724;
+    }}
+
+    .code-block pre {{
+      margin: 0;
+      padding: 16px 20px;
+      overflow-x: auto;
+    }}
+
+    .code-block code {{
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #c9d1d9;
+      white-space: pre;
+    }}
+
     .mermaid {{
       display: flex;
       justify-content: center;
@@ -340,6 +372,9 @@ def parse_md(md_text):
     sections = []
     current_section = None
     in_mermaid = False
+    in_code = False
+    code_lang = ''
+    code_lines = []
     mermaid_lines = []
     prose_lines = []
 
@@ -355,6 +390,11 @@ def parse_md(md_text):
             current_section['blocks'].append(('mermaid', '\n'.join(mermaid_lines).strip()))
         mermaid_lines.clear()
 
+    def flush_code():
+        if current_section is not None and code_lines:
+            current_section['blocks'].append(('code', (code_lang, '\n'.join(code_lines))))
+        code_lines.clear()
+
     for line in lines:
         if in_mermaid:
             if line.strip() == '```':
@@ -362,6 +402,14 @@ def parse_md(md_text):
                 in_mermaid = False
             else:
                 mermaid_lines.append(line)
+            continue
+
+        if in_code:
+            if line.strip() == '```':
+                flush_code()
+                in_code = False
+            else:
+                code_lines.append(line)
             continue
 
         heading_match = re.match(r'^(#{1,4})\s+(.*)', line)
@@ -378,9 +426,12 @@ def parse_md(md_text):
             in_mermaid = True
             continue
 
-        if line.strip().startswith('```'):
-            # Non-mermaid code block — treat as prose
-            prose_lines.append(line)
+        fence_match = re.match(r'^```(\w*)', line.strip())
+        if fence_match:
+            flush_prose()
+            in_code = True
+            code_lang = fence_match.group(1)
+            code_lines.clear()
             continue
 
         if current_section is not None:
@@ -395,6 +446,8 @@ def prose_to_html(prose):
     html_lines = []
     in_list = False
     in_ol = False
+    in_table = False
+    table_rows = []
 
     def close_list():
         nonlocal in_list, in_ol
@@ -405,10 +458,41 @@ def prose_to_html(prose):
             html_lines.append('</ol>')
             in_ol = False
 
+    def flush_table():
+        nonlocal in_table, table_rows
+        if not table_rows:
+            return
+        html_lines.append('<table style="border-collapse:collapse;width:100%;font-size:0.9rem;margin:8px 0">')
+        for row_idx, row in enumerate(table_rows):
+            # Skip separator rows (---|---|---)
+            if re.match(r'^[\s|:\-]+$', row):
+                continue
+            cells = [c.strip() for c in row.strip('|').split('|')]
+            tag = 'th' if row_idx == 0 else 'td'
+            style = 'padding:7px 12px;border:1px solid #e2e4ef;text-align:left;'
+            if row_idx == 0:
+                style += 'background:#f0f1f8;font-weight:600;'
+            html_lines.append('<tr>' + ''.join(
+                f'<{tag} style="{style}">{inline_format(c)}</{tag}>' for c in cells
+            ) + '</tr>')
+        html_lines.append('</table>')
+        table_rows.clear()
+        in_table = False
+
     lines = prose.splitlines()
     i = 0
     while i < len(lines):
         line = lines[i]
+
+        # Table row detection
+        if re.match(r'^\s*\|', line):
+            close_list()
+            in_table = True
+            table_rows.append(line)
+            i += 1
+            continue
+        elif in_table:
+            flush_table()
 
         # Unordered list
         ul_match = re.match(r'^[-*]\s+(.*)', line)
@@ -442,6 +526,7 @@ def prose_to_html(prose):
         i += 1
 
     close_list()
+    flush_table()
     return '\n'.join(html_lines)
 
 
@@ -530,6 +615,16 @@ def build_blocks(blocks):
     for kind, content in blocks:
         if kind == 'prose':
             html += f'<div class="prose-block">{prose_to_html(content)}</div>'
+        elif kind == 'code':
+            lang, code = content
+            escaped = code.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            lang_label = f'<span class="code-lang">{lang}</span>' if lang else ''
+            html += (
+                f'<div class="code-block">'
+                f'{lang_label}'
+                f'<pre><code>{escaped}</code></pre>'
+                f'</div>'
+            )
         elif kind == 'mermaid':
             escaped = content.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
             html += (
