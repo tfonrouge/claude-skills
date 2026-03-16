@@ -1,27 +1,89 @@
 ---
 name: business-blueprint-workflow
 metadata:
-  version: 0.3.0
+  version: 0.5.0
 description: >
-  Two-mode workflow for building business software with Claude Code. Use immediately when any of
-  these appear — even without an explicit request for a structured workflow.
+  Artifact workflow for designing and tracking business software in Claude Code.
+  Produces blueprints/ with Markdown specs, a global INDEX.md, and per-blueprint AUDIT.md.
+  Use immediately — even without an explicit request — when starting or planning software.
 
-  MODULE MODE: Building a full module from scratch (ERP, CRM, WMS, SaaS, internal tooling).
-  Triggers: "new module", "build a module", "start a module", module specs, flow charts, API
-  contracts, implementation plans, traceability, or any multi-artifact module development process.
+  MODULE MODE — new module from scratch (ERP, CRM, WMS, SaaS, internal tooling).
+  Triggers: "new module", "build a module", "start a module", "diseñar módulo", multi-entity
+  scope, or requests for specs + flowcharts + API contracts together.
+  Skip if discussing an already-built module unless user says "redesign" or "refactor".
 
-  BRIDGE MODE: Adding a feature/entity that connects existing modules without building a standalone
-  module. Triggers: "functionality between X and Y", "bridge between modules", "new entity that
+  BRIDGE MODE — feature or entity connecting two existing modules, permanent or temporary.
+  Triggers: "functionality between X and Y", "bridge between modules", "new entity that
   integrates with", "extend existing module", "connect X to Y", "puente entre módulos",
-  "funcionalidad entre entidades existentes", single entity + inter-module contracts + a few views.
-  Produces scoped artifacts in a directory with the (BRIDGE) suffix.
-  Module Mode artifacts use the (MODULE) suffix. Both live under blueprints/.
+  "funcionalidad entre entidades existentes". Scope: single entity + contracts + a few views.
+
+  Artifacts use (MODULE) or (BRIDGE) suffix in blueprints/.
 ---
 
 # Business Module Workflow
 
 A repeatable, Claude Code–assisted methodology for building modules or inter-module features in a
 large-scale business software system.
+
+---
+
+## blueprints/INDEX.md — Global Blueprint Index
+
+Create this file the first time any module or bridge is started. Update it every time a blueprint
+is created, changes status, or is deprecated. It is the single source of truth for the state of
+the entire system design.
+
+### Structure
+
+```markdown
+# Blueprints Index
+**Updated**: [date]
+
+## Active Modules
+| Module | Status | Phase | Owner | Notes |
+|--------|--------|-------|-------|-------|
+| [ImportManagement(MODULE)](ImportManagement(MODULE)/BRIEF.md) | 🟡 In Progress | Step 4 | @dev | Blocked on API contract review |
+| [Inventory(MODULE)](Inventory(MODULE)/BRIEF.md) | ✅ Complete | — | @team | |
+
+## Active Bridges
+| Bridge | Connects | Type | Status | Expiry Condition |
+|--------|----------|------|--------|-----------------|
+| [StockSync(BRIDGE)](StockSync(BRIDGE)/BRIEF.md) | Inventory ↔ WMS | Temporary | 🟡 Active | When WMS v2 ships |
+| [PlanReparacion(BRIDGE)](PlanReparacion(BRIDGE)/BRIEF.md) | Orders ↔ Service | Permanent | 🟢 Stable | — |
+
+## Deprecated
+| Name | Reason | Deprecated On |
+|------|--------|---------------|
+| [OldImport(BRIDGE)](OldImport(BRIDGE)/ARCHIVED.md) | Absorbed by ImportManagement | 2024-Q1 |
+
+## Dependency Map (optional)
+```mermaid
+graph LR
+  Inventory --> StockSync
+  StockSync --> WMS
+  Orders --> PlanReparacion
+```
+```
+
+### Status Legend
+| Icon | Meaning |
+|------|---------|
+| 🔵 Planning | Blueprint in progress, no code yet |
+| 🟡 In Progress | Active development |
+| 🟢 Stable | In production, blueprint aligned |
+| ⚠️ Drifted | AUDIT.md flags misalignment |
+| 🔴 Blocked | Waiting on external dependency |
+| ✅ Complete | Shipped and verified |
+| 🗄️ Deprecated | No longer active |
+
+### Claude Code Prompt Pattern
+```
+Update blueprints/INDEX.md.
+New entry: [ModuleName or FeatureName], type: [MODULE/BRIDGE], status: [status].
+[If bridge] Type: [Permanent/Temporary], connects: [ModuleA ↔ ModuleB].
+[If deprecated] Reason: [reason], date: [date].
+Preserve all existing entries.
+```
 
 ---
 
@@ -68,17 +130,25 @@ Otherwise → BRIDGE MODE.
 
 | Step | Artifact | Purpose |
 |------|----------|---------|
+| — | `blueprints/INDEX.md` | Global index of all modules and bridges with status and links |
 | 0 | `BRIEF.md` | Context, owner, justification |
 | 1 | `SPECIFICATION.md` | What the module does |
 | 2 | `FLOWCHART.md` | How it flows (Mermaid diagrams) |
 | 3 | `API_CONTRACT.md` | How it connects to other modules |
-| 4 | `IMPLEMENTATION_PLAN.md` | How it will be built |
-| 5 | `TEST_PLAN.md` | How it will be verified |
-| 6 | `TRACEABILITY_MATRIX.md` | Living progress tracker (init here, update always) |
-| 6b | `GANTT.html` | Visual Gantt chart only — generated from the Mermaid block in TRACEABILITY_MATRIX.md (regenerate every sprint) |
+| 4 | `VIEW_MAP.md` | Every screen, view, and UI change |
+| 5 | `IMPLEMENTATION_PLAN.md` | How it will be built |
+| 6 | `TEST_PLAN.md` | How it will be verified |
+| 7 | `TRACEABILITY_MATRIX.md` | Living progress tracker (init here, update always) |
+| 7b | `GANTT.html` | Visual Gantt chart — rendered from TRACEABILITY_MATRIX.md (regenerate every sprint) |
+| — | `AUDIT.md` | Drift detection between blueprint and actual implementation |
 
-> **TRACEABILITY_MATRIX.md is a living document.** Initialize it after Step 4 and update it
+> **TRACEABILITY_MATRIX.md is a living document.** Initialize it after Step 5 and update it
 > continuously as work progresses. It is never "done."
+>
+> **AUDIT.md** is created after initial implementation and revisited at the start of each sprint
+> or before onboarding a new developer.
+>
+> **blueprints/INDEX.md** is updated every time a blueprint is created, deprecated, or its status changes.
 
 ---
 
@@ -218,33 +288,6 @@ Visually map every path through the module using **Mermaid diagrams**.
 4. **Integration Event Flow** — when/what this module sends to or receives from others
 5. **Role-Based View** — what each user role sees and can trigger
 
-### Rendering FLOWCHART.md
-
-The `.md` file is the **canonical editable source** — Claude and your team edit this.
-To produce a browser-ready version anyone can open without plugins, run:
-
-```bash
-python scripts/render_flowchart.py blueprints/<ModuleName>(MODULE)/FLOWCHART.md
-```
-
-This generates `FLOWCHART.html` in the same directory. Open it in any browser.
-Regenerate it whenever the `.md` source changes — the HTML is always disposable.
-
-> **Important — script bootstrap:** `render_flowchart.py` is bundled inside this skill at
-> `scripts/render_flowchart.py`. The first time you render a flowchart in a project, copy it
-> into the project root's `scripts/` directory:
->
-> ```bash
-> mkdir -p scripts
-> cp <skill-dir>/scripts/render_flowchart.py scripts/render_flowchart.py
-> ```
->
-> Claude should do this automatically if the file is missing. After the first copy it will
-> always be present in the project and does not need to be copied again.
-
-> The script requires only Python 3 (no packages). The HTML loads Mermaid.js from CDN,
-> so an internet connection is needed on first open (it caches after that).
-
 ### Mermaid Conventions
 - Use `flowchart TD` for process flows
 - Use `sequenceDiagram` for integration event flows
@@ -261,13 +304,6 @@ Use Mermaid diagrams. I need:
 4. Integration sequence diagram with [list connected modules]
 5. Role-based view for: [list roles]
 Be exhaustive — more detail is better here.
-```
-
-### Claude Code Prompt Pattern — Render to HTML
-```
-Render blueprints/[ModuleName](MODULE)/FLOWCHART.md to HTML.
-If scripts/render_flowchart.py does not exist in the project root,
-copy it from the skill's scripts/ directory first, then run it.
 ```
 
 ### Definition of Done
@@ -319,7 +355,80 @@ that are underspecified and need cross-team clarification.
 
 ---
 
-## Step 4: IMPLEMENTATION_PLAN.md
+## Step 4: VIEW_MAP.md
+
+### Purpose
+Enumerate every UI surface the module introduces or modifies — before implementation planning,
+so the frontend scope is explicit and nothing gets missed or over-built.
+
+### Required Sections
+1. **View Inventory by Domain Area** — group views into logical sections (e.g. "Approval Views", "Inventory Views"). Flat lists don't scale for modules with 10+ views.
+2. **New Views** — each new page/screen/modal/component with purpose and actor
+3. **Modified Views** — each existing view that changes, with an explicit diff description
+4. **Role-Based Access Matrix** — rows = views, columns = roles, cells = read / write / hidden
+5. **State-to-View Traceability** — every state from the FLOWCHART.md state machine must map to ≥1 view
+6. **Navigation Changes** — new routes, menu entries, permission guards
+7. **Shared Components** — new reusable components introduced by this module
+8. **Empty / Error / Loading States** — explicit design decisions for each view (not afterthoughts)
+
+### Format for Each View Entry
+```markdown
+### [ViewName] — NEW | MODIFIED
+- **Group**: (domain area this view belongs to)
+- **Type**: Page / Modal / Component / Section
+- **Route**: /path/to/view (if applicable)
+- **Actors**: which roles access this (read / write)
+- **Purpose**: one sentence
+- **Key Elements**: table, form, status badge, action buttons…
+- **Data Sources**: which API endpoints / services feed this view
+- **States Displayed**: which entity states from the state machine appear here
+- **Empty State**: what the user sees when there is no data
+- **Error State**: what the user sees on load failure or validation error
+- **Loading State**: skeleton, spinner, or other pattern
+- **Modifications** (if MODIFIED): describe the delta only — not a full rewrite
+```
+
+### Role-Based Access Matrix Template
+```markdown
+| View | RoleA | RoleB | RoleC | RoleD |
+|------|-------|-------|-------|-------|
+| [ViewName] | read | read/write | hidden | read |
+```
+
+### State-to-View Traceability Template
+```markdown
+| Entity State | View(s) That Display It | Action Available |
+|--------------|-------------------------|-----------------|
+| Draft        | [ViewName]              | Submit, Delete  |
+| Pending      | [ViewName], [ViewName2] | Approve, Reject |
+```
+
+### Claude Code Prompt Pattern
+```
+Based on SPECIFICATION.md, FLOWCHART.md, and API_CONTRACT.md for [ModuleName],
+generate VIEW_MAP.md.
+User roles are: [list roles].
+Existing views in affected modules: [list them or say "none"].
+Our frontend pattern: [e.g. "Vue 3 + Quasar, one .vue file per view, views in /src/views/[Module]/"].
+Group views by domain area. For each view, include empty/error/loading state decisions.
+Build the role-based access matrix for all roles × all views.
+Ensure every state in the state machine has at least one view that displays it.
+For modified views, describe only the delta — not a full rewrite.
+Flag any view change that could break existing functionality for other user roles.
+```
+
+### Definition of Done
+- [ ] All views grouped by domain area
+- [ ] Every state from FLOWCHART.md state machine has ≥1 view
+- [ ] Every actor from SPECIFICATION.md has ≥1 entry point
+- [ ] Role-based access matrix complete for all roles × all views
+- [ ] Empty, error, and loading states defined for every view
+- [ ] All modified views have explicit diff descriptions (not "update as needed")
+- [ ] Frontend lead has reviewed and signed off
+
+---
+
+## Step 5: IMPLEMENTATION_PLAN.md
 
 ### Purpose
 Break the specification into buildable phases with clear milestones, dependencies, and estimates.
@@ -345,7 +454,7 @@ Break the specification into buildable phases with clear milestones, dependencie
 
 ### Claude Code Prompt Pattern
 ```
-Based on SPECIFICATION.md, FLOWCHART.md, and API_CONTRACT.md for [ModuleName],
+Based on SPECIFICATION.md, FLOWCHART.md, API_CONTRACT.md, and VIEW_MAP.md for [ModuleName],
 generate IMPLEMENTATION_PLAN.md.
 Our team has [N] developers. Preferred phase size is [1–2 week sprints / other].
 Known constraints: [list any].
@@ -355,12 +464,13 @@ Flag dependencies on other modules' API contracts not yet finalized.
 ### Definition of Done
 - [ ] 3–5 phases defined, each with a shippable deliverable
 - [ ] All spec requirements mapped to a phase
+- [ ] All views from VIEW_MAP.md assigned to a phase
 - [ ] Risk register has at least 3 entries
 - [ ] Tech lead and project owner have approved
 
 ---
 
-## Step 5: TEST_PLAN.md
+## Step 6: TEST_PLAN.md
 
 ### Purpose
 Document complete user journeys that validate the module end-to-end, tracing every path
@@ -388,25 +498,27 @@ in the flow chart against every requirement in the spec.
 
 ### Claude Code Prompt Pattern
 ```
-Based on all artifacts for [ModuleName], generate TEST_PLAN.md.
-Ensure every requirement in SPECIFICATION.md and every path in
-FLOWCHART.md has at least one test. Flag any paths that are
+Based on all artifacts for [ModuleName] (SPECIFICATION.md, FLOWCHART.md,
+API_CONTRACT.md, VIEW_MAP.md, and IMPLEMENTATION_PLAN.md), generate TEST_PLAN.md.
+Ensure every requirement in SPECIFICATION.md, every path in FLOWCHART.md,
+and every view in VIEW_MAP.md has at least one test. Flag any paths that are
 difficult to test automatically vs. require manual QA.
 ```
 
 ### Definition of Done
 - [ ] Every requirement has ≥1 test
 - [ ] Every flow chart path has ≥1 test
+- [ ] Every view in VIEW_MAP.md has ≥1 UI test
 - [ ] All exception paths covered
 - [ ] QA lead has reviewed
 
 ---
 
-## Step 6: TRACEABILITY_MATRIX.md (Living Document)
+## Step 7: TRACEABILITY_MATRIX.md (Living Document)
 
 ### Purpose
 Track progress across phases and link completed work to requirements.
-**Initialize after Step 4. Update after every PR merge, milestone, or sprint.**
+**Initialize after Step 5. Update after every PR merge, milestone, or sprint.**
 
 ### Structure
 ```markdown
@@ -473,9 +585,6 @@ Set all statuses to "Not Started".
 Include a Mermaid Gantt chart under the "Timeline" section using the
 phases and date estimates from IMPLEMENTATION_PLAN.md.
 Mark all tasks with no state (not started).
-Then render GANTT.html using:
-  python scripts/render_flowchart.py blueprints/[ModuleName](MODULE)/TRACEABILITY_MATRIX.md \
-    --gantt-only --output blueprints/[ModuleName](MODULE)/GANTT.html
 ```
 
 ### Claude Code Prompt Pattern (update)
@@ -486,40 +595,79 @@ Blockers discovered: [list].
 Adjust actuals vs estimates and flag any requirements at risk.
 Also update the Mermaid Gantt — mark completed tasks as "done",
 in-progress as "active", and blocked tasks as "crit".
-Then regenerate GANTT.html using:
-  python scripts/render_flowchart.py blueprints/[ModuleName](MODULE)/TRACEABILITY_MATRIX.md \
-    --gantt-only --output blueprints/[ModuleName](MODULE)/GANTT.html
-```
-
-### Claude Code Prompt Pattern — Render to HTML only
-```
-Render the Gantt chart from blueprints/[ModuleName](MODULE)/TRACEABILITY_MATRIX.md
-to GANTT.html in the same directory.
-If scripts/render_flowchart.py does not exist in the project root,
-copy it from the skill's scripts/ directory first, then run:
-  python scripts/render_flowchart.py blueprints/[ModuleName](MODULE)/TRACEABILITY_MATRIX.md \
-    --gantt-only --output blueprints/[ModuleName](MODULE)/GANTT.html
 ```
 
 ### Definition of Done
 *This document is never "done" — it is complete when the module ships and all requirements show "Verified" and all Gantt tasks show "done".*
 
-> `GANTT.html` should be regenerated and attached to sprint review meetings as a progress snapshot.
+---
+
+## AUDIT.md — Blueprint vs. Implementation Drift Detection
+
+Create `AUDIT.md` after initial implementation is underway. Revisit at the start of each sprint
+or before onboarding a new developer. Its purpose is to answer: *how faithful is the blueprint
+to what actually exists in the codebase?*
+
+### Structure
+
+```markdown
+# Audit — [ModuleName]
+**Last Audit**: [date]
+**Audited By**: [person or "Claude Code assisted"]
+**Overall Status**: ✅ Aligned | ⚠️ Partial Drift | 🔴 Stale
+
+## Drift Log
+| Artifact | Section | Blueprint Says | Reality | Severity | Action |
+|----------|---------|---------------|---------|----------|--------|
+| SPECIFICATION.md | FR-04 | Users can bulk import | Not implemented | Medium | Backlog or update spec |
+| API_CONTRACT.md | POST /api/orders | Returns 201 + order object | Returns 200 only | Low | Update contract |
+
+## Audit Checklist
+- [ ] Every FR in SPECIFICATION.md has a corresponding implementation or explicit deferral
+- [ ] API_CONTRACT.md matches current endpoint signatures
+- [ ] VIEW_MAP.md matches current views in codebase
+- [ ] TRACEABILITY_MATRIX.md status reflects actual completion
+- [ ] BRIEF.md scope still matches what was built (no silent scope creep)
+
+## Notes
+[Free-form observations — decisions made during implementation that diverge from the blueprint]
+```
+
+### Severity Guide
+| Level | Meaning |
+|-------|---------|
+| Low | Minor wording or format difference, no functional impact |
+| Medium | Missing feature or changed behavior, no blocker |
+| High | Contract mismatch or missing requirement that affects other modules |
+| Critical | Blueprint actively misleads — must update before next onboarding |
+
+### Claude Code Prompt Pattern
+```
+Audit [ModuleName](MODULE) blueprint against the current codebase.
+Compare:
+- SPECIFICATION.md requirements vs. implemented behavior
+- API_CONTRACT.md endpoint signatures vs. actual routes in [file/dir]
+- VIEW_MAP.md views vs. actual views in [file/dir]
+Produce AUDIT.md listing every divergence found with severity and suggested action.
+```
 
 ---
 
 ## Full Workflow Summary
 
 ```
+blueprints/INDEX.md        → create on first module/bridge; update on every status change
+
 Step 0: Kickoff → confirm scope, create directory
 Step 1: SPECIFICATION.md → what the module does
 Step 2: FLOWCHART.md → how it flows
 Step 3: API_CONTRACT.md → how it connects (share with other teams)
-Step 4: IMPLEMENTATION_PLAN.md → how it will be built
+Step 4: VIEW_MAP.md → every screen and UI change
+Step 5: IMPLEMENTATION_PLAN.md → how it will be built
          └─ Initialize TRACEABILITY_MATRIX.md here
-Step 5: TEST_PLAN.md → how it will be verified
-Step 6: TRACEABILITY_MATRIX.md → update continuously through development
-         └─ Regenerate GANTT.html every sprint for print-ready timeline
+Step 6: TEST_PLAN.md → how it will be verified
+Step 7: TRACEABILITY_MATRIX.md → update continuously through development
+AUDIT.md → create after initial implementation; revisit each sprint
 ```
 
 > See `references/example-prompts.md` for a full set of Claude Code prompts per module type.
@@ -543,11 +691,13 @@ blueprints/<FeatureName>(BRIDGE)/
 
 | Step | Artifact | Purpose |
 |------|----------|---------|
-| B0 | `BRIEF.md` | Scope, actors, affected modules, justification |
+| B0 | `BRIEF.md` | Scope, actors, affected modules, justification, lifecycle type |
 | B1 | `ENTITY_DESCRIPTOR.md` | New entity/entities: states, rules, data model |
 | B2 | `SERVICE_CONTRACTS.md` | API / service boundaries between touched modules |
 | B3 | `VIEW_MAP.md` | New views + existing views to modify |
 | B4 | `IMPLEMENTATION_ORDER.md` | Flat execution order with checkboxes |
+| — | `AUDIT.md` | Drift detection between blueprint and actual implementation |
+| — | `ARCHIVED.md` | Created on deprecation — explains what happened and why |
 
 > No FLOWCHART.md (use a single integration diagram inside ENTITY_DESCRIPTOR.md instead).
 > No TRACEABILITY_MATRIX.md — use IMPLEMENTATION_ORDER.md checkboxes for progress tracking.
@@ -570,6 +720,10 @@ Confirm scope and boundaries before any design work. Keep it short — this is a
 | Out of Scope | Explicit list of what this feature does NOT do |
 | Owner | Who is accountable |
 | Target | Rough date or sprint |
+| **Lifecycle Type** | **Permanent** or **Temporary** |
+| **Expiry Condition** | *(Temporary only)* The condition that makes this bridge obsolete — e.g. "when ModuleX completes its API refactor" or "after data migration is complete" |
+| **Absorption Target** | *(Temporary only)* Which module will eventually own this functionality, if known |
+| **Planned Deprecation** | *(Temporary only)* Estimated sprint or date for deprecation, if known |
 
 ### Claude Code Prompt Pattern
 ```
@@ -581,6 +735,8 @@ Flag anything that sounds like scope creep.
 
 ### Definition of Done
 - [ ] All fields filled
+- [ ] Lifecycle type declared (Permanent or Temporary)
+- [ ] If Temporary: expiry condition is specific and measurable, not vague
 - [ ] Out of Scope section has ≥3 explicit exclusions
 - [ ] Affected modules confirmed with their tech leads
 - [ ] No ambiguities before proceeding to B1
@@ -773,14 +929,22 @@ Add any new tasks discovered: [describe].
 ## Bridge Mode — Full Workflow Summary
 
 ```
-B0: BRIEF.md               → confirm scope, affected modules, out-of-scope
+B0: BRIEF.md               → confirm scope, lifecycle type, affected modules, out-of-scope
 B1: ENTITY_DESCRIPTOR.md   → states, rules, data model, integration flow diagram
 B2: SERVICE_CONTRACTS.md   → API/service boundaries (share with other teams before coding)
 B3: VIEW_MAP.md            → new views + existing views to modify
 B4: IMPLEMENTATION_ORDER.md → flat checklist ordered by dependency layer
+AUDIT.md                   → create after initial implementation; revisit each sprint
 
 Directory: blueprints/<FeatureName>(BRIDGE)/
 ```
+
+### Deprecating a Temporary Bridge
+When the expiry condition defined in `BRIEF.md` is met:
+1. Mark all `IMPLEMENTATION_ORDER.md` tasks as complete or explicitly cancelled
+2. Create `ARCHIVED.md` in the bridge directory with: reason for deprecation, date, and which module (if any) absorbed the functionality
+3. Update `blueprints/INDEX.md`: move the entry from Active Bridges to Deprecated
+4. Do **not** delete the directory — it serves as a record of what existed and why
 
 ### Bridge Mode Claude Code Kickoff Prompt
 ```

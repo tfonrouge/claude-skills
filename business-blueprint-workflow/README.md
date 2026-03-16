@@ -1,6 +1,6 @@
 # business-blueprint-workflow
 
-**v0.3.0**
+**v0.5.0**
 
 A Claude skill that gives you a structured, repeatable methodology for building software modules and inter-module features in large-scale business systems — ERP, CRM, WMS, SaaS platforms, internal tooling, and more — using **Claude Code as a development partner**.
 
@@ -12,9 +12,15 @@ Part of the [`claude-skills`](https://github.com/tfonrouge/claude-skills) monore
 
 ## What it does
 
+### Global artifacts
+
+| Artifact | Purpose |
+|----------|---------|
+| `blueprints/INDEX.md` | Global index of all modules and bridges — status, phase, links. Created on first use, updated on every status change. |
+
 ### Module Mode — full module from scratch
 
-When building a new module, Claude guides you through 7 artifacts in order:
+When building a new module, Claude guides you through 9 artifacts in order:
 
 | Step | Artifact | Purpose |
 |------|----------|---------|
@@ -22,24 +28,28 @@ When building a new module, Claude guides you through 7 artifacts in order:
 | 1 | `SPECIFICATION.md` | What the module does |
 | 2 | `FLOWCHART.md` + `.html` | How it flows (Mermaid diagrams, browser-ready) |
 | 3 | `API_CONTRACT.md` | How it connects to other modules |
-| 4 | `IMPLEMENTATION_PLAN.md` | How it will be built |
-| 5 | `TEST_PLAN.md` | How it will be verified |
-| 6 | `TRACEABILITY_MATRIX.md` | Living progress tracker |
-| 6b | `GANTT.html` | Visual Gantt chart — extracted from TRACEABILITY_MATRIX.md (regenerate every sprint) |
+| 4 | `VIEW_MAP.md` | Every screen, view, and UI change — grouped by domain area, with role matrix and state-to-view traceability |
+| 5 | `IMPLEMENTATION_PLAN.md` | How it will be built |
+| 6 | `TEST_PLAN.md` | How it will be verified |
+| 7 | `TRACEABILITY_MATRIX.md` | Living progress tracker (initialize after Step 5, update every sprint) |
+| 7b | `GANTT.html` | Visual Gantt chart — extracted from TRACEABILITY_MATRIX.md (regenerate every sprint) |
+| — | `AUDIT.md` | Drift detection between blueprint and actual implementation |
 
 Artifacts go in: `blueprints/<ModuleName>(MODULE)/`
 
-### Bridge Mode — feature between existing modules *(new in v0.2.0)*
+### Bridge Mode — feature between existing modules
 
 When adding an entity or workflow that connects two or more existing modules — without building a full standalone module — Bridge Mode produces 5 scoped artifacts instead of the full set:
 
 | Step | Artifact | Purpose |
 |------|----------|---------|
-| B0 | `BRIEF.md` | Scope, actors, affected modules, explicit out-of-scope |
+| B0 | `BRIEF.md` | Scope, actors, affected modules, lifecycle type (Permanent / Temporary), explicit out-of-scope |
 | B1 | `ENTITY_DESCRIPTOR.md` | States, rules, data model + integration flow diagram |
 | B2 | `SERVICE_CONTRACTS.md` | API/service boundaries between touched modules |
 | B3 | `VIEW_MAP.md` | New views + delta description of modified existing views |
 | B4 | `IMPLEMENTATION_ORDER.md` | Flat checklist ordered by dependency layer |
+| — | `AUDIT.md` | Drift detection between blueprint and actual implementation |
+| — | `ARCHIVED.md` | Created on deprecation — records reason, date, and absorption target |
 
 Artifacts go in: `blueprints/<FeatureName>(BRIDGE)/`
 
@@ -165,9 +175,9 @@ The `--gantt-only` flag extracts just the Mermaid Gantt block — no tables, no 
 ```
 skills/business-blueprint-workflow/
 ├── README.md                         # This file
-├── SKILL.md                          # Main skill — mode selection, steps 0–6 (Module), B0–B4 (Bridge)
+├── SKILL.md                          # Main skill — INDEX.md, mode selection, steps 0–7 + AUDIT.md (Module), B0–B4 + AUDIT.md + ARCHIVED.md (Bridge)
 ├── scripts/
-│   └── render_flowchart.py           # Converts FLOWCHART.md → FLOWCHART.html and TRACEABILITY_MATRIX.md → GANTT.html
+│   └── render_flowchart.py           # Converts FLOWCHART.md → FLOWCHART.html and TRACEABILITY_MATRIX.md → GANTT.html (--gantt-only)
 └── references/
     ├── refactor-guide.md             # Full refactoring guide — overrides each step for existing modules
     ├── example-prompts.md            # Copy-paste Claude Code prompt library for every step
