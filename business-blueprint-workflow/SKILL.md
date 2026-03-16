@@ -1,7 +1,7 @@
 ---
 name: business-blueprint-workflow
 metadata:
-  version: 0.5.0
+  version: 0.6.0
 description: >
   Artifact workflow for designing and tracking business software in Claude Code.
   Produces blueprints/ with Markdown specs, a global INDEX.md, and per-blueprint AUDIT.md.
@@ -139,7 +139,6 @@ Otherwise → BRIDGE MODE.
 | 5 | `IMPLEMENTATION_PLAN.md` | How it will be built |
 | 6 | `TEST_PLAN.md` | How it will be verified |
 | 7 | `TRACEABILITY_MATRIX.md` | Living progress tracker (init here, update always) |
-| 7b | `GANTT.html` | Visual Gantt chart — rendered from TRACEABILITY_MATRIX.md (regenerate every sprint) |
 | — | `AUDIT.md` | Drift detection between blueprint and actual implementation |
 
 > **TRACEABILITY_MATRIX.md is a living document.** Initialize it after Step 5 and update it
@@ -149,6 +148,53 @@ Otherwise → BRIDGE MODE.
 > or before onboarding a new developer.
 >
 > **blueprints/INDEX.md** is updated every time a blueprint is created, deprecated, or its status changes.
+
+---
+
+## Artifact Navigation
+
+Every `.md` artifact must include a navigation footer so readers can jump between documents without leaving their editor or browser.
+
+### Rules
+
+1. **Always at the bottom** — the nav block is the very last content in the file, after all sections.
+2. **Current artifact is bold and not a link** — so the reader knows where they are.
+3. **Only link artifacts that already exist** — if an artifact hasn't been generated yet, render it as plain text (no brackets, no link).
+4. **Always include the INDEX link** — even if it's the only link present.
+5. **Regenerate when a new artifact is created** — when generating artifact N, update the footer of all previously generated artifacts in the same blueprint directory to add the new link.
+
+### MODULE MODE footer template
+
+```markdown
+---
+[← Index](../INDEX.md) · **BRIEF** · [SPEC](SPECIFICATION.md) · [FLOWCHART](FLOWCHART.md) · [API](API_CONTRACT.md) · [VIEWS](VIEW_MAP.md) · [PLAN](IMPLEMENTATION_PLAN.md) · [TESTS](TEST_PLAN.md) · [MATRIX](TRACEABILITY_MATRIX.md) · [AUDIT](AUDIT.md)
+```
+
+Replace **BRIEF** with the name of the current file in bold. Files not yet created appear as plain text without brackets:
+
+```markdown
+---
+[← Index](../INDEX.md) · [BRIEF](BRIEF.md) · **SPEC** · FLOWCHART · API · VIEWS · PLAN · TESTS · MATRIX · AUDIT
+```
+
+### BRIDGE MODE footer template
+
+```markdown
+---
+[← Index](../INDEX.md) · **BRIEF** · [ENTITY](ENTITY_DESCRIPTOR.md) · [CONTRACTS](SERVICE_CONTRACTS.md) · [VIEWS](VIEW_MAP.md) · [ORDER](IMPLEMENTATION_ORDER.md) · [AUDIT](AUDIT.md)
+```
+
+### Claude Code Prompt Pattern
+
+When generating any artifact, append this to the generation prompt:
+
+```
+After generating the artifact, add the navigation footer at the bottom.
+Bold the current file name. Link all artifacts that already exist in this
+blueprint directory. Render non-existent artifacts as plain text.
+Also update the footer of every previously generated .md artifact in this
+directory to add a link to the newly created file.
+```
 
 ---
 
@@ -559,22 +605,6 @@ gantt
 | Issue | Impact | Owner | Target Resolution |
 |-------|--------|-------|-------------------|
 ```
-
-### Rendering GANTT.html
-
-`TRACEABILITY_MATRIX.md` is the **canonical editable source** — Claude and your team edit this.
-To produce a focused, chart-only HTML file showing just the Gantt timeline, run:
-
-```bash
-python scripts/render_flowchart.py blueprints/<ModuleName>(MODULE)/TRACEABILITY_MATRIX.md \
-  --gantt-only \
-  --output blueprints/<ModuleName>(MODULE)/GANTT.html
-```
-
-This generates `GANTT.html` containing **only the Gantt chart** — no tables, no prose, no issue tracker — so it stays compact and focused as a timeline snapshot. Open it in any browser and use **File → Print** to produce a PDF or paper copy. Regenerate it every sprint after updating the Mermaid Gantt block in the `.md` source — the HTML is always disposable.
-
-> The `--gantt-only` flag extracts only `gantt` diagram blocks from the markdown and discards all other content. If no Gantt diagram is found, the HTML will display a "no diagrams found" notice.
-> If the script is missing, copy it from the skill's `scripts/` directory first.
 
 ### Claude Code Prompt Pattern (initial generation)
 ```

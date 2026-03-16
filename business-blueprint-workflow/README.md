@@ -1,6 +1,6 @@
 # business-blueprint-workflow
 
-**v0.5.0**
+**v0.6.0**
 
 A Claude skill that gives you a structured, repeatable methodology for building software modules and inter-module features in large-scale business systems — ERP, CRM, WMS, SaaS platforms, internal tooling, and more — using **Claude Code as a development partner**.
 
@@ -26,13 +26,12 @@ When building a new module, Claude guides you through 9 artifacts in order:
 |------|----------|---------|
 | 0 | `BRIEF.md` | Confirm scope, owner, integration surface |
 | 1 | `SPECIFICATION.md` | What the module does |
-| 2 | `FLOWCHART.md` + `.html` | How it flows (Mermaid diagrams, browser-ready) |
+| 2 | `FLOWCHART.md` | How it flows (Mermaid diagrams) |
 | 3 | `API_CONTRACT.md` | How it connects to other modules |
-| 4 | `VIEW_MAP.md` | Every screen, view, and UI change — grouped by domain area, with role matrix and state-to-view traceability |
+| 4 | `VIEW_MAP.md` | Every screen, view, and UI change — grouped by domain area, with role-based access matrix, state-to-view traceability, and explicit empty/error/loading state decisions |
 | 5 | `IMPLEMENTATION_PLAN.md` | How it will be built |
 | 6 | `TEST_PLAN.md` | How it will be verified |
 | 7 | `TRACEABILITY_MATRIX.md` | Living progress tracker (initialize after Step 5, update every sprint) |
-| 7b | `GANTT.html` | Visual Gantt chart — extracted from TRACEABILITY_MATRIX.md (regenerate every sprint) |
 | — | `AUDIT.md` | Drift detection between blueprint and actual implementation |
 
 Artifacts go in: `blueprints/<ModuleName>(MODULE)/`
@@ -74,7 +73,6 @@ Every step in both modes includes **Claude Code prompt patterns**, a **Definitio
 
 - [Claude Code](https://code.claude.com) (for CLI usage)
 - **or** Claude.ai Pro, Max, Team, or Enterprise (for web upload)
-- Python 3 (for the flowchart HTML renderer — no packages needed)
 
 ---
 
@@ -144,29 +142,16 @@ I need to add functionality between the Inventory and Billing modules to handle 
 
 Claude will determine the appropriate mode, confirm it with you, and walk through the artifacts step by step.
 
-### Rendering flowcharts
+### Artifact navigation
 
-After `FLOWCHART.md` is generated, render it to a browser-ready HTML file:
+Every generated `.md` artifact includes a navigation footer linking to all other artifacts in the same blueprint directory. The current file is bolded; artifacts not yet generated appear as plain text. This lets you jump between documents without leaving your editor or browser.
 
-```bash
-python scripts/render_flowchart.py blueprints/<ModuleName>(MODULE)/FLOWCHART.md
+Example footer in a MODULE blueprint:
+
 ```
-
-Open the resulting `FLOWCHART.html` in any browser — no plugins required.
-> Claude handles this automatically if you ask it to render the flowchart.
-
-### Rendering the Gantt chart
-
-After updating `TRACEABILITY_MATRIX.md` each sprint, render a focused, chart-only timeline snapshot:
-
-```bash
-python scripts/render_flowchart.py blueprints/<ModuleName>(MODULE)/TRACEABILITY_MATRIX.md \
-  --gantt-only \
-  --output blueprints/<ModuleName>(MODULE)/GANTT.html
+---
+[← Index](../INDEX.md) · [BRIEF](BRIEF.md) · **SPEC** · [FLOWCHART](FLOWCHART.md) · API · VIEWS · PLAN · TESTS · MATRIX · AUDIT
 ```
-
-The `--gantt-only` flag extracts just the Mermaid Gantt block — no tables, no prose — keeping `GANTT.html` compact and focused. Open it in any browser and use **File → Print** to produce a PDF or paper copy.
-> Claude handles this automatically if you ask it to render the Gantt chart.
 
 ---
 
@@ -176,8 +161,6 @@ The `--gantt-only` flag extracts just the Mermaid Gantt block — no tables, no 
 skills/business-blueprint-workflow/
 ├── README.md                         # This file
 ├── SKILL.md                          # Main skill — INDEX.md, mode selection, steps 0–7 + AUDIT.md (Module), B0–B4 + AUDIT.md + ARCHIVED.md (Bridge)
-├── scripts/
-│   └── render_flowchart.py           # Converts FLOWCHART.md → FLOWCHART.html and TRACEABILITY_MATRIX.md → GANTT.html (--gantt-only)
 └── references/
     ├── refactor-guide.md             # Full refactoring guide — overrides each step for existing modules
     ├── example-prompts.md            # Copy-paste Claude Code prompt library for every step
