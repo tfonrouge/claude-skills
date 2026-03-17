@@ -1,37 +1,39 @@
 ---
 name: business-blueprint-workflow
 metadata:
-  version: 0.6.0
+  version: 0.7.0
 description: >
   Artifact workflow for designing and tracking business software in Claude Code.
-  Produces blueprints/ with Markdown specs, a global INDEX.md, and per-blueprint AUDIT.md.
-  Use immediately — even without an explicit request — when starting or planning software.
+  Produces blueprints/ with Markdown specs, INDEX.md, and per-blueprint AUDIT.md.
+  Use immediately — even without explicit request — when starting or planning software.
 
-  MODULE MODE — new module from scratch (ERP, CRM, WMS, SaaS, internal tooling).
-  Triggers: "new module", "build a module", "start a module", "diseñar módulo", multi-entity
-  scope, or requests for specs + flowcharts + API contracts together.
-  Skip if discussing an already-built module unless user says "redesign" or "refactor".
+  MODULE MODE — new app module (ERP, CRM, WMS, SaaS, internal tooling).
+  Triggers: "new module", "build a module", "start a module", "diseñar módulo",
+  multi-entity scope, or requests for specs + flowcharts + API contracts together.
 
-  BRIDGE MODE — feature or entity connecting two existing modules, permanent or temporary.
-  Triggers: "functionality between X and Y", "bridge between modules", "new entity that
-  integrates with", "extend existing module", "connect X to Y", "puente entre módulos",
-  "funcionalidad entre entidades existentes". Scope: single entity + contracts + a few views.
+  LIBRARY MODE — reusable SDK or library (KMP, npm, Maven, pip, etc.).
+  Triggers: "new library", "build a library", "SDK", "KMP library",
+  "package for other apps", primary output is a published artifact (.jar/.tgz/.whl).
 
-  Artifacts use (MODULE) or (BRIDGE) suffix in blueprints/.
+  BRIDGE MODE — feature/entity connecting two existing modules, permanent or temporary.
+  Triggers: "functionality between X and Y", "bridge between modules", "extend module",
+  "connect X to Y", "puente entre módulos", "funcionalidad entre entidades".
+
+  Artifacts: (MODULE) suffix for modules and libraries, (BRIDGE) for bridge features.
 ---
 
 # Business Module Workflow
 
-A repeatable, Claude Code–assisted methodology for building modules or inter-module features in a
-large-scale business software system.
+A repeatable, Claude Code–assisted methodology for building modules, libraries, or inter-module
+features in a large-scale business software system.
 
 ---
 
 ## blueprints/INDEX.md — Global Blueprint Index
 
-Create this file the first time any module or bridge is started. Update it every time a blueprint
-is created, changes status, or is deprecated. It is the single source of truth for the state of
-the entire system design.
+Create this file the first time any module, library, or bridge is started. Update it every time a
+blueprint is created, changes status, or is deprecated. It is the single source of truth for the
+state of the entire system design.
 
 ### Structure
 
@@ -39,11 +41,11 @@ the entire system design.
 # Blueprints Index
 **Updated**: [date]
 
-## Active Modules
-| Module | Status | Phase | Owner | Notes |
-|--------|--------|-------|-------|-------|
-| [ImportManagement(MODULE)](ImportManagement(MODULE)/BRIEF.md) | 🟡 In Progress | Step 4 | @dev | Blocked on API contract review |
-| [Inventory(MODULE)](Inventory(MODULE)/BRIEF.md) | ✅ Complete | — | @team | |
+## Active Modules & Libraries
+| Name | Mode | Status | Phase | Owner | Notes |
+|------|------|--------|-------|-------|-------|
+| [ImportManagement(MODULE)](ImportManagement(MODULE)/BRIEF.md) | MODULE | 🟡 In Progress | Step 4 | @dev | Blocked on API contract review |
+| [marketPlazeLib(MODULE)](marketPlazeLib(MODULE)/BRIEF.md) | LIBRARY | ✅ Complete | — | @team | |
 
 ## Active Bridges
 | Bridge | Connects | Type | Status | Expiry Condition |
@@ -79,7 +81,7 @@ graph LR
 ### Claude Code Prompt Pattern
 ```
 Update blueprints/INDEX.md.
-New entry: [ModuleName or FeatureName], type: [MODULE/BRIDGE], status: [status].
+New entry: [ModuleName or FeatureName], type: [MODULE/LIBRARY/BRIDGE], status: [status].
 [If bridge] Type: [Permanent/Temporary], connects: [ModuleA ↔ ModuleB].
 [If deprecated] Reason: [reason], date: [date].
 Preserve all existing entries.
@@ -93,14 +95,29 @@ Before starting any work, determine which mode applies and tell the user:
 
 ### MODULE MODE
 Use when:
-- Building a new module from scratch with its own data model, routes, and UI
+- Building a new application module from scratch with its own data model, routes, and UI
 - The module has no pre-existing architectural patterns to inherit
 - Scope spans multiple weeks / multiple developers
+- Users interact with the module directly (screens, forms, dashboards)
 
-→ Follow the full workflow below (Steps 0–6). Artifacts go in:
+→ Follow the full workflow below (Steps 0–7). Artifacts go in:
 ```
 blueprints/<ModuleName>(MODULE)/
 ```
+
+### LIBRARY MODE
+Use when:
+- Building a reusable SDK, library, or package (KMP, npm, Maven, pip, etc.)
+- Primary output is a published artifact (`.jar`, `.tgz`, `.whl`) consumed by other code
+- No REST endpoints or application screens — instead: a public API surface (types, interfaces, functions, utilities) that other code imports
+- May include optional UI building blocks (React hooks, Angular components, KVision building blocks, etc.) that consumer apps assemble
+- Consumers are developers, not end users
+
+→ Follow the **Library Mode workflow** (Section below). Artifacts go in:
+```
+blueprints/<LibraryName>(MODULE)/
+```
+> Use the `(MODULE)` suffix — a library is a first-class module, not a bridge.
 
 ### BRIDGE MODE
 Use when:
@@ -118,19 +135,29 @@ The `(BRIDGE)` suffix makes the directory's purpose immediately identifiable whe
 ### When in doubt, ask:
 ```
 Claude Code prompt:
-"I need to implement [description]. Should this be a full module or a bridge feature?
-Summarize: how many new entities, new views, new routes, and which existing modules are touched."
+"I need to implement [description]. Should this be a full module, a library, or a bridge feature?
+Summarize: how many new entities, new views/screens, new routes, and which existing modules are touched.
+Is the primary output a published artifact consumed by other code, or an application users interact with?"
 ```
-Use the answer to pick the mode. If it's ≥3 new entities or ≥3 new route groups → MODULE MODE.
-Otherwise → BRIDGE MODE.
+Decision guide — evaluate in this order:
+
+1. **Is the primary output a published artifact consumed by other code** (`.jar`, `.tgz`, `.whl`, npm package)?
+   → **LIBRARY MODE** — stop here, regardless of entity count.
+
+2. **Does the scope span ≥3 new entities OR ≥3 new route groups**, with no pre-existing architecture to inherit?
+   → **MODULE MODE**
+
+3. **Otherwise** (existing architecture, 1–2 new entities, days-to-weeks scope)
+   → **BRIDGE MODE**
 
 ---
 
 ## Overview of Artifacts
 
+### MODULE MODE
 | Step | Artifact | Purpose |
 |------|----------|---------|
-| — | `blueprints/INDEX.md` | Global index of all modules and bridges with status and links |
+| — | `blueprints/INDEX.md` | Global index of all modules, libraries, and bridges |
 | 0 | `BRIEF.md` | Context, owner, justification |
 | 1 | `SPECIFICATION.md` | What the module does |
 | 2 | `FLOWCHART.md` | How it flows (Mermaid diagrams) |
@@ -138,8 +165,33 @@ Otherwise → BRIDGE MODE.
 | 4 | `VIEW_MAP.md` | Every screen, view, and UI change |
 | 5 | `IMPLEMENTATION_PLAN.md` | How it will be built |
 | 6 | `TEST_PLAN.md` | How it will be verified |
-| 7 | `TRACEABILITY_MATRIX.md` | Living progress tracker (init here, update always) |
+| 7 | `TRACEABILITY_MATRIX.md` | Living progress tracker (init after Step 5, update always) |
 | — | `AUDIT.md` | Drift detection between blueprint and actual implementation |
+
+### LIBRARY MODE
+| Step | Artifact | Purpose |
+|------|----------|---------|
+| — | `blueprints/INDEX.md` | Global index |
+| 0 | `BRIEF.md` | Context, owner, library scope, platform/runtime targets, consumer modules |
+| 1 | `SPECIFICATION.md` | What the library provides — functional requirements, entities, constraints |
+| 2 | `FLOWCHART.md` | Data flows, processing pipelines, async patterns, lifecycle diagrams |
+| 3 | `API_SURFACE.md` | Public API: types, interfaces, functions, utilities, published artifact coordinates |
+| 4 | `VIEW_MAP.md` | *(Optional)* UI building blocks — only if library provides UI components |
+| 5 | `IMPLEMENTATION_PLAN.md` | Build phases — build units, platform/runtime targets, publication steps |
+| 6 | `TEST_PLAN.md` | Unit/integration tests per build unit, platform/runtime coverage, serialization |
+| 7 | `TRACEABILITY_MATRIX.md` | Living progress tracker |
+| — | `AUDIT.md` | Drift detection between API_SURFACE.md and actual implementation |
+
+### BRIDGE MODE
+| Step | Artifact | Purpose |
+|------|----------|---------|
+| B0 | `BRIEF.md` | Scope, actors, affected modules, lifecycle type |
+| B1 | `ENTITY_DESCRIPTOR.md` | New entity/entities: states, rules, data model |
+| B2 | `SERVICE_CONTRACTS.md` | API / service boundaries between touched modules |
+| B3 | `VIEW_MAP.md` | New views + existing views to modify |
+| B4 | `IMPLEMENTATION_ORDER.md` | Flat execution order with checkboxes |
+| — | `AUDIT.md` | Drift detection between blueprint and actual implementation |
+| — | `ARCHIVED.md` | Created on deprecation |
 
 > **TRACEABILITY_MATRIX.md is a living document.** Initialize it after Step 5 and update it
 > continuously as work progresses. It is never "done."
@@ -148,6 +200,8 @@ Otherwise → BRIDGE MODE.
 > or before onboarding a new developer.
 >
 > **blueprints/INDEX.md** is updated every time a blueprint is created, deprecated, or its status changes.
+>
+> **ARCHIVED.md** is created only for Temporary bridges, when their expiry condition is met.
 
 ---
 
@@ -177,6 +231,20 @@ Replace **BRIEF** with the name of the current file in bold. Files not yet creat
 [← Index](../INDEX.md) · [BRIEF](BRIEF.md) · **SPEC** · FLOWCHART · API · VIEWS · PLAN · TESTS · MATRIX · AUDIT
 ```
 
+### LIBRARY MODE footer template
+
+```markdown
+---
+[← Index](../INDEX.md) · **BRIEF** · [SPEC](SPECIFICATION.md) · [FLOWCHART](FLOWCHART.md) · [API SURFACE](API_SURFACE.md) · [VIEWS](VIEW_MAP.md) · [PLAN](IMPLEMENTATION_PLAN.md) · [TESTS](TEST_PLAN.md) · [MATRIX](TRACEABILITY_MATRIX.md) · [AUDIT](AUDIT.md)
+```
+
+`VIEW_MAP.md` is optional in LIBRARY MODE. If the library does not provide UI components, omit it from the footer:
+
+```markdown
+---
+[← Index](../INDEX.md) · [BRIEF](BRIEF.md) · [SPEC](SPECIFICATION.md) · **FLOWCHART** · [API SURFACE](API_SURFACE.md) · [PLAN](IMPLEMENTATION_PLAN.md) · [TESTS](TEST_PLAN.md) · [MATRIX](TRACEABILITY_MATRIX.md) · [AUDIT](AUDIT.md)
+```
+
 ### BRIDGE MODE footer template
 
 ```markdown
@@ -204,7 +272,7 @@ directory to add a link to the newly created file.
 Claude Code performs significantly better when given structured context. Without artifacts, it guesses intent, invents data models, and makes integration assumptions that conflict with the rest of your system. With this workflow:
 - **SPECIFICATION.md** gives Claude a precise contract to code against — no ambiguity, no hallucinated business rules
 - **FLOWCHART.md** lets Claude generate code that handles every branch, not just the happy path
-- **API_CONTRACT.md** means Claude can write integration code that matches what the other module actually emits
+- **API_CONTRACT.md / API_SURFACE.md** means Claude can write integration code that matches what the other module actually emits
 - **TEST_PLAN.md** enables Claude to write tests that trace real requirements, not synthetic ones it invented
 
 The result: less back-and-forth correction, fewer "that's not what I meant" moments, and significantly more of Claude's context window spent on building rather than re-clarifying.
@@ -245,6 +313,10 @@ Each artifact maps cleanly to a stakeholder concern:
 - **TEST_PLAN.md** → QA and compliance teams can verify coverage before sign-off
 
 The workflow produces evidence of rigor — useful when justifying timelines, requesting resources, or demonstrating compliance to auditors.
+
+---
+
+# MODULE MODE — Full Application Module Workflow
 
 ---
 
@@ -309,11 +381,6 @@ The module touches [list integration points].
 Key business rules include: [paste any known constraints].
 Flag any ambiguities you find and ask me to resolve them before finalizing.
 ```
-
-### Review Checklist (human)
-- Are all requirements testable (no vague words like "fast" or "easy")?
-- Does every integration point name a real existing module?
-- Are all user roles accounted for?
 
 ### Definition of Done
 - [ ] All 8 sections present and non-empty
@@ -408,14 +475,14 @@ Enumerate every UI surface the module introduces or modifies — before implemen
 so the frontend scope is explicit and nothing gets missed or over-built.
 
 ### Required Sections
-1. **View Inventory by Domain Area** — group views into logical sections (e.g. "Approval Views", "Inventory Views"). Flat lists don't scale for modules with 10+ views.
+1. **View Inventory by Domain Area** — group views into logical sections
 2. **New Views** — each new page/screen/modal/component with purpose and actor
 3. **Modified Views** — each existing view that changes, with an explicit diff description
 4. **Role-Based Access Matrix** — rows = views, columns = roles, cells = read / write / hidden
 5. **State-to-View Traceability** — every state from the FLOWCHART.md state machine must map to ≥1 view
 6. **Navigation Changes** — new routes, menu entries, permission guards
 7. **Shared Components** — new reusable components introduced by this module
-8. **Empty / Error / Loading States** — explicit design decisions for each view (not afterthoughts)
+8. **Empty / Error / Loading States** — explicit design decisions for each view
 
 ### Format for Each View Entry
 ```markdown
@@ -434,43 +501,13 @@ so the frontend scope is explicit and nothing gets missed or over-built.
 - **Modifications** (if MODIFIED): describe the delta only — not a full rewrite
 ```
 
-### Role-Based Access Matrix Template
-```markdown
-| View | RoleA | RoleB | RoleC | RoleD |
-|------|-------|-------|-------|-------|
-| [ViewName] | read | read/write | hidden | read |
-```
-
-### State-to-View Traceability Template
-```markdown
-| Entity State | View(s) That Display It | Action Available |
-|--------------|-------------------------|-----------------|
-| Draft        | [ViewName]              | Submit, Delete  |
-| Pending      | [ViewName], [ViewName2] | Approve, Reject |
-```
-
-### Claude Code Prompt Pattern
-```
-Based on SPECIFICATION.md, FLOWCHART.md, and API_CONTRACT.md for [ModuleName],
-generate VIEW_MAP.md.
-User roles are: [list roles].
-Existing views in affected modules: [list them or say "none"].
-Our frontend pattern: [e.g. "Vue 3 + Quasar, one .vue file per view, views in /src/views/[Module]/"].
-Group views by domain area. For each view, include empty/error/loading state decisions.
-Build the role-based access matrix for all roles × all views.
-Ensure every state in the state machine has at least one view that displays it.
-For modified views, describe only the delta — not a full rewrite.
-Flag any view change that could break existing functionality for other user roles.
-```
-
 ### Definition of Done
 - [ ] All views grouped by domain area
 - [ ] Every state from FLOWCHART.md state machine has ≥1 view
 - [ ] Every actor from SPECIFICATION.md has ≥1 entry point
 - [ ] Role-based access matrix complete for all roles × all views
 - [ ] Empty, error, and loading states defined for every view
-- [ ] All modified views have explicit diff descriptions (not "update as needed")
-- [ ] Frontend lead has reviewed and signed off
+- [ ] All modified views have explicit diff descriptions
 
 ---
 
@@ -496,15 +533,6 @@ Break the specification into buildable phases with clear milestones, dependencie
 - **Estimated Effort**: X dev-days
 - **Owner**: ...
 - **Risks**: ...
-```
-
-### Claude Code Prompt Pattern
-```
-Based on SPECIFICATION.md, FLOWCHART.md, API_CONTRACT.md, and VIEW_MAP.md for [ModuleName],
-generate IMPLEMENTATION_PLAN.md.
-Our team has [N] developers. Preferred phase size is [1–2 week sprints / other].
-Known constraints: [list any].
-Flag dependencies on other modules' API contracts not yet finalized.
 ```
 
 ### Definition of Done
@@ -539,16 +567,6 @@ in the flow chart against every requirement in the spec.
 - **Steps**: numbered list
 - **Expected Result**: ...
 - **Pass Criteria**: ...
-- **Edge Variant**: (optional)
-```
-
-### Claude Code Prompt Pattern
-```
-Based on all artifacts for [ModuleName] (SPECIFICATION.md, FLOWCHART.md,
-API_CONTRACT.md, VIEW_MAP.md, and IMPLEMENTATION_PLAN.md), generate TEST_PLAN.md.
-Ensure every requirement in SPECIFICATION.md, every path in FLOWCHART.md,
-and every view in VIEW_MAP.md has at least one test. Flag any paths that are
-difficult to test automatically vs. require manual QA.
 ```
 
 ### Definition of Done
@@ -583,11 +601,9 @@ gantt
     [Task name]  :active,  p1b, YYYY-MM-DD, YYYY-MM-DD
   section Phase 2
     [Task name]  :         p2a, YYYY-MM-DD, YYYY-MM-DD
-    [Task name]  :         p2b, YYYY-MM-DD, YYYY-MM-DD
 ```
 
 > Task states: `done` = completed, `active` = in progress, `crit` = blocked/at risk, *(none)* = not started.
-> Update this diagram every sprint alongside the tables below.
 
 ## Requirement Traceability
 | REQ-ID | Description | Phase | Status | Test ID | Notes |
@@ -597,34 +613,9 @@ gantt
 | Milestone | Planned | Actual | Delta | Owner | Blockers |
 |-----------|---------|--------|-------|-------|----------|
 
-## Time Tracking
-| Phase | Estimated (days) | Actual (days) | Variance |
-|-------|-----------------|---------------|----------|
-
 ## Open Issues
 | Issue | Impact | Owner | Target Resolution |
 |-------|--------|-------|-------------------|
-```
-
-### Claude Code Prompt Pattern (initial generation)
-```
-Generate an initial TRACEABILITY_MATRIX.md for [ModuleName] based on
-IMPLEMENTATION_PLAN.md and SPECIFICATION.md.
-Pre-populate REQ IDs from the spec and milestones from the plan.
-Set all statuses to "Not Started".
-Include a Mermaid Gantt chart under the "Timeline" section using the
-phases and date estimates from IMPLEMENTATION_PLAN.md.
-Mark all tasks with no state (not started).
-```
-
-### Claude Code Prompt Pattern (update)
-```
-Update TRACEABILITY_MATRIX.md for [ModuleName].
-Completed this sprint: [list items].
-Blockers discovered: [list].
-Adjust actuals vs estimates and flag any requirements at risk.
-Also update the Mermaid Gantt — mark completed tasks as "done",
-in-progress as "active", and blocked tasks as "crit".
 ```
 
 ### Definition of Done
@@ -635,8 +626,7 @@ in-progress as "active", and blocked tasks as "crit".
 ## AUDIT.md — Blueprint vs. Implementation Drift Detection
 
 Create `AUDIT.md` after initial implementation is underway. Revisit at the start of each sprint
-or before onboarding a new developer. Its purpose is to answer: *how faithful is the blueprint
-to what actually exists in the codebase?*
+or before onboarding a new developer.
 
 ### Structure
 
@@ -649,18 +639,26 @@ to what actually exists in the codebase?*
 ## Drift Log
 | Artifact | Section | Blueprint Says | Reality | Severity | Action |
 |----------|---------|---------------|---------|----------|--------|
-| SPECIFICATION.md | FR-04 | Users can bulk import | Not implemented | Medium | Backlog or update spec |
-| API_CONTRACT.md | POST /api/orders | Returns 201 + order object | Returns 200 only | Low | Update contract |
 
 ## Audit Checklist
 - [ ] Every FR in SPECIFICATION.md has a corresponding implementation or explicit deferral
-- [ ] API_CONTRACT.md matches current endpoint signatures
-- [ ] VIEW_MAP.md matches current views in codebase
+- [ ] API_CONTRACT.md (MODULE) or API_SURFACE.md (LIBRARY) matches current signatures
+- [ ] VIEW_MAP.md matches current views in codebase (if applicable)
 - [ ] TRACEABILITY_MATRIX.md status reflects actual completion
-- [ ] BRIEF.md scope still matches what was built (no silent scope creep)
+- [ ] BRIEF.md scope still matches what was built
 
 ## Notes
 [Free-form observations — decisions made during implementation that diverge from the blueprint]
+```
+
+### Claude Code Prompt Pattern
+```
+Perform a blueprint audit for [ModuleName].
+Read all artifacts in blueprints/[ModuleName](MODULE)/.
+Then inspect the actual codebase: [describe where to look, e.g. "src/modules/[ModuleName]/"].
+For each artifact, compare blueprint claims against reality and populate the Drift Log.
+Flag every discrepancy with a severity (Low / Medium / High / Critical).
+At the end, set the Overall Status and list recommended actions.
 ```
 
 ### Severity Guide
@@ -671,19 +669,9 @@ to what actually exists in the codebase?*
 | High | Contract mismatch or missing requirement that affects other modules |
 | Critical | Blueprint actively misleads — must update before next onboarding |
 
-### Claude Code Prompt Pattern
-```
-Audit [ModuleName](MODULE) blueprint against the current codebase.
-Compare:
-- SPECIFICATION.md requirements vs. implemented behavior
-- API_CONTRACT.md endpoint signatures vs. actual routes in [file/dir]
-- VIEW_MAP.md views vs. actual views in [file/dir]
-Produce AUDIT.md listing every divergence found with severity and suggested action.
-```
-
 ---
 
-## Full Workflow Summary
+## MODULE MODE — Full Workflow Summary
 
 ```
 blueprints/INDEX.md        → create on first module/bridge; update on every status change
@@ -706,13 +694,336 @@ AUDIT.md → create after initial implementation; revisit each sprint
 
 ---
 
+# LIBRARY MODE — SDK / Package / Reusable Library Workflow
+
+Use this section when Mode Selection determined **LIBRARY MODE**. This mode is optimized for
+libraries, SDKs, and packages where the primary output is a published artifact consumed by other
+code — not a user-facing application.
+
+Key differences from MODULE MODE:
+- **Step 3 uses `API_SURFACE.md`** instead of `API_CONTRACT.md` — documents the public API surface
+  (types, interfaces, functions, utilities) that consumers import, rather than REST endpoints.
+- **Step 4 (`VIEW_MAP.md`) is optional** — only include if the library provides UI building blocks
+  that consumer apps assemble (e.g. React hooks, Angular directives, KVision components).
+- **TEST_PLAN.md** includes required sections for per-target coverage and serialization tests.
+  *(If using KMP: JVM/JS/Native target matrix and JSON round-trip tests.)*
+
+---
+
+## Library Step 0: BRIEF.md (Kickoff)
+
+### Purpose
+Establish the library's identity, scope, consumer dependencies, and target platforms before any design work begins. This is the contract between the library author and the teams that will depend on it.
+
+### Actions
+1. Create the directory:
+   ```
+   blueprints/
+   └── <LibraryName>(MODULE)/
+   ```
+2. Confirm the following fields:
+
+| Field | Description |
+|-------|-------------|
+| Library Name | PascalCase identifier, e.g. `MarketPlazeLib` |
+| Business Owner | Who is accountable |
+| Business Justification | Why this library is needed now |
+| Platform/Runtime Targets | Which runtimes/targets this library supports. e.g. KMP: JVM/JS/Native · npm: Node 18+ · pip: Python 3.10+ |
+| Published Artifacts | Package coordinates (e.g. Maven `com.example:myLib`, npm `@scope/lib`, PyPI `mylib`) |
+| Consumer Modules | Apps / modules that will depend on this library |
+| Integration Surface | Libraries this library depends on |
+
+### Claude Code Prompt Pattern
+```
+I want to start a new library called [LibraryName] for [system/platform name].
+Here's the context: [paste kickoff fields above].
+Help me validate the scope: confirm what is and isn't part of the public API,
+and list which consumer modules will depend on this library.
+```
+
+### Definition of Done
+- [ ] Directory created at `blueprints/<LibraryName>(MODULE)/`
+- [ ] `BRIEF.md` created and all fields populated
+- [ ] Consumer modules identified and notified
+- [ ] Published artifact coordinates defined (group:artifact)
+- [ ] Platform/runtime targets agreed upon (e.g. KMP targets, Node version, Python version)
+- [ ] No unresolved ambiguities before proceeding to Step 1
+
+---
+
+## Library Step 1: SPECIFICATION.md
+
+### Purpose
+Define *what* the library does — its functional requirements, data contracts, consumer roles, and platform constraints. This is the foundation all subsequent artifacts build on.
+
+### Required Sections
+1. **Library Objective & Scope** — one paragraph
+2. **Functional Requirements** — numbered list, testable ("The library SHALL…")
+3. **Business Rules & Constraints** — calculation rules, precision constraints, edge cases
+4. **Consumer Roles** — which consumer types use which parts of the library
+5. **Data Models & Relationships** — entities, value types, enums, and language-specific sum types *(e.g. Kotlin sealed classes, TypeScript discriminated unions, Python enums)*
+6. **Integration Points** — dependencies (other libraries) and data exchanged
+7. **Performance Requirements** — latency constraints, memory footprint
+8. **Platform/Target Constraints** — which APIs are available on which targets/runtimes
+   *(If KMP: commonMain vs jvmMain vs jsMain availability)*
+
+### Claude Code Prompt Pattern
+```
+Using the kickoff brief for [LibraryName], generate a full SPECIFICATION.md.
+Consumer modules are: [list].
+Known business rules or constraints: [paste any].
+Flag any requirement that would need to be target-specific (e.g. JVM-only, browser-only).
+Flag any ambiguities before finalizing.
+```
+
+### Definition of Done
+- [ ] All 8 sections present and non-empty
+- [ ] Every requirement is testable — no vague language
+- [ ] Platform/target constraints noted per API area
+- [ ] No unresolved ambiguities (Claude flags, human resolves)
+- [ ] Business owner has reviewed and signed off
+
+---
+
+## Library Step 2: FLOWCHART.md
+
+### Purpose
+Visually map how data flows through the library, how stateful components behave over time, and how consumer apps interact with the public API. Diagrams surface ambiguities in the spec before any code is written.
+
+### Required Diagrams
+1. **Core Processing Flow** — how the library's main algorithm or pipeline works
+2. **Lifecycle Diagrams** — for any stateful components (schedulers, sync engines, etc.)
+3. **Data Transformation Flow** — how input data flows through the library's functions
+4. **Integration Flow** — how consuming apps call the library and what happens
+5. **Exception / Error Handling Paths** — what the library returns on failure
+
+### Claude Code Prompt Pattern
+```
+Based on SPECIFICATION.md for [LibraryName], generate FLOWCHART.md.
+Use Mermaid diagrams. I need:
+1. Core processing flow (main algorithm or pipeline)
+2. Lifecycle diagram for any stateful components
+3. Data transformation flow (input → library → output)
+4. Integration flow showing how consumer apps call the library
+5. Exception / error handling paths
+Be exhaustive on the error paths — a library must never silently swallow errors.
+```
+
+### Definition of Done
+- [ ] All 5 diagram types present
+- [ ] Every requirement from SPECIFICATION.md traceable to at least one flow step
+- [ ] Error / Result paths explicit for every operation that can fail
+- [ ] Diagrams render without errors in a Mermaid previewer
+
+---
+
+## Library Step 3: API_SURFACE.md
+
+### Purpose
+Document the complete public API surface of the library — what consumers import and depend on.
+This is the **published contract** — breaking changes require a major version bump.
+
+### Required Sections
+1. **Published Artifacts** — package coordinates and version *(e.g. Maven `group:artifact`, npm `@scope/lib`, PyPI `mylib`)*, plus platform/runtime targets
+2. **Core Entities & Models** — data classes, entities, their fields and constraints
+3. **Service & Algorithm Interfaces** — public interfaces, base classes, top-level functions, and other callable API *(e.g. abstract classes in OOP, protocols in Swift/Python, type classes in Haskell)*
+4. **Value Types** — enums, discriminated unions, sealed types, and other value-only types *(e.g. Kotlin inline/sealed classes, TypeScript union types, Python enums)*
+5. **Utility / Extension API** — utility functions, extension functions, or mixins provided to consumers *(e.g. Kotlin extension functions, JS prototype extensions, Python helper modules)*
+6. **UI Building Blocks** *(optional)* — column definitions, filter views, form builders (if applicable)
+7. **Error / Result Types** — how the library communicates failure
+8. **Versioning Policy** — semantic versioning rules for this library
+
+### Format for Each API Entry
+
+> **Adapt to your language/platform.** The template shows one possible structure; adapt field names and the Signature block to your language.
+> For TypeScript: use `package` for `Module/Package`, omit `Platform/Targets`, use TS signatures.
+> For Python: use `module path` for `Module/Package`, omit `Platform/Targets`, use Python type hints.
+
+```markdown
+### [ClassName] / [FunctionName]
+- **Kind**: Entity | Interface | Base Type | Object | Function | Value Type | UI Component
+- **Module/Package**: [build unit path, e.g. commonLib/commonMain | @scope/core | mylib.core]
+- **Platform/Targets**: [runtimes this symbol is available on, e.g. JVM · JS · Node · Python 3.10+]
+- **Purpose**: one sentence
+- **Signature**:
+  ```
+  // language-appropriate signature, type definition, or data class fields
+  ```
+- **Constraints**: (nullability, ranges, validation rules)
+- **Side Effects**: (events, state changes, if any)
+- **Consumers**: (which apps/modules use this)
+```
+
+### Claude Code Prompt Pattern
+```
+Based on SPECIFICATION.md and FLOWCHART.md for [LibraryName],
+generate API_SURFACE.md.
+Consumer modules: [list].
+Platform/runtime targets: [list, e.g. JVM+JS, Node 18, Python 3.10+].
+Document all: entities, interfaces, base types, top-level functions,
+value/utility types, utility/extension API, [and UI building blocks if applicable].
+Flag any API that is target-specific (e.g. JVM-only, browser-only, Node-only).
+Flag any breaking change vs. the previous version.
+```
+
+### Definition of Done
+- [ ] All public types documented (no undocumented public symbols)
+- [ ] Platform/runtime target availability noted for each entry
+- [ ] Consumer modules listed
+- [ ] Breaking changes from previous version flagged
+- [ ] Reviewed by consumer module leads
+
+---
+
+## Library Step 4: VIEW_MAP.md *(Optional)*
+
+### Purpose
+Enumerate every UI building block the library exports so consumer teams know exactly what they can assemble without reading source code. Only needed if the library provides UI components.
+
+Only include this artifact if the library provides **UI building blocks** that consumer apps assemble
+(e.g., React hooks, Angular directives, KVision column definitions).
+
+If the library has no UI components, skip this step and omit `VIEW_MAP.md` from the navigation footer.
+
+### When included, required sections:
+> **Adapt section names to your UI framework.** The examples below use KVision patterns.
+> For React: replace "Column Definitions" with "Component Inventory", "Filter View Builders" with "Hook Catalog", etc.
+
+1. **Building Block Inventory** — grouped by domain area (e.g., "Marketplace columns", "Product forms")
+2. **UI Component / Column Definitions** — each exported component or `colDef*()` function: purpose, props/params, display type
+3. **Filter / Query Builders** — each filter or query builder: entities filtered, input types
+4. **Form Field Builders** — each form builder: fields included, layout
+5. **Consumer Assembly Pattern** — how consuming apps use these building blocks (code example)
+6. **Samples Module** — reference implementations provided (if applicable)
+
+---
+
+## Library Step 5: IMPLEMENTATION_PLAN.md
+
+### Purpose
+Break the library build into phases ordered by dependency — shared/common code first, then platform-specific targets, then publication. Makes the build sequence explicit and assignable.
+
+### Required Sections
+Same as MODULE MODE, with these library-specific additions:
+- **Build Unit Breakdown** — which build units (packages/modules) get built in which phase *(e.g. Gradle modules, npm workspaces, Python packages)*
+- **Target/Runtime Build Order** — the order in which platform targets or runtimes are built *(e.g. KMP: commonMain first, then jvmMain, then jsMain; npm: CJS then ESM; pip: sdist then wheel)*
+- **Publication Steps** — when and how to publish to the relevant registry *(Maven Local/Central, npm registry, PyPI, etc.)*
+
+### Phase Structure Template
+```markdown
+## Phase N: [Name]
+- **Deliverable**: [publishable artifact or milestone]
+- **Build Units Affected**: [e.g. commonLib + shopifyLib | @scope/core | mylib.core]
+- **Target/Runtimes**: [e.g. commonMain/jvmMain | Node 18 CJS+ESM | Python 3.10+]
+- **Technical Objectives**: ...
+- **Dependencies**: (phases or external libraries)
+- **Estimated Effort**: X dev-days
+```
+
+### Claude Code Prompt Pattern
+```
+Based on SPECIFICATION.md and FLOWCHART.md for [LibraryName],
+generate IMPLEMENTATION_PLAN.md.
+Build units: [list, e.g. Gradle modules / npm workspaces / Python packages].
+Platform/runtime targets: [list].
+Publication registry: [e.g. Maven Central / npm / PyPI].
+Use 3–5 phases, each with a publishable milestone.
+Order: shared/common code first, then platform-specific targets, then publication.
+Flag any phase that requires coordination with consumer module teams.
+```
+
+---
+
+## Library Step 6: TEST_PLAN.md
+
+### Purpose
+Document the test strategy that validates every public symbol across every supported platform/runtime. A library ships to many consumers — gaps in test coverage become their production bugs.
+
+### Required Sections
+1. **Test Coverage Matrix** — FR-ID → Test ID mapping
+2. **Unit Tests by Build Unit** — per package/module, grouped by tested class/function *(e.g. per Gradle module, per npm workspace, per Python package)*
+3. **Platform/Runtime Coverage** — which tests run on which targets/runtimes
+
+```markdown
+### Platform/Runtime Coverage
+| Test Class | [Target A] | [Target B] | [Target C] |
+|-----------|------------|------------|------------|
+| ExampleTest | ✅ | ⬜ | ⬜ |
+```
+*(e.g. KMP: JVM / JS / Native · npm: Node / Browser · pip: Python 3.10 / 3.11)*
+
+4. **Serialization / Schema Tests** — round-trip tests for all serializable entities or data contracts
+5. **Integration Tests** — end-to-end scenarios using test doubles or in-memory implementations
+6. **Known Gaps** — untested areas and justification (e.g., visual components, live API calls)
+
+### Claude Code Prompt Pattern
+```
+Based on SPECIFICATION.md, FLOWCHART.md, and API_SURFACE.md for [LibraryName],
+generate TEST_PLAN.md.
+Build units: [list].
+Platform/runtime targets: [list — each target needs its own coverage column].
+For each public symbol in API_SURFACE.md, include at least one unit test.
+Include serialization/schema round-trip tests for all data types.
+Use InMemoryRepository or test doubles for integration tests — no live dependencies.
+```
+
+### Test Entry Format
+Same as MODULE MODE (`TEST-[NNN]` format).
+
+---
+
+## Library TRACEABILITY_MATRIX.md and AUDIT.md
+
+Same structure as MODULE MODE.
+
+### Claude Code Prompt Pattern (initialize TRACEABILITY_MATRIX.md)
+```
+Based on IMPLEMENTATION_PLAN.md for [LibraryName], generate TRACEABILITY_MATRIX.md.
+Initialize the Gantt with all phases and tasks from the plan.
+Initialize the Requirement Traceability table with all FR-IDs from SPECIFICATION.md.
+Set all statuses to "Not Started". Leave Test ID column blank — fill as tests are written.
+```
+
+For `AUDIT.md`, the checklist adapts:
+
+```markdown
+## Audit Checklist
+- [ ] Every FR in SPECIFICATION.md has a corresponding implementation or explicit deferral
+- [ ] API_SURFACE.md matches current public API signatures
+- [ ] VIEW_MAP.md (if present) matches current UI building blocks
+- [ ] TRACEABILITY_MATRIX.md status reflects actual completion
+- [ ] BRIEF.md scope still matches what was built
+```
+
+---
+
+## LIBRARY MODE — Full Workflow Summary
+
+```
+blueprints/INDEX.md        → create on first use; update on every status change
+
+Step 0: BRIEF.md → library name, platform/runtime targets, consumer modules
+Step 1: SPECIFICATION.md → functional requirements, entities, business rules
+Step 2: FLOWCHART.md → data flows, lifecycle diagrams, processing pipelines
+Step 3: API_SURFACE.md → public interfaces, types, functions, published artifact coordinates
+Step 4: VIEW_MAP.md → [OPTIONAL] UI building blocks (components, hooks, form builders)
+Step 5: IMPLEMENTATION_PLAN.md → build unit phases, target/runtime order, publication steps
+         └─ Initialize TRACEABILITY_MATRIX.md here
+Step 6: TEST_PLAN.md → unit tests per build unit, platform/runtime coverage, serialization
+Step 7: TRACEABILITY_MATRIX.md → update continuously through development
+AUDIT.md → create after initial implementation; revisit each sprint
+
+Directory: blueprints/<LibraryName>(MODULE)/
+Footer: [← Index] · BRIEF · SPEC · FLOWCHART · API SURFACE · [VIEWS] · PLAN · TESTS · MATRIX · AUDIT
+```
+
 ---
 
 # BRIDGE MODE — Scoped Feature Workflow
 
-Use this section when Mode Selection determined **BRIDGE MODE**. Do not run the full Steps 0–6 workflow.
+Use this section when Mode Selection determined **BRIDGE MODE**. Do not run the full MODULE MODE workflow (Steps 0–7).
 
-Bridge Mode produces 5 focused artifacts — no more. All artifacts live in:
+Bridge Mode produces 5 core artifacts (B0–B4), plus AUDIT.md and optionally ARCHIVED.md. All live in:
 ```
 blueprints/<FeatureName>(BRIDGE)/
 ```
@@ -751,16 +1062,19 @@ Confirm scope and boundaries before any design work. Keep it short — this is a
 | Owner | Who is accountable |
 | Target | Rough date or sprint |
 | **Lifecycle Type** | **Permanent** or **Temporary** |
-| **Expiry Condition** | *(Temporary only)* The condition that makes this bridge obsolete — e.g. "when ModuleX completes its API refactor" or "after data migration is complete" |
-| **Absorption Target** | *(Temporary only)* Which module will eventually own this functionality, if known |
-| **Planned Deprecation** | *(Temporary only)* Estimated sprint or date for deprecation, if known |
+| **Expiry Condition** | *(Temporary only)* The condition that makes this bridge obsolete |
+| **Absorption Target** | *(Temporary only)* Which module will eventually own this functionality |
+| **Planned Deprecation** | *(Temporary only)* Estimated sprint or date for deprecation |
 
 ### Claude Code Prompt Pattern
 ```
 I need to implement [FeatureName] — a bridge feature between [ModuleA] and [ModuleB].
-New entities involved: [list].
-Help me write a BRIEF.md that clearly defines scope and explicitly marks what is out of scope.
-Flag anything that sounds like scope creep.
+Context: [describe the business need in 2-3 sentences].
+Existing entities involved: [list].
+Architecture pattern: [describe your stack/patterns briefly].
+
+Help me write BRIEF.md. Confirm the scope is tight and explicitly list what is out of scope.
+Declare the lifecycle type (Permanent or Temporary) and, if Temporary, define the expiry condition.
 ```
 
 ### Definition of Done
@@ -795,7 +1109,7 @@ Known business rules: [paste any].
 I need:
 - A state machine diagram for [EntityName]
 - A sequence diagram showing the flow between [ModuleA] → [FeatureName] → [ModuleB]
-- Data model that fits our existing [ORM/schema pattern]
+- A data model that fits our existing [ORM/schema pattern]
 Flag any rules that are ambiguous or conflict with existing module behavior.
 ```
 
@@ -816,7 +1130,7 @@ This is the document you share with other teams before writing a single line of 
 
 ### Required Sections
 1. **Contract Summary Table** — one row per integration point: direction, caller, method, purpose
-2. **Service / API Entries** — one entry per endpoint or service method (see format below)
+2. **Service / API Entries** — one entry per endpoint or service method
 3. **Events Emitted** — any domain events this feature publishes
 4. **Events Consumed** — any domain events this feature listens to
 5. **Shared Entities / DTOs** — any data structures crossing module boundaries
@@ -856,7 +1170,10 @@ Flag any integration point that requires a breaking change to an existing module
 
 ### Purpose
 Enumerate every UI change required: new views to create and existing views to modify.
-This scopes the frontend work precisely so nothing is missed or over-built.
+
+> **Intentionally simplified** vs MODULE MODE VIEW_MAP. Bridge scope is narrow — no role-based
+> access matrix, no empty/error/loading states required. If the feature grows beyond 4–5 views,
+> reconsider whether MODULE MODE is the right fit.
 
 ### Required Sections
 1. **New Views** — each new view/screen/component with its purpose and actor
@@ -871,7 +1188,7 @@ This scopes the frontend work precisely so nothing is missed or over-built.
 - **Route**: /path/to/view (if applicable)
 - **Actor**: which roles access this
 - **Purpose**: one sentence
-- **Key Elements**: list of main UI elements (table, form, status badge, action buttons…)
+- **Key Elements**: list of main UI elements
 - **Data Sources**: which service/API feeds this view
 - **Modifications** (if MODIFIED): describe what changes vs. current behavior
 ```
@@ -880,16 +1197,16 @@ This scopes the frontend work precisely so nothing is missed or over-built.
 ```
 Based on ENTITY_DESCRIPTOR.md and SERVICE_CONTRACTS.md for [FeatureName],
 generate VIEW_MAP.md.
-Existing views in affected modules: [list them].
-Our frontend pattern: [e.g. "Vue 3 + Quasar, one .vue file per view, views in /src/views/[Module]/"].
-For each modified view, describe only the delta — not a full rewrite.
+Existing views in affected modules: [list them or say "none"].
+Our frontend pattern: [e.g. "Vue 3 + Quasar, one .vue file per view"].
+For modified views, describe only the delta — not a full rewrite.
 Flag any view change that could break existing functionality for other user roles.
 ```
 
 ### Definition of Done
 - [ ] Every state from the state machine has at least one view that displays it
 - [ ] Every actor from the actor matrix has at least one entry point
-- [ ] All modified views have explicit diff descriptions (not "update as needed")
+- [ ] All modified views have explicit diff descriptions
 - [ ] Frontend lead has reviewed
 
 ---
@@ -911,27 +1228,22 @@ Not phases, not sprints — just the order that respects dependencies so nothing
 ### Layer 1 — Data
 - [ ] B4-01 · Create migration for [EntityName] table
 - [ ] B4-02 · Add FK [field] to [ExistingTable]
-- [ ] B4-03 · Create [EntityName] model / schema
 
 ### Layer 2 — Business Logic
-- [ ] B4-04 · Implement [EntityName] service: create, transition states
-- [ ] B4-05 · Implement [specific rule] logic
-- [ ] B4-06 · Unit tests for state machine transitions
+- [ ] B4-03 · Implement [EntityName] service
+- [ ] B4-04 · Unit tests for state machine transitions
 
 ### Layer 3 — Integration
-- [ ] B4-07 · Implement contract: [FeatureName] → [ModuleA].[method]
-- [ ] B4-08 · Implement contract: [ModuleB] → [FeatureName].[method]
-- [ ] B4-09 · Integration tests for contracts
+- [ ] B4-05 · Implement contract: [FeatureName] → [ModuleA].[method]
+- [ ] B4-06 · Integration tests for contracts
 
 ### Layer 4 — UI
-- [ ] B4-10 · Create view: [NewViewName]
-- [ ] B4-11 · Modify view: [ExistingViewName] (delta: [description])
-- [ ] B4-12 · Wire navigation / route guards
+- [ ] B4-07 · Create view: [NewViewName]
+- [ ] B4-08 · Modify view: [ExistingViewName] (delta: [description])
 
 ### Layer 5 — Validation
-- [ ] B4-13 · End-to-end test: [happy path description]
-- [ ] B4-14 · End-to-end test: [rejection/error path]
-- [ ] B4-15 · Smoke test in staging with [affected module] team
+- [ ] B4-09 · End-to-end test: [happy path]
+- [ ] B4-10 · Smoke test in staging
 ```
 
 ### Claude Code Prompt Pattern (generate)
@@ -956,7 +1268,39 @@ Add any new tasks discovered: [describe].
 
 ---
 
-## Bridge Mode — Full Workflow Summary
+## ARCHIVED.md — Deprecation Record
+
+Create `ARCHIVED.md` when a Temporary bridge reaches its expiry condition and is deprecated.
+Do **not** delete the bridge directory — `ARCHIVED.md` serves as the permanent record.
+
+### Required Fields
+
+```markdown
+# Archived — [FeatureName](BRIDGE)
+**Deprecated On**: [date]
+**Deprecated By**: [person]
+**Reason**: [the expiry condition from BRIEF.md that was met]
+**Absorption Target**: [which module absorbed this functionality, if any]
+**Final State**: [was the feature fully shipped, partially shipped, or cancelled?]
+
+## Summary
+[2-3 sentences describing what the bridge did and why it no longer exists as a standalone entity]
+
+## Key Artifacts for Reference
+- [Link to final ENTITY_DESCRIPTOR.md]
+- [Link to final SERVICE_CONTRACTS.md]
+- [PR or commit that removed/absorbed the bridge code]
+```
+
+### Definition of Done
+- [ ] All `IMPLEMENTATION_ORDER.md` tasks marked complete or explicitly cancelled
+- [ ] Absorption target documented (or "none — functionality removed")
+- [ ] `blueprints/INDEX.md` updated: entry moved from Active Bridges → Deprecated
+- [ ] Link to the absorbing module's blueprint added (if applicable)
+
+---
+
+## BRIDGE MODE — Full Workflow Summary
 
 ```
 B0: BRIEF.md               → confirm scope, lifecycle type, affected modules, out-of-scope
@@ -965,6 +1309,7 @@ B2: SERVICE_CONTRACTS.md   → API/service boundaries (share with other teams be
 B3: VIEW_MAP.md            → new views + existing views to modify
 B4: IMPLEMENTATION_ORDER.md → flat checklist ordered by dependency layer
 AUDIT.md                   → create after initial implementation; revisit each sprint
+ARCHIVED.md                → create only when deprecating a Temporary bridge
 
 Directory: blueprints/<FeatureName>(BRIDGE)/
 ```
@@ -975,16 +1320,5 @@ When the expiry condition defined in `BRIEF.md` is met:
 2. Create `ARCHIVED.md` in the bridge directory with: reason for deprecation, date, and which module (if any) absorbed the functionality
 3. Update `blueprints/INDEX.md`: move the entry from Active Bridges to Deprecated
 4. Do **not** delete the directory — it serves as a record of what existed and why
-
-### Bridge Mode Claude Code Kickoff Prompt
-```
-I need to implement [FeatureName] — a bridge feature between [ModuleA] and [ModuleB].
-Context: [describe the business need in 2-3 sentences].
-Existing entities involved: [list].
-Architecture pattern: [describe your stack/patterns briefly].
-
-Start with B0: help me write BRIEF.md, confirm the scope is tight,
-and explicitly list what is out of scope. Then we'll proceed step by step.
-```
 
 > See `references/example-prompts.md` for additional Bridge Mode prompt examples per scenario type.
