@@ -1,7 +1,7 @@
 ---
 name: business-blueprint-workflow
 metadata:
-  version: 0.7.0
+  version: 0.8.0
 description: >
   Artifact workflow for designing and tracking business software in Claude Code.
   Produces blueprints/ with Markdown specs, INDEX.md, and per-blueprint AUDIT.md.
@@ -34,6 +34,10 @@ features in a large-scale business software system.
 Create this file the first time any module, library, or bridge is started. Update it every time a
 blueprint is created, changes status, or is deprecated. It is the single source of truth for the
 state of the entire system design.
+
+> **Status column is derived from `.blueprint-status` files** — see the section below.
+> Never edit the Status column manually; instead update the corresponding `.blueprint-status` file
+> and then refresh INDEX.md from it.
 
 ### Structure
 
@@ -68,28 +72,177 @@ graph LR
 ```
 
 ### Status Legend
-| Icon | Meaning |
-|------|---------|
-| 🔵 Planning | Blueprint in progress, no code yet |
-| 🟡 In Progress | Active development |
-| 🟢 Stable | In production, blueprint aligned |
-| ⚠️ Drifted | AUDIT.md flags misalignment |
-| 🔴 Blocked | Waiting on external dependency |
-| ✅ Complete | Shipped and verified |
-| 🗄️ Deprecated | No longer active |
+| Icon | Status | Meaning |
+|------|--------|---------|
+| 🔵 | `PLANNING` | Blueprint in progress, no code yet |
+| 🟡 | `ACTIVE` | Active development |
+| 🎯 | `FOCUSED` | Current sprint's primary focus (1–2 max) |
+| ⏸️ | `PAUSED` | Halted intentionally; reason in `.blueprint-status` |
+| 🔴 | `BLOCKED` | Waiting on external dependency; reason in `.blueprint-status` |
+| 🟢 | `STABLE` | In production, blueprint aligned |
+| ⚠️ | `DRIFTED` | AUDIT.md flags misalignment |
+| 🗄️ | `CLOSED` | Deprecated bridge — ARCHIVED.md exists |
 
 ### Claude Code Prompt Pattern
 ```
 Update blueprints/INDEX.md.
-New entry: [ModuleName or FeatureName], type: [MODULE/LIBRARY/BRIDGE], status: [status].
+New entry: [ModuleName or FeatureName], type: [MODULE/LIBRARY/BRIDGE], status: [STATUS].
 [If bridge] Type: [Permanent/Temporary], connects: [ModuleA ↔ ModuleB].
 [If deprecated] Reason: [reason], date: [date].
+Source status from each blueprint's .blueprint-status file.
 Preserve all existing entries.
 ```
 
 ---
 
-## Mode Selection — Do This First
+## `.blueprint-status` — Per-Blueprint Status File
+
+Every blueprint directory contains a single plain-text file called `.blueprint-status`.
+It is the **authoritative source** for that blueprint's current status — INDEX.md reads from it,
+never the other way around. Directory names are **never renamed** to encode status.
+
+### Format
+
+One line. Status keyword, optionally followed by `: <reason>`.
+
+```
+ACTIVE
+```
+```
+FOCUSED
+```
+```
+PAUSED: waiting for UX sign-off on VIEW_MAP
+```
+```
+BLOCKED: WMS v2 must deploy before this can continue
+```
+```
+CLOSED
+```
+
+### Status Values
+
+| Status | Meaning |
+|--------|---------|
+| `PLANNING` | Blueprint in progress, no code yet |
+| `ACTIVE` | Under active development |
+| `FOCUSED` | Current sprint's primary development focus (use sparingly — 1–2 at a time) |
+| `PAUSED` | Work halted intentionally; will resume. Always add `: <reason>` |
+| `BLOCKED` | Waiting on an external dependency before work can continue. Always add `: <dependency>` |
+| `STABLE` | In production; blueprint aligned with implementation |
+| `DRIFTED` | AUDIT.md flags misalignment between blueprint and implementation |
+| `CLOSED` | Temporary bridge that has been deprecated and archived |
+
+> **`FOCUSED` is a sprint-level signal, not a permanent state.** At most 1–2 blueprints should
+> carry `FOCUSED` at any time. When a sprint ends, update them back to `ACTIVE`.
+
+### Icon Mapping for INDEX.md
+
+| Status | Icon |
+|--------|------|
+| `PLANNING` | 🔵 |
+| `ACTIVE` | 🟡 |
+| `FOCUSED` | 🎯 |
+| `PAUSED` | ⏸️ |
+| `BLOCKED` | 🔴 |
+| `STABLE` | 🟢 |
+| `DRIFTED` | ⚠️ |
+| `CLOSED` | 🗄️ |
+
+### Claude Code Prompt Pattern
+
+```
+Update the .blueprint-status file for blueprints/[Name](MODE)/.
+New status: [STATUS]: [optional reason].
+Then refresh the Status column for this entry in blueprints/INDEX.md.
+```
+
+### Why a file instead of directory prefix?
+
+- **No git rename trauma** — status changes are single-file edits, not directory renames
+- **No shell quoting pain** — directory names stay clean
+- **Grep-friendly** — `find blueprints -name .blueprint-status | xargs grep BLOCKED` shows all blocked blueprints instantly
+- **Richer content** — the reason field (`: <text>`) carries context that a prefix never could
+- **Single source of truth** — INDEX.md derives from it; no drift between two places
+
+---
+
+## blueprints/MAP.md — System Roadmap
+
+`MAP.md` answers a different question than `INDEX.md`:
+
+| File | Question |
+|------|----------|
+| `INDEX.md` | *What exists and what state is it in right now?* |
+| `MAP.md` | *Where is the system going? What depends on what? What are we building next?* |
+
+Create `MAP.md` when you have ≥3 blueprints and a multi-sprint horizon. Update it when focus
+shifts, blockers change, or the dependency graph evolves.
+
+### Structure
+
+```markdown
+# System Roadmap
+**Updated**: [date]
+**Current Focus**: [1–2 blueprint names that are FOCUSED right now]
+
+## Dependency Graph
+
+```mermaid
+graph LR
+  Inventory --> StockSync
+  StockSync --> WMS
+  Orders --> PlanReparacion
+  PlanReparacion --> Billing
+```
+
+> Arrows mean "must complete or be stable before the downstream work begins."
+
+## Sprint / Cycle Focus
+
+| Blueprint | Status | Goal This Sprint |
+|-----------|--------|-----------------|
+| [OrderManagement(MODULE)](OrderManagement(MODULE)/BRIEF.md) | 🎯 FOCUSED | Complete API contract review |
+| [PlanReparacion(BRIDGE)](PlanReparacion(BRIDGE)/BRIEF.md) | 🎯 FOCUSED | Ship to staging |
+
+## Upcoming (Next 2–3 Sprints)
+
+| Blueprint | Mode | Unblocked By | Notes |
+|-----------|------|-------------|-------|
+| Billing(MODULE) | MODULE | OrderManagement stable | Q3 target |
+
+## Blocked / Waiting
+
+| Blueprint | Blocked On | Owner | Est. Resolution |
+|-----------|-----------|-------|----------------|
+| WMS(MODULE) | Vendor API contract | @vendor-team | 2024-Q3 |
+
+## North Star
+
+[1–2 sentences: where is the overall system heading in the next 2–4 quarters?]
+```
+
+### Relationship to INDEX.md
+
+- `INDEX.md` = **status board** — exhaustive, row-per-blueprint, always current
+- `MAP.md` = **roadmap** — curated, forward-looking, focused on sequence and intent
+- They reference each other; neither duplicates the other's data
+
+### Claude Code Prompt Pattern
+
+```
+Update blueprints/MAP.md.
+Current focus: [list FOCUSED blueprints].
+New blockers: [list].
+Upcoming work: [describe next items].
+North star change: [if any].
+Keep the dependency graph accurate — add/remove edges as needed.
+```
+
+---
+
+
 
 Before starting any work, determine which mode applies and tell the user:
 
@@ -154,10 +307,16 @@ Decision guide — evaluate in this order:
 
 ## Overview of Artifacts
 
+### Root (`blueprints/`)
+| File | Purpose |
+|------|---------|
+| `INDEX.md` | Global status board — all modules, libraries, bridges |
+| `MAP.md` | System roadmap — dependency graph, focus, blockers, north star |
+
 ### MODULE MODE
 | Step | Artifact | Purpose |
 |------|----------|---------|
-| — | `blueprints/INDEX.md` | Global index of all modules, libraries, and bridges |
+| — | `.blueprint-status` | Single-line status file; source of truth for INDEX.md |
 | 0 | `BRIEF.md` | Context, owner, justification |
 | 1 | `SPECIFICATION.md` | What the module does |
 | 2 | `FLOWCHART.md` | How it flows (Mermaid diagrams) |
@@ -171,7 +330,7 @@ Decision guide — evaluate in this order:
 ### LIBRARY MODE
 | Step | Artifact | Purpose |
 |------|----------|---------|
-| — | `blueprints/INDEX.md` | Global index |
+| — | `.blueprint-status` | Single-line status file; source of truth for INDEX.md |
 | 0 | `BRIEF.md` | Context, owner, library scope, platform/runtime targets, consumer modules |
 | 1 | `SPECIFICATION.md` | What the library provides — functional requirements, entities, constraints |
 | 2 | `FLOWCHART.md` | Data flows, processing pipelines, async patterns, lifecycle diagrams |
@@ -185,6 +344,7 @@ Decision guide — evaluate in this order:
 ### BRIDGE MODE
 | Step | Artifact | Purpose |
 |------|----------|---------|
+| — | `.blueprint-status` | Single-line status file; source of truth for INDEX.md |
 | B0 | `BRIEF.md` | Scope, actors, affected modules, lifecycle type |
 | B1 | `ENTITY_DESCRIPTOR.md` | New entity/entities: states, rules, data model |
 | B2 | `SERVICE_CONTRACTS.md` | API / service boundaries between touched modules |
@@ -200,6 +360,10 @@ Decision guide — evaluate in this order:
 > or before onboarding a new developer.
 >
 > **blueprints/INDEX.md** is updated every time a blueprint is created, deprecated, or its status changes.
+> Its status column is sourced from each blueprint's `.blueprint-status` file — never edited manually.
+>
+> **blueprints/MAP.md** is updated when development focus shifts, blockers change, or the dependency
+> graph evolves. It is the roadmap view of the system; INDEX.md is the status board.
 >
 > **ARCHIVED.md** is created only for Temporary bridges, when their expiry condition is met.
 
@@ -214,42 +378,42 @@ Every `.md` artifact must include a navigation footer so readers can jump betwee
 1. **Always at the bottom** — the nav block is the very last content in the file, after all sections.
 2. **Current artifact is bold and not a link** — so the reader knows where they are.
 3. **Only link artifacts that already exist** — if an artifact hasn't been generated yet, render it as plain text (no brackets, no link).
-4. **Always include the INDEX link** — even if it's the only link present.
+4. **Always include the INDEX and MAP links** — even if they are the only links present.
 5. **Regenerate when a new artifact is created** — when generating artifact N, update the footer of all previously generated artifacts in the same blueprint directory to add the new link.
 
 ### MODULE MODE footer template
 
 ```markdown
 ---
-[← Index](../INDEX.md) · **BRIEF** · [SPEC](SPECIFICATION.md) · [FLOWCHART](FLOWCHART.md) · [API](API_CONTRACT.md) · [VIEWS](VIEW_MAP.md) · [PLAN](IMPLEMENTATION_PLAN.md) · [TESTS](TEST_PLAN.md) · [MATRIX](TRACEABILITY_MATRIX.md) · [AUDIT](AUDIT.md)
+[← Index](../INDEX.md) · [Map](../MAP.md) · **BRIEF** · [SPEC](SPECIFICATION.md) · [FLOWCHART](FLOWCHART.md) · [API](API_CONTRACT.md) · [VIEWS](VIEW_MAP.md) · [PLAN](IMPLEMENTATION_PLAN.md) · [TESTS](TEST_PLAN.md) · [MATRIX](TRACEABILITY_MATRIX.md) · [AUDIT](AUDIT.md)
 ```
 
 Replace **BRIEF** with the name of the current file in bold. Files not yet created appear as plain text without brackets:
 
 ```markdown
 ---
-[← Index](../INDEX.md) · [BRIEF](BRIEF.md) · **SPEC** · FLOWCHART · API · VIEWS · PLAN · TESTS · MATRIX · AUDIT
+[← Index](../INDEX.md) · [Map](../MAP.md) · [BRIEF](BRIEF.md) · **SPEC** · FLOWCHART · API · VIEWS · PLAN · TESTS · MATRIX · AUDIT
 ```
 
 ### LIBRARY MODE footer template
 
 ```markdown
 ---
-[← Index](../INDEX.md) · **BRIEF** · [SPEC](SPECIFICATION.md) · [FLOWCHART](FLOWCHART.md) · [API SURFACE](API_SURFACE.md) · [VIEWS](VIEW_MAP.md) · [PLAN](IMPLEMENTATION_PLAN.md) · [TESTS](TEST_PLAN.md) · [MATRIX](TRACEABILITY_MATRIX.md) · [AUDIT](AUDIT.md)
+[← Index](../INDEX.md) · [Map](../MAP.md) · **BRIEF** · [SPEC](SPECIFICATION.md) · [FLOWCHART](FLOWCHART.md) · [API SURFACE](API_SURFACE.md) · [VIEWS](VIEW_MAP.md) · [PLAN](IMPLEMENTATION_PLAN.md) · [TESTS](TEST_PLAN.md) · [MATRIX](TRACEABILITY_MATRIX.md) · [AUDIT](AUDIT.md)
 ```
 
 `VIEW_MAP.md` is optional in LIBRARY MODE. If the library does not provide UI components, omit it from the footer:
 
 ```markdown
 ---
-[← Index](../INDEX.md) · [BRIEF](BRIEF.md) · [SPEC](SPECIFICATION.md) · **FLOWCHART** · [API SURFACE](API_SURFACE.md) · [PLAN](IMPLEMENTATION_PLAN.md) · [TESTS](TEST_PLAN.md) · [MATRIX](TRACEABILITY_MATRIX.md) · [AUDIT](AUDIT.md)
+[← Index](../INDEX.md) · [Map](../MAP.md) · [BRIEF](BRIEF.md) · [SPEC](SPECIFICATION.md) · **FLOWCHART** · [API SURFACE](API_SURFACE.md) · [PLAN](IMPLEMENTATION_PLAN.md) · [TESTS](TEST_PLAN.md) · [MATRIX](TRACEABILITY_MATRIX.md) · [AUDIT](AUDIT.md)
 ```
 
 ### BRIDGE MODE footer template
 
 ```markdown
 ---
-[← Index](../INDEX.md) · **BRIEF** · [ENTITY](ENTITY_DESCRIPTOR.md) · [CONTRACTS](SERVICE_CONTRACTS.md) · [VIEWS](VIEW_MAP.md) · [ORDER](IMPLEMENTATION_ORDER.md) · [AUDIT](AUDIT.md)
+[← Index](../INDEX.md) · [Map](../MAP.md) · **BRIEF** · [ENTITY](ENTITY_DESCRIPTOR.md) · [CONTRACTS](SERVICE_CONTRACTS.md) · [VIEWS](VIEW_MAP.md) · [ORDER](IMPLEMENTATION_ORDER.md) · [AUDIT](AUDIT.md)
 ```
 
 ### Claude Code Prompt Pattern
@@ -674,18 +838,20 @@ At the end, set the Overall Status and list recommended actions.
 ## MODULE MODE — Full Workflow Summary
 
 ```
-blueprints/INDEX.md        → create on first module/bridge; update on every status change
+blueprints/INDEX.md        → create on first module/bridge; refresh status from .blueprint-status files
+blueprints/MAP.md          → create when ≥3 blueprints exist; update when focus or blockers change
 
-Step 0: Kickoff → confirm scope, create directory
+Step 0: Kickoff → confirm scope, create directory, create .blueprint-status (initial: PLANNING)
 Step 1: SPECIFICATION.md → what the module does
 Step 2: FLOWCHART.md → how it flows
 Step 3: API_CONTRACT.md → how it connects (share with other teams)
 Step 4: VIEW_MAP.md → every screen and UI change
 Step 5: IMPLEMENTATION_PLAN.md → how it will be built
-         └─ Initialize TRACEABILITY_MATRIX.md here
+         └─ Initialize TRACEABILITY_MATRIX.md here; update .blueprint-status → ACTIVE
 Step 6: TEST_PLAN.md → how it will be verified
 Step 7: TRACEABILITY_MATRIX.md → update continuously through development
 AUDIT.md → create after initial implementation; revisit each sprint
+.blueprint-status → update on every status change (PLANNING → ACTIVE → FOCUSED / PAUSED / BLOCKED → STABLE)
 ```
 
 > See `references/example-prompts.md` for a full set of Claude Code prompts per module type.
@@ -1000,21 +1166,24 @@ For `AUDIT.md`, the checklist adapts:
 ## LIBRARY MODE — Full Workflow Summary
 
 ```
-blueprints/INDEX.md        → create on first use; update on every status change
+blueprints/INDEX.md        → create on first use; refresh status from .blueprint-status files
+blueprints/MAP.md          → create when ≥3 blueprints exist; update when focus or blockers change
 
 Step 0: BRIEF.md → library name, platform/runtime targets, consumer modules
+         └─ Create .blueprint-status (initial: PLANNING)
 Step 1: SPECIFICATION.md → functional requirements, entities, business rules
 Step 2: FLOWCHART.md → data flows, lifecycle diagrams, processing pipelines
 Step 3: API_SURFACE.md → public interfaces, types, functions, published artifact coordinates
 Step 4: VIEW_MAP.md → [OPTIONAL] UI building blocks (components, hooks, form builders)
 Step 5: IMPLEMENTATION_PLAN.md → build unit phases, target/runtime order, publication steps
-         └─ Initialize TRACEABILITY_MATRIX.md here
+         └─ Initialize TRACEABILITY_MATRIX.md here; update .blueprint-status → ACTIVE
 Step 6: TEST_PLAN.md → unit tests per build unit, platform/runtime coverage, serialization
 Step 7: TRACEABILITY_MATRIX.md → update continuously through development
 AUDIT.md → create after initial implementation; revisit each sprint
+.blueprint-status → update on every status change
 
 Directory: blueprints/<LibraryName>(MODULE)/
-Footer: [← Index] · BRIEF · SPEC · FLOWCHART · API SURFACE · [VIEWS] · PLAN · TESTS · MATRIX · AUDIT
+Footer: [← Index] · [Map] · BRIEF · SPEC · FLOWCHART · API SURFACE · [VIEWS] · PLAN · TESTS · MATRIX · AUDIT
 ```
 
 ---
@@ -1304,12 +1473,15 @@ Do **not** delete the bridge directory — `ARCHIVED.md` serves as the permanent
 
 ```
 B0: BRIEF.md               → confirm scope, lifecycle type, affected modules, out-of-scope
+                               └─ Create .blueprint-status (initial: PLANNING)
 B1: ENTITY_DESCRIPTOR.md   → states, rules, data model, integration flow diagram
 B2: SERVICE_CONTRACTS.md   → API/service boundaries (share with other teams before coding)
 B3: VIEW_MAP.md            → new views + existing views to modify
 B4: IMPLEMENTATION_ORDER.md → flat checklist ordered by dependency layer
+                               └─ Update .blueprint-status → ACTIVE
 AUDIT.md                   → create after initial implementation; revisit each sprint
 ARCHIVED.md                → create only when deprecating a Temporary bridge
+                               └─ Update .blueprint-status → CLOSED
 
 Directory: blueprints/<FeatureName>(BRIDGE)/
 ```
@@ -1318,7 +1490,9 @@ Directory: blueprints/<FeatureName>(BRIDGE)/
 When the expiry condition defined in `BRIEF.md` is met:
 1. Mark all `IMPLEMENTATION_ORDER.md` tasks as complete or explicitly cancelled
 2. Create `ARCHIVED.md` in the bridge directory with: reason for deprecation, date, and which module (if any) absorbed the functionality
-3. Update `blueprints/INDEX.md`: move the entry from Active Bridges to Deprecated
-4. Do **not** delete the directory — it serves as a record of what existed and why
+3. Update `.blueprint-status` to `CLOSED`
+4. Update `blueprints/INDEX.md`: move the entry from Active Bridges to Deprecated
+5. Update `blueprints/MAP.md`: remove from Sprint Focus and Upcoming; add a note to the North Star if relevant
+6. Do **not** delete the directory — it serves as a record of what existed and why
 
 > See `references/example-prompts.md` for additional Bridge Mode prompt examples per scenario type.
