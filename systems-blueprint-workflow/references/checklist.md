@@ -73,7 +73,7 @@ Print or copy for each workstream.
 - [ ] Behavior test per new function
 - [ ] Compatibility test per COMPAT.md fracture
 - [ ] Performance benchmark for hot-path changes
-- [ ] Tests are executable (hbtest / .prg / .c)
+- [ ] Tests are executable (project test framework or compilable test files)
 
 ### Step 7 — TRACEABILITY.md
 - [ ] Gantt initialized with all phases
@@ -131,3 +131,8 @@ Print or copy for each workstream.
 - [ ] Fix-proof test (proves bug is fixed)
 - [ ] Regression test (proves nothing else broke)
 - [ ] Edge case test
+
+### AUDIT.md (required, lightweight)
+- [ ] Fix matches CHANGESET.md — no undocumented changes
+- [ ] No scope creep beyond BRIEF.md blast radius
+- [ ] Tests pass

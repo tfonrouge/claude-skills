@@ -1,7 +1,7 @@
 ---
 name: systems-blueprint-workflow
 metadata:
-  version: 0.1.0
+  version: 0.2.0
 description: >
   Artifact workflow for designing and tracking systems-level software in Claude Code:
   compilers, VMs, runtimes, databases, OS kernels, language toolchains, embedded firmware.
@@ -45,6 +45,20 @@ don't account for:
   affected patterns, and quantify the blast radius of every change.
 - **The "spec" is often the existing code.** There may be no document describing
   what the GC does — the GC *is* the document.
+
+---
+
+## Design Premise Deference
+
+If the project's `CLAUDE.md` defines a design premise (e.g. `PREMISE: cathedral`),
+all artifact decisions — alternatives considered, design trade-offs, implementation
+ordering — must align with that premise. When the premise and a pragmatic shortcut
+conflict, the premise wins. Document the conflict and resolution in DESIGN.md's
+"Alternatives Considered" section.
+
+When running audits, the premise's principle alignment checks take precedence
+over this skill's Definitions of Done. A blueprint can satisfy every DoD checkbox
+and still fail the audit if its design choices violate the governing premise.
 
 ---
 
@@ -139,7 +153,7 @@ graph LR
 ## Sprint Focus
 | Blueprint | Status | Goal This Sprint |
 |-----------|--------|-----------------|
-| ScalarClasses(SUBSYSTEM) | 🎯 | Wire existing tscalar.prg classes into VM dispatch |
+| ScalarClasses(SUBSYSTEM) | 🎯 | Wire existing scalar classes into VM dispatch |
 
 ## Upcoming
 | Blueprint | Mode | Unblocked By | Notes |
@@ -246,7 +260,7 @@ Directory: `blueprints/<Name>(PATCH)/`
 | P0 | `BRIEF.md` | What, why, blast radius, rollback plan |
 | P1 | `CHANGESET.md` | Exact files and functions affected, before/after |
 | P2 | `TEST_PLAN.md` | Regression tests proving the fix and no side effects |
-| — | `AUDIT.md` | Optional — only if patch scope grew unexpectedly |
+| — | `AUDIT.md` | Required (lightweight) — verify fix matches CHANGESET, no scope creep |
 
 ---
 
@@ -518,7 +532,7 @@ a compilable, testable state — no phase leaves the build broken.
 ## Phase N: [Name]
 - **Milestone**: [what is true when this phase is done]
 - **Files touched**: [list]
-- **Build verification**: `make && bin/linux/gcc/hbtest`
+- **Build verification**: [project build & test command]
 - **Performance checkpoint**: [benchmark command or "N/A"]
 - **Rollback**: `git revert` to commit before phase / feature flag off
 - **Depends on**: [Phase N-1 / external]
@@ -555,7 +569,7 @@ at the function, opcode, and integration level.
 - **Type**: Regression / New / Compat / Perf / Stress
 - **Covers**: [DESIGN.md section or COMPAT.md fracture]
 - **Setup**: [preconditions]
-- **Action**: [what to execute — .prg code, C function call, or hbtest assertion]
+- **Action**: [what to execute — test code, function call, or test framework assertion]
 - **Expected**: [specific result]
 - **Threshold**: [for perf tests: max time, max memory, max regression %]
 ```
@@ -565,7 +579,7 @@ at the function, opcode, and integration level.
 - [ ] Every new function has a behavior test
 - [ ] Every COMPAT.md fracture has a compatibility test
 - [ ] Performance-critical changes have benchmarks with thresholds
-- [ ] Tests are executable (hbtest assertions or compilable .prg files)
+- [ ] Tests are executable (project test framework or compilable test files)
 
 ---
 
@@ -716,6 +730,27 @@ what was, what will be, and why.
 Regression test proving the fix works and nothing else broke.
 Same format as SUBSYSTEM TEST_PLAN.md but typically 3-5 tests, not 30.
 
+### AUDIT.md (required, lightweight)
+
+Every patch gets an audit — but it can be minimal. Three checkboxes:
+
+```markdown
+# Audit — [Name]
+**Last Audit**: [date]
+**Overall**: ✅ Aligned | ⚠️ Scope Grew | ❌ Drifted
+
+## Checklist
+- [ ] Fix matches CHANGESET.md — no undocumented changes
+- [ ] No scope creep beyond BRIEF.md blast radius
+- [ ] Tests pass
+
+## Notes
+[Only if something unexpected happened during the fix]
+```
+
+If the patch grew beyond its original blast radius during implementation,
+escalate to FEATURE or SUBSYSTEM mode.
+
 ---
 
 # Workflow Summary
@@ -748,5 +783,5 @@ PATCH MODE (targeted fix):
   P0: BRIEF.md              → problem, root cause, fix, blast radius
   P1: CHANGESET.md          → before/after for every change
   P2: TEST_PLAN.md          → regression proof
-  AUDIT.md                  → optional
+  AUDIT.md                  → required (lightweight): fix matches changeset, no scope creep
 ```
