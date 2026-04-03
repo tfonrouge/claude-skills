@@ -19,7 +19,9 @@ The repository is modularized by skill domains. A typical skill module contains:
 
 ### Active Modules
 
-- **[`business-module-workflow`](./business-module-workflow/)**: A specialized workflow emphasizing clean architecture, separation of concerns, and robust data integrity operations when designing or refactoring business logic layers.
+- **[`business-blueprint-workflow`](./business-blueprint-workflow/)**: A specialized workflow emphasizing clean architecture, separation of concerns, and robust data integrity operations when designing or refactoring business logic layers.
+
+- **[`systems-blueprint-workflow`](./systems-blueprint-workflow/)**: An artifact workflow for designing and tracking systems-level software—compilers, VMs, runtimes, databases, OS kernels, language toolchains, and embedded firmware. Supports three modes: **Subsystem** (deep structural changes), **Feature** (self-contained additions), and **Patch** (targeted fixes). Produces `blueprints/` with Markdown specs, `INDEX.md`, and per-blueprint `AUDIT.md`.
 
 ## 🚀 How to Use
 
