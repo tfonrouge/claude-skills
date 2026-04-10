@@ -1,42 +1,34 @@
-# 🧠 AI Skills Repository
+# AI Skills Repository
 
-Welcome to the **AI Skills Repository**. This repository serves as a centralized collection of robust, all-purpose skill definitions and workflows designed to augment and enhance daily AI-assisted development, engineering, and operational tasks.
+A centralized collection of skill definitions for AI-assisted software development. Each skill is a structured Markdown document that an AI agent ingests to align its behavior with established engineering principles and workflows.
 
-## 🎯 Purpose
+## Repository Structure
 
-In the evolving landscape of AI-assisted software engineering, agents require structured context, standardized procedures, and domain-specific knowledge to perform complex tasks effectively. This repository houses these "skills"—structured Markdown documents containing instructions, constraints, and methodologies that an AI agent can ingest to align its behavior with established best practices.
+Each skill module contains:
 
-By utilizing these skills, you can ensure that your AI assistants produce more reliable, maintainable, and architecturally sound outputs across varying domains.
+- **`SKILL.md`**: The core instruction set — agent constraints, operational context, and step-by-step methodologies.
+- **`references/`**: Supplementary context, checklists, and domain-specific guidelines referenced by the main skill file.
 
-## 📂 Repository Structure
+### Active Skills
 
-The repository is modularized by skill domains. A typical skill module contains:
+- **[`cathedral-premise`](./cathedral-premise/)**: A governance premise for principled software development. Enforces five core principles — correctness first, solve the general problem, clean abstractions, established patterns over novel invention, and incremental discipline — across all blueprint-driven work. Supports two domains:
 
-- **`SKILL.md`**: The core instruction set defining agent constraints, operational context, and step-by-step methodologies.
-- **`README.md`**: Human-readable documentation outlining the skill's scope, prerequisites, and intended usage.
-- **`references/`**: Supplementary context, checklists, prompt examples, or architectural guidelines referenced by the main skill file.
-- **`scripts/`**: Auxiliary scripts, generators, or validation tools that the AI might utilize during task execution.
+  - **Systems** (compilers, VMs, runtimes, GC, JIT) via `references/cathedral-systems.md`
+  - **Business** (ERP, CRM, WMS, SaaS modules) via `references/cathedral-business.md`
 
-### Active Modules
+  The premise governs blueprint skills — it does not replace them. It provides cathedral audits, design decision evaluation, spike hygiene enforcement, and a Decision Ledger with falsification conditions to prevent both rejection amnesia and approval calcification.
 
-- **[`business-blueprint-workflow`](./business-blueprint-workflow/)**: A specialized workflow emphasizing clean architecture, separation of concerns, and robust data integrity operations when designing or refactoring business logic layers.
+## How to Use
 
-- **[`systems-blueprint-workflow`](./systems-blueprint-workflow/)**: An artifact workflow for designing and tracking systems-level software—compilers, VMs, runtimes, databases, OS kernels, language toolchains, and embedded firmware. Supports three modes: **Subsystem** (deep structural changes), **Feature** (self-contained additions), and **Patch** (targeted fixes). Produces `blueprints/` with Markdown specs, `INDEX.md`, and per-blueprint `AUDIT.md`.
+1. **Install** the skill into your agent's workspace (e.g., as a Claude Code skill directory or by mounting the repo).
+2. **Configure** the project's `CLAUDE.md` with the appropriate premise and blueprint skill (see `cathedral-premise/references/cathedral-core.md` for the config template).
+3. **Invoke** the skill by trigger phrase (e.g., "run cathedral audit", "premise check") or let the agent activate it automatically when it detects relevant context.
 
-## 🚀 How to Use
+## Adding a New Skill
 
-To utilize a skill from this repository within your AI environment (such as Claude, Gemini, or custom Agentic coding workflows):
-
-1. **Mount or specify** the repository within your agent's workspace context.
-2. **Direct the agent** to read the relevant `SKILL.md` file for the task at hand (e.g., "Please read `business-module-workflow/SKILL.md` before proceeding").
-3. **Provide the task** or specific context. The AI will adopt the defined persona and follow the structured workflows to execute the task with significantly higher precision and structural compliance.
-
-## 🛠️ Contribution & Expansion
-
-When expanding this repository with a new skill:
-1. Create a dedicated top-level directory for the new skill domain.
-2. Define a comprehensive `SKILL.md` that explicitly dictates the rules of engagement and constraints for the AI.
-3. Include reference materials (`references/`) to ground the AI's understanding with concrete examples.
+1. Create a dedicated top-level directory for the skill domain.
+2. Define a `SKILL.md` with frontmatter (name, version, description, triggers) and the full instruction set.
+3. Place domain-specific reference materials in `references/`.
 
 ---
 *Built to empower intelligent agents with structured engineering workflows.*
