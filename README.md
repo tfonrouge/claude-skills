@@ -31,7 +31,7 @@ The two prompts support a two-session review loop: an **implementer** (edits, co
 
 Lifecycle:
 
-1. **Once per project** — paste `owner-rar-protocol.prompt.md` into the implementer session. It installs a `v1`, marker-delimited block in `CLAUDE.md`; re-paste a newer version to replace it in place.
+1. **Once per project** — paste `owner-rar-protocol.prompt.md` into the implementer session. It installs a versioned, marker-delimited block in `CLAUDE.md`; re-paste a newer version to replace it in place.
 2. **Each reviewer session** — paste `rar-reviewer.prompt.md` into the RAR session so it wraps output correctly from the first message.
 3. **Each review** — copy RAR's wrapped output into the implementer; the implementer triages each finding (Confirmed / Rejected / Stale / Needs owner decision / Unclear) before changing anything.
 

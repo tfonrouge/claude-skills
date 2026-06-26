@@ -1,6 +1,6 @@
 # Owner/RAR Protocol — installer prompt
 
-**Protocol version:** owner-rar-protocol v1
+**Protocol version:** owner-rar-protocol v2
 
 > Paste this entire file into a project's **implementer** session, once per project.
 > Re-paste any time to upgrade the protocol in place.
@@ -8,18 +8,21 @@
 ---
 
 Add the protocol block below to this project's persistent agent-instructions file
-(`CLAUDE.md`, or `AGENTS.md` / equivalent if that is what the project uses). The block is
-delimited by the HTML-comment markers `OWNER_RAR_PROTOCOL:begin/end`:
+(`CLAUDE.md`, or `AGENTS.md` / equivalent if that is what the project uses). It is delimited by
+stable, **version-less** HTML-comment markers `<!-- OWNER_RAR_PROTOCOL:begin -->` /
+`<!-- OWNER_RAR_PROTOCOL:end -->` (the version lives in the visible `Protocol version` line inside,
+so upgrades replace cleanly):
 
-- If a block with these exact markers already exists, **replace it in place** (do not duplicate).
+- If a block delimited by those markers already exists, **replace everything between and including
+  them in place** (do not duplicate), whatever version it currently shows.
 - Otherwise insert it as a top-level section.
 - Copy it **verbatim** between the markers — do not rephrase or summarize.
 - Change nothing else. **Do not commit** — leave the diff for the Owner to review.
 
-<!-- OWNER_RAR_PROTOCOL:begin v1 -->
+<!-- OWNER_RAR_PROTOCOL:begin -->
 ## Session Roles Protocol — Owner vs. RAR
 
-_Protocol version: owner-rar-protocol v1._
+_Protocol version: owner-rar-protocol v2._
 
 Two collaborating sessions drive this repo. Distinguish messages by **authority, not identity**:
 
@@ -62,4 +65,11 @@ RAR triage:
 - Needs owner decision:  trade-off / scope / priority — STOP and surface, do not act
 - Unclear:               cannot verify without more context — investigate or ask, do not act
 ```
+
+**Persistence.** The triage is a working-loop artifact: keep it in chat, not in repo files. Do not
+write findings or the triage table to any durable audit or spec artifact. Promote a single finding
+to a durable record only at Owner direction, and only when it qualifies: drift between a
+blueprint/contract and the implementation → the project's audit record (e.g. `AUDIT.md`); a decision
+or deliberate rejection of a suggested change → the project's decision ledger (e.g. `LEDGER.md`).
+Everything else lives in the commit message and chat.
 <!-- OWNER_RAR_PROTOCOL:end -->

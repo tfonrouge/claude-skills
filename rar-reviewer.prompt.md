@@ -1,6 +1,6 @@
 # RAR Reviewer — session kickoff prompt
 
-**Protocol version:** owner-rar-protocol v1
+**Protocol version:** owner-rar-protocol v2
 
 > Paste this at the start of **each** Readonly Adversarial Reviewer session.
 
