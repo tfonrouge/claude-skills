@@ -22,18 +22,18 @@ Each skill module contains:
 
 Paste-ready prompts that currently live at the repo root (they may move into a `prompts/` directory if more accrue). Unlike skills (which an agent ingests as `SKILL.md`), these are **copied directly into a chat session**:
 
-- **[`owner-rar-protocol.prompt.md`](./owner-rar-protocol.prompt.md)** — installer. Paste once into a project's *implementer* session to add the versioned **Owner/RAR Session Roles Protocol** to that project's `CLAUDE.md` (or `AGENTS.md`).
-- **[`rar-reviewer.prompt.md`](./rar-reviewer.prompt.md)** — kickoff. Paste at the start of each *Readonly Adversarial Reviewer (RAR)* session.
+- **[`owner-roar-protocol.prompt.md`](./owner-roar-protocol.prompt.md)** — installer. Paste once into a project's *implementer* session to add the versioned **Owner/ROAR Session Roles Protocol** to that project's `CLAUDE.md` (or `AGENTS.md`).
+- **[`roar-reviewer.prompt.md`](./roar-reviewer.prompt.md)** — kickoff. Paste at the start of each *Read-Only Adversarial Reviewer (ROAR)* session.
 
-### Owner/RAR review workflow
+### Owner/ROAR review workflow
 
-The two prompts support a two-session review loop: an **implementer** (edits, commits, pushes) and a **Readonly Adversarial Reviewer** (verdict + critique only). The Owner shuttles RAR output into the implementer. The protocol lets the implementer tell *authority* apart — **Owner directives** vs. **RAR claims-to-verify** — via a whole-line wrapper (`--- BEGIN RAR ---` / `--- END RAR ---`), and forces a triage circuit-breaker before any edit so the implementer metabolizes the review instead of blindly obeying it.
+The two prompts support a two-session review loop: an **implementer** (edits, commits, pushes) and a **Read-Only Adversarial Reviewer** (verdict + critique only). The Owner shuttles ROAR output into the implementer. The protocol lets the implementer tell *authority* apart — **Owner directives** vs. **ROAR claims-to-verify** — via a whole-line wrapper (`--- BEGIN ROAR ---` / `--- END ROAR ---`), and forces a triage circuit-breaker before any edit so the implementer metabolizes the review instead of blindly obeying it.
 
 Lifecycle:
 
-1. **Once per project** — paste `owner-rar-protocol.prompt.md` into the implementer session. It installs a versioned, marker-delimited block in `CLAUDE.md`; re-paste a newer version to replace it in place.
-2. **Each reviewer session** — paste `rar-reviewer.prompt.md` into the RAR session so it wraps output correctly from the first message.
-3. **Each review** — copy RAR's wrapped output into the implementer; the implementer triages each finding (Confirmed / Rejected / Stale / Needs owner decision / Unclear) before changing anything.
+1. **Once per project** — paste `owner-roar-protocol.prompt.md` into the implementer session. It installs a versioned, marker-delimited block in `CLAUDE.md`; re-paste a newer version to replace it in place.
+2. **Each reviewer session** — paste `roar-reviewer.prompt.md` into the ROAR session so it wraps output correctly from the first message.
+3. **Each review** — copy ROAR's wrapped output into the implementer; the implementer triages each finding (Confirmed / Rejected / Stale / Needs owner decision / Unclear) before changing anything.
 
 ## How to Use
 
@@ -44,7 +44,7 @@ Lifecycle:
 ## Adding a New Skill
 
 1. Create a dedicated top-level directory for the skill domain.
-2. Define a `SKILL.md` with frontmatter (name, version, description, triggers) and the full instruction set.
+2. Define a `SKILL.md` with frontmatter — a top-level `name`, a `metadata:` block holding `version`, and a `description` block scalar that embeds the trigger phrases (there is no separate `triggers` key) — plus the full instruction set.
 3. Place domain-specific reference materials in `references/`.
 
 ---

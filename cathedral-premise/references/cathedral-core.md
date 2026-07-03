@@ -156,16 +156,6 @@ Follow the cathedral premise.
 
 ---
 
-## Effort Configuration
-
-| Context | Effort | How to set |
-|---------|--------|------------|
-| Default | high | settings.json: `{"effortLevel": "high"}` |
-| Cathedral audit, architecture work | max | `/effort max` |
-| Mechanical edits | low | `/effort low`, then restore |
-
----
-
 ## Cathedral Audit — Shared Procedure
 
 When asked to **"run cathedral audit"**, Claude must:
@@ -187,7 +177,7 @@ Produce a single **`CATHEDRAL_AUDIT_REPORT.md`** in the project root:
 > Generated: {date}
 > Premise: cathedral
 > Skill: {blueprint skill name}
-> Blueprints scanned: {root}
+> Blueprint root: {root}
 
 ## Summary
 - Blueprints scanned: N

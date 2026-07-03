@@ -13,6 +13,9 @@ These checks supplement the universal principles in `cathedral-core.md`.
 | LIBRARY | `(MODULE)` | BRIEF, ARCHITECTURE, PUBLIC_API, IMPLEMENTATION_ORDER, AUDIT |
 | BRIDGE | `(BRIDGE)` | BRIEF, ENTITY_DESCRIPTOR, SERVICE_CONTRACTS, VIEW_MAP, IMPLEMENTATION_ORDER, AUDIT, (ARCHIVED) |
 
+> A parenthesized artifact (e.g. `(ARCHIVED)`) is **conditional** — produced only when its trigger
+> fires. `ARCHIVED.md` is created when a Temporary bridge closes (see "Temporary bridge hygiene").
+
 ---
 
 ## Established Patterns Reference

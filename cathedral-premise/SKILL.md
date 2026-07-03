@@ -1,7 +1,7 @@
 ---
 name: cathedral-premise
 metadata:
-  version: 1.1.0
+  version: 1.1.1
 description: >
   Governance premise for principled software development. Enforces correctness-first
   design, clean abstractions, established patterns, blueprint alignment, and spike
@@ -25,9 +25,9 @@ description: >
 > "If a simpler path and a right path exist, choose the right path."
 
 This skill enforces a governance layer over blueprint-driven development. It ensures
-that all design and implementation decisions satisfy four core principles: correctness
-first, solve the general problem, clean abstractions, and established patterns over
-novel invention.
+that all design and implementation decisions satisfy five core principles: correctness
+first, solve the general problem, clean abstractions, established patterns over
+novel invention, and incremental discipline.
 
 ---
 
@@ -35,7 +35,7 @@ novel invention.
 
 ### Step 1: Load the core principles
 
-Always read `references/cathedral-core.md` first. It contains the four principles,
+Always read `references/cathedral-core.md` first. It contains the five principles,
 spike rules, blueprint alignment mandate, and the shared audit procedure. These
 apply to every cathedral-governed project regardless of domain.
 
@@ -60,11 +60,11 @@ Depending on the task:
 
 | Task | What to do |
 |------|-----------|
-| **Design decision** | Evaluate against the four principles. Flag violations. Cite the specific principle. |
+| **Design decision** | Evaluate against the five principles. Flag violations. Cite the specific principle. |
 | **Blueprint review** | Check all artifacts against the domain-specific checks. Produce findings. |
 | **Cathedral audit** | Follow the full audit procedure in `cathedral-core.md` using the domain-specific checks. Produce `CATHEDRAL_AUDIT_REPORT.md`. |
 | **Spike proposal** | Verify it meets all spike rules (tagged, time-bounded, BRIEF.md entry, will not ship as-is). |
-| **Trade-off discussion** | Present options through the lens of the four principles. The premise wins when it conflicts with shortcuts. |
+| **Trade-off discussion** | Present options through the lens of the five principles. The premise wins when it conflicts with shortcuts. |
 
 ---
 
