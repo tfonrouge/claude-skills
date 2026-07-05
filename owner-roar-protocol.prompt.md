@@ -1,6 +1,6 @@
 # Owner/ROAR Protocol — installer prompt
 
-**Protocol version:** owner-roar-protocol v3
+**Protocol version:** owner-roar-protocol v4
 
 > Paste this entire file into a project's **implementer** session, once per project.
 > Re-paste any time to upgrade the protocol in place.
@@ -26,7 +26,7 @@ so upgrades replace cleanly):
 <!-- OWNER_ROAR_PROTOCOL:begin -->
 ## Session Roles Protocol — Owner vs. ROAR
 
-_Protocol version: owner-roar-protocol v3._
+_Protocol version: owner-roar-protocol v4._
 
 Two collaborating sessions drive this repo. Distinguish messages by **authority, not identity**:
 

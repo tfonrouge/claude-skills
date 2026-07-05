@@ -27,6 +27,20 @@ five principles (Incremental Discipline plus the Decision Ledger with falsificat
 Versioned via the visible `Protocol version` line inside the installed block. Prior to v3 the
 protocol and its reviewer role used the acronym **RAR**; see v3 for the rename to **ROAR**.
 
+## v4
+
+- **Adds a reviewer discipline rule to the kickoff prompt** (`roar-reviewer.prompt.md`): *verify
+  asserted absences, not just presences.* When a finding rests on "X does not exist / is never read /
+  has no write-path," the reviewer must run the search that would surface X before asserting it and
+  cite the (empty or non-empty) result — never state the expected outcome of an unrun check — and must
+  search one ring beyond the files the analysis already cites.
+- The installed protocol block (`owner-roar-protocol.prompt.md`) is **unchanged in substance**; the
+  rule lives only in the kickoff. Its visible version line moves to v4 in lockstep because the kickoff
+  and the installed block share a single protocol version (see [`DECISIONS.md`](./DECISIONS.md) D4).
+- **Migration:** re-pasting v4 replaces a v3 block in place — the `OWNER_ROAR_PROTOCOL` markers are
+  unchanged (no marker rename this time; D2 stability holds), so the swap is clean and yields a block
+  identical to v3 but for the version line.
+
 ## v3
 
 - **Renames the reviewer acronym `RAR` → `ROAR`** (Read-Only Adversarial Reviewer) to avoid collision

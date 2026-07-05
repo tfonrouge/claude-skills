@@ -99,3 +99,35 @@ D2 stability guarantee resumes under the new name.
 
 **Reopen only if:** `ROAR` itself later proves to collide in a way that outweighs the churn of another
 rename — reopen with the same dual-matching migration mechanism.
+
+## D4 — The kickoff prompt and the installed block share one protocol version, bumped in lockstep
+
+**Status:** decided 2026-07-05 · introduced in owner-roar-protocol v4
+
+**Decision.** `roar-reviewer.prompt.md` (the reviewer kickoff) and `owner-roar-protocol.prompt.md`
+(the installer and its installed block) carry a single shared `Protocol version: owner-roar-protocol
+vN` line. A substantive change to *either* artifact bumps that version in *both*, even when the other
+artifact's content is unchanged. v4 is the first case: only the kickoff gained a rule
+(absence-verification), yet both version lines advance to v4.
+
+**Why.**
+
+- The two prompts are one protocol expressed in two places (detailed reviewer instructions in the
+  kickoff; a compact restatement in the installed block). A change to reviewer behavior must be
+  spottable from the version line wherever it is read.
+- Letting the versions diverge (kickoff v4, block v3) reintroduces the exact "which v3?" ambiguity the
+  version line exists to eliminate — the same failure class D2/D3 guard against.
+- The cost of a no-content-change bump on the installed block is nil: re-pasting v4 replaces a v3
+  block in place under the stable `OWNER_ROAR_PROTOCOL` markers (D2), producing a block byte-identical
+  to v3 except for the version line.
+
+**Alternatives rejected.**
+
+- *Give the kickoff its own independent version:* doubles the version surface and creates a
+  "which kickoff pairs with which block?" compatibility matrix for what is a single two-file protocol;
+  rejected.
+- *Leave the installed block at v3 since its content didn't change:* makes "v3" denote two different
+  reviewer behaviors depending on which file you read — the drift the version guards against; rejected.
+
+**Reopen only if:** the kickoff and installed block ever need independent compatibility (e.g. a kickoff
+designed to work against several protocol-block versions) — then version them separately.
