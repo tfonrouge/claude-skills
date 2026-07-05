@@ -40,6 +40,12 @@ protocol and its reviewer role used the acronym **RAR**; see v3 for the rename t
 - **Migration:** re-pasting v4 replaces a v3 block in place — the `OWNER_ROAR_PROTOCOL` markers are
   unchanged (no marker rename this time; D2 stability holds), so the swap is clean and yields a block
   identical to v3 but for the version line.
+- **Packaging:** both prompts now ship as **self-contained, manual-invoke Claude Code skills** —
+  `roar-reviewer/` and `owner-roar-protocol/`. Each `SKILL.md` is a thin wrapper that reads and applies the
+  canonical prompt bundled in its own `references/` (single source of truth, no forked text). The prompts
+  moved out of the repo root into those `references/` dirs and stay paste-able for use in any tool.
+  Packaging version `0.1.0`, independent of the protocol version. Rationale in
+  [`DECISIONS.md`](./DECISIONS.md) (D5).
 
 ## v3
 

@@ -131,3 +131,51 @@ artifact's content is unchanged. v4 is the first case: only the kickoff gained a
 
 **Reopen only if:** the kickoff and installed block ever need independent compatibility (e.g. a kickoff
 designed to work against several protocol-block versions) — then version them separately.
+
+## D5 — The prompts ship as thin skill wrappers; the `.prompt.md` files stay the single source of truth
+
+**Status:** decided 2026-07-05
+
+**Decision.** `roar-reviewer` and `owner-roar-protocol` are each exposed as a Claude Code skill
+(`roar-reviewer/SKILL.md`, `owner-roar-protocol/SKILL.md`). Each `SKILL.md` is a **thin wrapper**: it
+carries only frontmatter (`name`, a packaging `version`, a manual-only `description`) and instructs the
+agent to read and apply the canonical `.prompt.md` **bundled in the skill's own `references/`**. The
+`.prompt.md` files remain the single source of behavioral truth — no protocol text is duplicated into a
+`SKILL.md`. Each skill is thereby **self-contained**: the wrapper points at `./references/<prompt>` (not
+at an external sibling), so the skill works even when its directory is installed on its own. Both skills
+are **manual-invocation only**; their descriptions explicitly forbid auto-activation. The skill's
+`metadata.version` is a **packaging** version (starts `0.1.0`), independent of the protocol behavior
+version, which stays carried by the `.prompt.md`'s `Protocol version: owner-roar-protocol vN` line.
+
+The prompts live *only* inside their skill's `references/` (they were previously root-level; moved here so
+each skill is self-contained). They remain **paste-able**: open the file and copy it into any tool — the
+tool-agnostic reviewer/installer text is unchanged.
+
+**Why.**
+
+- Skills add ergonomics (`/roar-reviewer`, `/owner-roar-protocol`) and, for owner-roar, encapsulate the
+  marker-replace + legacy-migration logic — the part most error-prone to follow by hand.
+- Duplicating prompt text into `SKILL.md` would fork content and invite exactly the version drift D2/D3/D4
+  exist to prevent. A thin pointer keeps one source.
+- The `.prompt.md` form stays tool-agnostic (paste-able into any chat or agent, e.g. running the reviewer
+  in a *different* model for independent perspective); the skill form is Claude Code-specific. Bundling the
+  prompt as the skill's `references/` source preserves that portability while keeping the skill
+  self-contained.
+- Manual-only is mandatory: owner-roar **edits CLAUDE.md** (the Owner gates that), and roar-reviewer flips
+  the whole session into read-only reviewer mode — neither should fire on incidental keyword matches.
+- Separating packaging version from protocol version avoids a third behavior-version surface and the
+  "which combination is compatible?" matrix (the D4 concern): the wrapper has no behavior of its own to
+  version.
+
+**Alternatives rejected.**
+
+- *Embed the full prompt text in `SKILL.md` (skill as source):* forks content, drift risk; and the
+  paste-able artifact would then point back at a skill, which is awkward to paste; rejected.
+- *Give the skill a behavior version tracking the protocol (e.g. `4.0.0`):* implies independent behavior
+  the wrapper does not have, and re-creates a version matrix; rejected.
+- *Auto-activating descriptions for discoverability:* unacceptable for a CLAUDE.md-editing skill and a
+  session-role-flipping skill; rejected.
+
+**Reopen only if:** a skill needs behavior the prompt can't express (then the skill gains real content and
+its own behavior version), or the paste-able form proves to have no users (then collapse the prompt inline
+into `SKILL.md` and drop `references/`).

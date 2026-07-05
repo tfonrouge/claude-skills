@@ -18,12 +18,26 @@ Each skill module contains:
 
   The premise governs blueprint skills — it does not replace them. It provides cathedral audits, design decision evaluation, spike hygiene enforcement, and a Decision Ledger with falsification conditions to prevent both rejection amnesia and approval calcification.
 
-## Root-Level Prompts
+- **[`roar-reviewer`](./roar-reviewer/)** and **[`owner-roar-protocol`](./owner-roar-protocol/)**: the
+  Owner/ROAR review prompts, each packaged as a **self-contained wrapper skill**. Each `SKILL.md` carries
+  only frontmatter and points the agent at the canonical prompt **bundled in its own `references/`**
+  (single source of truth — no duplicated text, no external path). Both are **manual-invoke only**
+  (`/roar-reviewer`, `/owner-roar-protocol`) and must not auto-activate: `owner-roar-protocol` edits
+  `CLAUDE.md`, and `roar-reviewer` flips the session into read-only reviewer mode. Their `metadata.version`
+  is a packaging version, independent of the protocol version carried by the prompts. Rationale in
+  [`DECISIONS.md`](./DECISIONS.md) (D5).
 
-Paste-ready prompts that currently live at the repo root (they may move into a `prompts/` directory if more accrue). Unlike skills (which an agent ingests as `SKILL.md`), these are **copied directly into a chat session**:
+## Owner/ROAR review prompts
 
-- **[`owner-roar-protocol.prompt.md`](./owner-roar-protocol.prompt.md)** — installer. Paste once into a project's *implementer* session to add the versioned **Owner/ROAR Session Roles Protocol** to that project's `CLAUDE.md` (or `AGENTS.md`).
-- **[`roar-reviewer.prompt.md`](./roar-reviewer.prompt.md)** — kickoff. Paste at the start of each *Read-Only Adversarial Reviewer (ROAR)* session.
+The two skills above each bundle a **paste-ready prompt** in `references/`. Beyond being invoked as skills
+inside Claude Code, these prompts are **tool-agnostic** — open the file and copy it directly into any chat
+session (for example, to run the ROAR reviewer in a *different* AI for independent perspective):
+
+- **[`owner-roar-protocol/references/owner-roar-protocol.prompt.md`](./owner-roar-protocol/references/owner-roar-protocol.prompt.md)** — installer. Paste once into a project's *implementer* session to add the versioned **Owner/ROAR Session Roles Protocol** to that project's `CLAUDE.md` (or `AGENTS.md`). In Claude Code, invoke as `/owner-roar-protocol`.
+- **[`roar-reviewer/references/roar-reviewer.prompt.md`](./roar-reviewer/references/roar-reviewer.prompt.md)** — kickoff. Paste at the start of each *Read-Only Adversarial Reviewer (ROAR)* session. In Claude Code, invoke as `/roar-reviewer`.
+
+> Each prompt is the **single source of truth** for its skill. The `SKILL.md` reads and applies it; it does
+> not copy the text. Edit the prompt, and both the paste-able and skill forms stay in sync.
 
 ### Owner/ROAR review workflow
 
