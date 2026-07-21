@@ -8,6 +8,15 @@ This repo ships four independently versioned products. Each has its own section 
 
 Versioned via the `metadata.version` field in `business-blueprint-workflow/SKILL.md`.
 
+## 0.8.3
+
+- **Removes the last reference to an HTML/docs-build mechanism.** The Bridge teardown step
+  (Bridge Mode) dropped its parenthetical about wiring up `scripts/build_dashboard.py` as a
+  "passive detector … on the next docs build." Blueprint artifacts are pure Markdown with inline
+  Mermaid (rendered natively by GitHub/editors, no build step); the skill no longer alludes to any
+  `.md → .html` build tool. The north-stars grep-scan — the actual, build-free drift check — is
+  unchanged. Documentation-only.
+
 ## 0.8.2
 
 - **Reference files brought back in line with the canonical skill** (they had drifted to an older

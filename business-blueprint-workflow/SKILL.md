@@ -1,7 +1,7 @@
 ---
 name: business-blueprint-workflow
 metadata:
-  version: 0.8.2
+  version: 0.8.3
 description: >
   Artifact workflow for designing and tracking business software in Claude Code.
   Produces blueprints/ with Markdown specs, INDEX.md, and per-blueprint AUDIT.md.
@@ -1493,7 +1493,7 @@ When the expiry condition defined in `BRIEF.md` is met:
 3. Update `.blueprint-status` to `CLOSED`
 4. Update `blueprints/INDEX.md`: move the entry from Active Bridges to Deprecated
 5. Update `blueprints/MAP.md`: remove from Sprint Focus and Upcoming; add a note to the North Star if relevant
-6. **Scan `blueprints/north-stars/` for references to this bridge.** Run `grep -rln "<BridgeName>(BRIDGE)" blueprints/north-stars/`. For each hit, check whether the line frames the bridge as a still-active plan step or as historical context. Lines containing ✅, `CLOSED`, `Shipped`, `cerrado`, `delivered`, `subsumido` on the same line are historical and may stay; every other mention is drift and must be updated or archived **in the same commit as the `.blueprint-status` flip**, so plan and reality move together. (Projects that wire up `scripts/build_dashboard.py` get a passive detector that surfaces what was missed on the next docs build — but catching it at closure-time is cheaper than fixing it later.)
+6. **Scan `blueprints/north-stars/` for references to this bridge.** Run `grep -rln "<BridgeName>(BRIDGE)" blueprints/north-stars/`. For each hit, check whether the line frames the bridge as a still-active plan step or as historical context. Lines containing ✅, `CLOSED`, `Shipped`, `cerrado`, `delivered`, `subsumido` on the same line are historical and may stay; every other mention is drift and must be updated or archived **in the same commit as the `.blueprint-status` flip**, so plan and reality move together.
 7. Do **not** delete the directory — it serves as a record of what existed and why
 
 > See `references/example-prompts.md` for additional Bridge Mode prompt examples per scenario type.
