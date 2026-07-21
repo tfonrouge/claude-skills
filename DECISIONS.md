@@ -179,3 +179,38 @@ tool-agnostic reviewer/installer text is unchanged.
 **Reopen only if:** a skill needs behavior the prompt can't express (then the skill gains real content and
 its own behavior version), or the paste-able form proves to have no users (then collapse the prompt inline
 into `SKILL.md` and drop `references/`).
+
+## D6 — The blueprint-workflow skills live in this repo, alongside their cathedral adapters
+
+**Status:** decided 2026-07-21 · reverses the eviction in `2c7c792`
+
+**Decision.** `business-blueprint-workflow` and `systems-blueprint-workflow` are tracked **in this
+repo**, next to `cathedral-premise`. This repo is their **single source of truth**; the copies under
+`~/.claude/skills/` are a downstream install target, kept in sync by `install.sh` — never the master.
+
+**Why.**
+
+- **`cathedral-premise` has a hard reference to them.** Its `SKILL.md` routes on a `Blueprint skill`
+  config, and `cathedral-{systems,business}.md` are explicitly *"audit checks for projects using
+  `<...>-blueprint-workflow`."* The governor and the producer it audits belong in one repo; a repo
+  that ships the auditor but not the audited leaves a dangling reference.
+- **The eviction inverted the source of truth and caused exactly the drift this ledger exists to
+  prevent.** `2c7c792` ("Restructure repo: consolidate into cathedral-premise skill") deleted both
+  skills, leaving the only live copies under version-control-free `~/.claude/skills/`. They then
+  drifted ahead of git: `business` `0.8.0`→`0.8.1`, and `systems` changed its `description` **without
+  a version bump** — two different `0.2.0`s, the same "which vN?" failure D2/D4 guard against.
+- **Restore used the installed copies, not git history**, because those were newest and were what was
+  actually running. The systems silent-drift was reconciled with a `0.2.1` bump (see `CHANGELOG.md`).
+
+**Alternatives rejected.**
+
+- *Keep them only in `~/.claude/skills/`:* not version-controlled, invisible to review, and the proven
+  cause of the drift above; rejected.
+- *Restore the older git-history versions:* would discard the improvements made while installed
+  (business's bridge north-stars scan, systems's description rework); rejected.
+- *Publish them as a separate repo:* defensible if they ever grow independent consumers, but today
+  their only governor lives here, so co-location is simpler and keeps the audit reference local.
+
+**Reopen only if:** the blueprint skills acquire consumers or a release cadence independent of
+`cathedral-premise` — then split them into their own repo and depend on it explicitly (versioned),
+rather than relying on co-location.

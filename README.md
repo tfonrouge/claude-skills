@@ -18,6 +18,8 @@ Each skill module contains:
 
   The premise governs blueprint skills — it does not replace them. It provides cathedral audits, design decision evaluation, spike hygiene enforcement, and a Decision Ledger with falsification conditions to prevent both rejection amnesia and approval calcification.
 
+- **[`systems-blueprint-workflow`](./systems-blueprint-workflow/)** and **[`business-blueprint-workflow`](./business-blueprint-workflow/)**: the **authoring** workflows that `cathedral-premise` governs. Where the premise *audits*, these *produce* — they define the modes (SUBSYSTEM / FEATURE / PATCH for systems; MODULE / LIBRARY / BRIDGE for business), the `blueprints/` layout, `INDEX.md`, and per-blueprint `AUDIT.md`. `cathedral-{systems,business}.md` are the thin per-domain adapters that teach the premise what each workflow's output should look like. Producer and governor are co-located on purpose (see [`DECISIONS.md`](./DECISIONS.md) D6); this repo is their single source of truth, and `install.sh` syncs them downstream into `~/.claude/skills/`.
+
 - **[`roar-reviewer`](./roar-reviewer/)** and **[`owner-roar-protocol`](./owner-roar-protocol/)**: the
   Owner/ROAR review prompts, each packaged as a **self-contained wrapper skill**. Each `SKILL.md` carries
   only frontmatter and points the agent at the canonical prompt **bundled in its own `references/`**
@@ -51,7 +53,7 @@ Lifecycle:
 
 ## How to Use
 
-1. **Install** the skill into your agent's workspace (e.g., as a Claude Code skill directory or by mounting the repo).
+1. **Install** the skills into your agent's workspace. Run [`./install.sh`](./install.sh) to sync every skill in this repo into `~/.claude/skills/` (`--link` to symlink instead of copy so repo edits take effect live; `--dry-run` to preview). This repo is the source of truth — the script only ever writes *downstream*, never back.
 2. **Configure** the project's `CLAUDE.md` with the appropriate premise and blueprint skill (see `cathedral-premise/references/cathedral-core.md` for the config template).
 3. **Invoke** the skill by trigger phrase (e.g., "run cathedral audit", "premise check") or let the agent activate it automatically when it detects relevant context.
 

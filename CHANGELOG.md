@@ -1,6 +1,48 @@
 # Changelog
 
-This repo ships two independently versioned products. Each has its own section below.
+This repo ships four independently versioned products. Each has its own section below.
+
+---
+
+# business-blueprint-workflow (skill)
+
+Versioned via the `metadata.version` field in `business-blueprint-workflow/SKILL.md`.
+
+## 0.8.1
+
+- Bridge teardown (Bridge Mode) gains a **north-stars drift scan**: on closing a bridge, run
+  `grep -rln "<BridgeName>(BRIDGE)" blueprints/north-stars/` and reconcile every non-historical
+  mention in the *same commit* as the `.blueprint-status` flip, so plan and reality move together.
+- **Restored to the repo** at this version. Between `2c7c792` (which removed the skill — see
+  [`DECISIONS.md`](./DECISIONS.md) D6) and this restore, the skill lived only as an installed copy
+  under `~/.claude/skills/`, where it advanced from the last git-tracked `0.8.0` to `0.8.1`.
+
+## 0.8.0 and earlier
+
+Predates this changelog. History is in git: `business-module-workflow` → renamed to
+`business-blueprint-workflow` (`09d1568`), Bridge Mode added, artifact names standardized. The
+`render_flowchart.py` Gantt/Mermaid tool from the `business-module-workflow` era was dropped during
+that lineage and is **not** restored; recover from history (`git show 00ab707:...`) if needed.
+
+---
+
+# systems-blueprint-workflow (skill)
+
+Versioned via the `metadata.version` field in `systems-blueprint-workflow/SKILL.md`.
+
+## 0.2.1
+
+- **Reconciles a silent drift.** While the skill lived only as an installed copy (see below), its
+  `description` trigger phrases were condensed/reworded **without a version bump** — leaving two
+  different `0.2.0`s. This release adopts the reworded description and bumps the version so the
+  content and the number agree again. Description-only change; no workflow behavior change.
+- **Restored to the repo** at this version. Removed in `2c7c792` (see [`DECISIONS.md`](./DECISIONS.md)
+  D6); until this restore the only live copy was under `~/.claude/skills/`.
+
+## 0.2.0 and earlier
+
+Predates this changelog. `0.1.0` was the initial systems skill (`f0e1a43`); `0.2.0` followed
+(`15074a3`).
 
 ---
 
