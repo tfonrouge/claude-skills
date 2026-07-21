@@ -1,8 +1,9 @@
-# Refactoring Guide — Business Module Workflow
+# Refactoring Guide — Business Blueprint Workflow
 
 When working on an **existing module** rather than a greenfield one, this guide overrides or
 supplements the default behavior of each step in `SKILL.md`. Read this file at the start of
-any refactoring engagement and follow it alongside the main workflow.
+any refactoring engagement and follow it alongside the main workflow. Step numbers, artifact
+names, and layout match the canonical MODULE flow in `SKILL.md`.
 
 ---
 
@@ -14,16 +15,18 @@ any refactoring engagement and follow it alongside the main workflow.
 | Spec starting point | Blank slate | Reverse-engineered current behavior |
 | Flow chart | Ideal target state | Current state → gap → target state |
 | API contract | Define freely | Preserve compatibility or plan migration |
+| View map | Design freely | Inventory existing views + plan modifications |
 | Implementation plan | Build phases | Migration path + strangler fig slices |
 | Tests | Validate new behavior | Regression baseline + new behavior |
 | Traceability | Track new requirements | Track what changed vs. what stayed |
 
 ---
 
-## Step 0: Module Kickoff (Refactor Mode)
+## Step 0: BRIEF.md — Kickoff (Refactor Mode)
 
 Before anything else, conduct a **module audit**. You cannot plan a refactor without
-understanding what currently exists.
+understanding what currently exists. Create the blueprint directory
+`blueprints/<ModuleName>(MODULE)/` with BRIEF.md and a `.blueprint-status` file as usual.
 
 ### Additional Kickoff Fields (refactor-specific)
 
@@ -102,7 +105,7 @@ Flag any conflicts between the target state and the frozen interface list.
 
 ---
 
-## Step 2: Flow_Chart_Process.md (Refactor Mode)
+## Step 2: FLOWCHART.md (Refactor Mode)
 
 A refactor flow chart requires **three diagrams** not present in greenfield:
 
@@ -116,7 +119,7 @@ code path is active at each stage of the rollout.
 
 ### Claude Code Prompt Pattern
 ```
-Generate Flow_Chart_Process.md for the refactor of [ModuleName].
+Generate FLOWCHART.md for the refactor of [ModuleName].
 
 In addition to the standard 5 diagrams, I need:
 - Current State Flow: [describe existing flow or paste pseudocode/notes]
@@ -129,7 +132,7 @@ Use Mermaid. Mark deprecated paths in the current state flow clearly.
 
 ---
 
-## Step 3: API_Contract.md (Refactor Mode)
+## Step 3: API_CONTRACT.md (Refactor Mode)
 
 This is the highest-risk step in a refactor. Existing consumers depend on the current contract.
 
@@ -149,7 +152,7 @@ is a **breaking change** and requires:
 
 ### Claude Code Prompt Pattern
 ```
-Generate API_Contract.md for the refactor of [ModuleName].
+Generate API_CONTRACT.md for the refactor of [ModuleName].
 
 Current contract (what exists today): [paste or describe existing APIs/events]
 Planned changes: [what we're adding, modifying, or removing]
@@ -167,9 +170,36 @@ migration path that minimizes consumer disruption.
 - [ ] Migration path defined for each breaking change
 - [ ] Deprecation timeline communicated to consumers
 
+> **LIBRARY refactors:** substitute `API_SURFACE.md` for `API_CONTRACT.md` throughout this
+> step — the same "preserve or migrate" discipline applies to a published API surface.
+
 ---
 
-## Step 4: Module_Implementation_Plan.md (Refactor Mode)
+## Step 4: VIEW_MAP.md (Refactor Mode)
+
+A refactor rarely designs views from scratch — it inventories what exists and plans changes.
+
+### Additional Required Content
+- **Existing View Inventory** — every current screen/view the module owns, as-is
+- **Modification List** — which existing views change, and how
+- **New Views** — views the refactor adds (should be few in a pure refactor)
+- **Removed/Deprecated Views** — with the same sunset discipline as APIs
+
+### Claude Code Prompt Pattern
+```
+Generate VIEW_MAP.md for the refactor of [ModuleName].
+
+Existing views: [list current screens/views or point to the UI]
+Planned UI changes: [what changes, what's added, what's removed]
+Frozen views (must not change): [list, if any]
+
+Distinguish new / modified / preserved / removed for every view.
+Flag any view whose removal affects a role's only entry point.
+```
+
+---
+
+## Step 5: IMPLEMENTATION_PLAN.md (Refactor Mode)
 
 Refactor plans must account for incremental delivery alongside the running system.
 A "big bang" refactor that ships all at once is a high-risk antipattern for production systems.
@@ -191,7 +221,7 @@ Phase 5: Cleanup — remove feature flags, finalize documentation
 
 ### Claude Code Prompt Pattern
 ```
-Generate Module_Implementation_Plan.md for the refactor of [ModuleName].
+Generate IMPLEMENTATION_PLAN.md for the refactor of [ModuleName].
 
 Migration strategy: [strangler fig / feature flags / parallel run / big bang]
 Live data affected: [yes/no — describe migration need]
@@ -204,7 +234,7 @@ a rollback would be difficult or destructive.
 
 ---
 
-## Step 5: Test_Routing_Map.md (Refactor Mode)
+## Step 6: TEST_PLAN.md (Refactor Mode)
 
 A refactor test plan has a layer greenfield doesn't: **regression coverage**.
 You must prove the refactor doesn't break existing behavior before validating new behavior.
@@ -228,7 +258,7 @@ You must prove the refactor doesn't break existing behavior before validating ne
 
 ### Claude Code Prompt Pattern
 ```
-Generate Test_Routing_Map.md for the refactor of [ModuleName].
+Generate TEST_PLAN.md for the refactor of [ModuleName].
 
 Frozen interfaces (must have parity tests): [list]
 Current behavior to preserve (regression baseline): [describe or paste]
@@ -242,7 +272,7 @@ the test infrastructure first.
 
 ---
 
-## Step 6: Traceability_Matrix.md (Refactor Mode)
+## Step 7: TRACEABILITY_MATRIX.md (Refactor Mode)
 
 The traceability matrix for a refactor tracks three things the greenfield version doesn't:
 
@@ -261,13 +291,13 @@ This table should be updated after every CI run during the refactor.
 
 ### Claude Code Prompt Pattern (initial)
 ```
-Generate an initial Traceability_Matrix.md for the refactor of [ModuleName].
+Generate an initial TRACEABILITY_MATRIX.md for the refactor of [ModuleName].
 
 Source requirements from SPECIFICATION.md delta summary.
 For each requirement, add a Change Type column: new / modified / preserved / deprecated.
 Add a Consumer Impact column using this consumer list: [list].
 Add a Migration Status column for each consumer.
-Initialize a Regression Health table from Test_Routing_Map.md regression baseline tests.
+Initialize a Regression Health table from TEST_PLAN.md regression baseline tests.
 ```
 
 ---
@@ -278,8 +308,8 @@ Initialize a Regression Health table from Test_Routing_Map.md regression baselin
 |---------|-------------------------------|
 | Scope creep ("while we're in here...") | Delta Summary in Step 1 locks scope |
 | Silent breaking changes | Step 3 requires explicit sign-off for every breaking change |
-| Regression in production | Step 5 mandates regression baseline before code changes |
+| Regression in production | Step 6 mandates regression baseline before code changes |
 | Consumer modules not notified | Step 3 lists all consumers; Steps 0 and 3 require their sign-off |
-| No rollback if things go wrong | Step 4 requires rollback plan per phase |
-| Data loss during migration | Step 4 data migration plan + Step 5 migration tests |
-| "Big bang" refactor fails at go-live | Step 4 recommends incremental delivery patterns |
+| No rollback if things go wrong | Step 5 requires rollback plan per phase |
+| Data loss during migration | Step 5 data migration plan + Step 6 migration tests |
+| "Big bang" refactor fails at go-live | Step 5 recommends incremental delivery patterns |

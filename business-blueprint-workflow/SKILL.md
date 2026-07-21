@@ -1,7 +1,7 @@
 ---
 name: business-blueprint-workflow
 metadata:
-  version: 0.8.1
+  version: 0.8.2
 description: >
   Artifact workflow for designing and tracking business software in Claude Code.
   Produces blueprints/ with Markdown specs, INDEX.md, and per-blueprint AUDIT.md.
@@ -377,8 +377,8 @@ Every `.md` artifact must include a navigation footer so readers can jump betwee
 
 1. **Always at the bottom** — the nav block is the very last content in the file, after all sections.
 2. **Current artifact is bold and not a link** — so the reader knows where they are.
-3. **Only link artifacts that already exist** — if an artifact hasn't been generated yet, render it as plain text (no brackets, no link).
-4. **Always include the INDEX and MAP links** — even if they are the only links present.
+3. **Only link artifacts that already exist** — if an artifact hasn't been generated yet, render it as plain text (no brackets, no link). This includes `../MAP.md`.
+4. **Always include the INDEX link; include the MAP link once it exists** — `INDEX.md` exists from the first blueprint, so `Index` is always a link. `MAP.md` is created only at ≥3 blueprints (see "blueprints/MAP.md" above); until then render `Map` as plain text, and convert it to a link when `MAP.md` is created (rule 5 covers that regeneration).
 5. **Regenerate when a new artifact is created** — when generating artifact N, update the footer of all previously generated artifacts in the same blueprint directory to add the new link.
 
 ### MODULE MODE footer template
@@ -388,11 +388,11 @@ Every `.md` artifact must include a navigation footer so readers can jump betwee
 [← Index](../INDEX.md) · [Map](../MAP.md) · **BRIEF** · [SPEC](SPECIFICATION.md) · [FLOWCHART](FLOWCHART.md) · [API](API_CONTRACT.md) · [VIEWS](VIEW_MAP.md) · [PLAN](IMPLEMENTATION_PLAN.md) · [TESTS](TEST_PLAN.md) · [MATRIX](TRACEABILITY_MATRIX.md) · [AUDIT](AUDIT.md)
 ```
 
-Replace **BRIEF** with the name of the current file in bold. Files not yet created appear as plain text without brackets:
+Replace **BRIEF** with the name of the current file in bold. Files not yet created appear as plain text without brackets — including `Map` while `../MAP.md` does not yet exist (early blueprints, before the ≥3 threshold):
 
 ```markdown
 ---
-[← Index](../INDEX.md) · [Map](../MAP.md) · [BRIEF](BRIEF.md) · **SPEC** · FLOWCHART · API · VIEWS · PLAN · TESTS · MATRIX · AUDIT
+[← Index](../INDEX.md) · Map · [BRIEF](BRIEF.md) · **SPEC** · FLOWCHART · API · VIEWS · PLAN · TESTS · MATRIX · AUDIT
 ```
 
 ### LIBRARY MODE footer template

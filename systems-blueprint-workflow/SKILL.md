@@ -1,7 +1,7 @@
 ---
 name: systems-blueprint-workflow
 metadata:
-  version: 0.2.1
+  version: 0.2.2
 description: >
   Artifact workflow for designing and tracking systems-level software in Claude Code:
   compilers, VMs, runtimes, databases, OS kernels, language toolchains, embedded firmware.
@@ -267,6 +267,9 @@ Directory: `blueprints/<Name>(PATCH)/`
 
 Every `.md` artifact includes a navigation footer. Current artifact is bold.
 Only link artifacts that exist. Update all footers when creating a new artifact.
+This applies to `../MAP.md` too: it is created only at 3+ blueprints, so render `Map` as
+plain text until then and convert it to a link once `MAP.md` exists. `../INDEX.md` exists from
+the first blueprint and is always a link. (The templates below show the fully-populated state.)
 
 ### SUBSYSTEM footer
 ```markdown

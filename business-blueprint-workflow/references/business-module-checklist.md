@@ -1,6 +1,7 @@
 # Business Module Checklist
 
 Print or copy this for each new module. Check off items as they are completed and signed off.
+Artifact names, order, and layout follow the canonical MODULE flow in `SKILL.md`.
 
 ---
 
@@ -10,14 +11,16 @@ Print or copy this for each new module. Check off items as they are completed an
 
 ---
 
-## Step 0 — Kickoff
-- [ ] Directory created: `module-descriptor/<ModuleName>/`
+## Step 0 — BRIEF.md (Kickoff)
+- [ ] Directory created: `blueprints/<ModuleName>(MODULE)/`
+- [ ] `.blueprint-status` file created (single-line status; source of truth for INDEX.md)
 - [ ] Module name confirmed (PascalCase)
 - [ ] Business owner identified
 - [ ] Business justification documented
 - [ ] Key stakeholders listed
 - [ ] Target go-live confirmed
 - [ ] Integration surface identified (which modules does this touch?)
+- [ ] `blueprints/INDEX.md` updated with the new blueprint
 
 ---
 
@@ -35,7 +38,7 @@ Print or copy this for each new module. Check off items as they are completed an
 
 ---
 
-## Step 2 — Flow_Chart_Process.md
+## Step 2 — FLOWCHART.md
 - [ ] Happy Path flowchart (Mermaid)
 - [ ] Decision Tree with all branch conditions labeled
 - [ ] Exception Handling paths for every decision node
@@ -47,7 +50,7 @@ Print or copy this for each new module. Check off items as they are completed an
 
 ---
 
-## Step 3 — API_Contract.md
+## Step 3 — API_CONTRACT.md
 - [ ] Inbound APIs documented (endpoint, payload, auth, SLA)
 - [ ] Outbound Events documented (name, payload, trigger)
 - [ ] Shared Data Entities listed
@@ -59,7 +62,17 @@ Print or copy this for each new module. Check off items as they are completed an
 
 ---
 
-## Step 4 — Module_Implementation_Plan.md
+## Step 4 — VIEW_MAP.md
+- [ ] Every screen, view, and UI change enumerated
+- [ ] Each entity state has ≥1 view that displays it
+- [ ] Each actor/role has ≥1 entry point
+- [ ] Role-based access per view documented (matches SPECIFICATION roles)
+- [ ] New vs. modified views distinguished
+- [ ] **UX/design lead review** ✓ Date: ___________
+
+---
+
+## Step 5 — IMPLEMENTATION_PLAN.md
 - [ ] 3–5 phases defined, each with a shippable deliverable
 - [ ] Milestones table complete (owner, effort, dependency)
 - [ ] Technical objectives per phase written
@@ -67,12 +80,12 @@ Print or copy this for each new module. Check off items as they are completed an
 - [ ] Resource allocation documented
 - [ ] Risk register has ≥3 entries with mitigations
 - [ ] All spec requirements mapped to a phase
-- [ ] **Traceability_Matrix.md initialized** ✓ Date: ___________
+- [ ] **TRACEABILITY_MATRIX.md initialized** ✓ Date: ___________
 - [ ] **Tech lead and project owner sign-off** ✓ Date: ___________
 
 ---
 
-## Step 5 — Test_Routing_Map.md
+## Step 6 — TEST_PLAN.md
 - [ ] Test coverage matrix (REQ-ID → TEST-ID) complete
 - [ ] Happy path scenarios written
 - [ ] Edge case scenarios written (boundary values, empty states)
@@ -85,7 +98,7 @@ Print or copy this for each new module. Check off items as they are completed an
 
 ---
 
-## Step 6 — Traceability_Matrix.md (Living)
+## Step 7 — TRACEABILITY_MATRIX.md (Living)
 - [ ] Initialized with all REQ-IDs (status: Not Started)
 - [ ] Milestone tracker pre-populated
 - [ ] Updated after Sprint 1
@@ -96,11 +109,19 @@ Print or copy this for each new module. Check off items as they are completed an
 
 ---
 
+## AUDIT.md (post-implementation)
+- [ ] Created after initial implementation
+- [ ] Drift between blueprint and actual code recorded
+- [ ] Revisited at the start of each sprint / before onboarding a new developer
+
+---
+
 ## Module Ship Criteria
-- [ ] All requirements status = Verified in Traceability Matrix
+- [ ] All requirements status = Verified in TRACEABILITY_MATRIX.md
 - [ ] All tests passing (automated + manual sign-off)
 - [ ] API contract consumers confirmed compatibility
 - [ ] Performance requirements validated under load
 - [ ] Security review completed
+- [ ] `.blueprint-status` and `blueprints/INDEX.md` reflect final state
 - [ ] Documentation reviewed by a developer who wasn't on the team
 - [ ] **Final sign-off** ✓ Date: ___________

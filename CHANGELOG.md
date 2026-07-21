@@ -8,6 +8,31 @@ This repo ships four independently versioned products. Each has its own section 
 
 Versioned via the `metadata.version` field in `business-blueprint-workflow/SKILL.md`.
 
+## 0.8.2
+
+- **Reference files brought back in line with the canonical skill** (they had drifted to an older
+  artifact vocabulary and step structure while the skill lived only as an installed copy):
+  - `references/business-module-checklist.md`, `references/example-prompts.md`, and
+    `references/refactor-guide.md` now use the canonical `blueprints/` layout and names
+    (`SPECIFICATION.md`, `FLOWCHART.md`, `API_CONTRACT.md`, `VIEW_MAP.md`, `IMPLEMENTATION_PLAN.md`,
+    `TEST_PLAN.md`, `TRACEABILITY_MATRIX.md`, `AUDIT.md`) — replacing the legacy
+    `module-descriptor/`, `Flow_Chart_Process.md`, `API_Contract.md`, `Module_Implementation_Plan.md`,
+    `Test_Routing_Map.md`, `Traceability_Matrix.md`.
+  - The missing **VIEW_MAP** step was inserted and steps renumbered to the canonical 0–7 order in
+    the checklist, example prompts, and refactor guide.
+  - `example-prompts.md` gained the **LIBRARY MODE** and **BRIDGE MODE** prompt sections the main
+    skill already advertised (they were previously absent). The LIBRARY prompts are
+    library-*specific* (target/runtime constraints, processing/lifecycle flows, build-unit &
+    publication ordering, per-runtime coverage, serialization tests) — mirroring the canonical
+    Library steps in `SKILL.md`, not just reusing the MODULE prompts. The cross-cutting
+    **consistency check** is now split into MODULE/LIBRARY and BRIDGE variants so each lists only
+    the artifacts its mode actually produces.
+- **Footer nav rule clarified** so it no longer self-contradicts: `Map` is rendered as plain text
+  until `blueprints/MAP.md` exists (it is created only at ≥3 blueprints), then linked. `Index` is
+  always a link.
+- No workflow-behavior change beyond the doc corrections. These fixes came from a ROAR review of the
+  restored skill; see the review triage in the working history.
+
 ## 0.8.1
 
 - Bridge teardown (Bridge Mode) gains a **north-stars drift scan**: on closing a bridge, run
@@ -30,6 +55,13 @@ that lineage and is **not** restored; recover from history (`git show 00ab707:..
 
 Versioned via the `metadata.version` field in `systems-blueprint-workflow/SKILL.md`.
 
+## 0.2.2
+
+- **Footer nav rule clarified** (Artifact Navigation): `../MAP.md` is created only at 3+ blueprints,
+  so `Map` is rendered as plain text until it exists, then linked; `../INDEX.md` is always a link.
+  Removes the ambiguity between "only link artifacts that exist" and the always-linked `Map` shown in
+  the footer templates (the templates depict the fully-populated state). Documentation-only.
+
 ## 0.2.1
 
 - **Reconciles a silent drift.** While the skill lived only as an installed copy (see below), its
@@ -49,6 +81,19 @@ Predates this changelog. `0.1.0` was the initial systems skill (`f0e1a43`); `0.2
 # cathedral-premise (skill)
 
 Versioned via the `metadata.version` field in `cathedral-premise/SKILL.md`.
+
+## 1.1.2
+
+- **Corrects the business-domain audit adapter (`references/cathedral-business.md`) to match the
+  artifacts `business-blueprint-workflow` actually produces.** The adapter audited for
+  `ENTITY_RELATIONSHIP.md`, `PUBLIC_API.md`, `ARCHITECTURE.md`, and a MODULE `IMPLEMENTATION_ORDER.md`
+  — none of which the producer emits — so every business cathedral audit would raise false
+  "missing artifact" findings and miss the real ones. The Applicable-Modes table and the MODULE/LIBRARY
+  checks now reference `SPECIFICATION.md`, `API_SURFACE.md` (LIBRARY), `IMPLEMENTATION_PLAN.md`,
+  `TEST_PLAN.md`, and `TRACEABILITY_MATRIX.md`. BRIDGE (which legitimately uses
+  `IMPLEMENTATION_ORDER.md`) is unchanged. Surfaced by a ROAR review once producer and adapter were
+  co-located (see [`DECISIONS.md`](./DECISIONS.md) D6). Audit-semantics fix; no change to the five
+  principles or the audit procedure.
 
 ## 1.1.1
 
