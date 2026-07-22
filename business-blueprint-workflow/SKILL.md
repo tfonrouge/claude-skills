@@ -112,6 +112,10 @@ All other INDEX sections (Deferred, Deprecated, organizational groupings) declar
 **BRIEF `Mode` row**: every new BRIEF carries its mode's fixed literal (`| Mode | MODULE |`,
 `| Mode | LIBRARY |`, `| Mode | BRIDGE |`) — required by each mode's Step 0/B0 DoD. In
 pre-existing BRIEFs its absence is never a violation — add it opportunistically on next touch.
+**Recognizer**: a BRIEF declares its mode via a `Mode` field in the header region (before the
+first `##` heading) — either the table row `| Mode | <MODE> |` or an inline `Mode: <MODE>`
+(bold markers allowed). The value must be the bare catalog literal; anything else is not a
+BRIEF declaration.
 
 ---
 

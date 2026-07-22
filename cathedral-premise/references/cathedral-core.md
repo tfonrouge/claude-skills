@@ -187,7 +187,10 @@ Over the catalog-valid sources, precedence is:
 **BRIEF `Mode` > *unambiguous* directory suffix > INDEX declaration > ambiguous-suffix default**
 
 *In-directory beats aggregate; explicit beats conventional; an ambiguous suffix is not a
-declaration.* The blueprint skill's `SKILL.md` states which suffixes are ambiguous (business:
+declaration.* A BRIEF `Mode` declaration is a `Mode` field in the BRIEF's header region (before
+the first `##` heading) — the table row `| Mode | <MODE> |` or an inline `Mode: <MODE>` line,
+bold markers allowed, value a bare catalog literal. The blueprint skill's `SKILL.md` states
+which suffixes are ambiguous (business:
 legacy `(MODULE)` may be MODULE or a pre-`(LIBRARY)` library) and defines INDEX declarations —
 a Mode column value, or the skill's explicit section→mode map (e.g. *Active Bridges* ⇒ BRIDGE).
 Sections outside that map (Deferred, Deprecated, organizational groupings) declare nothing.

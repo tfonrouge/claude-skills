@@ -382,4 +382,3 @@ AUDIT.md → create after initial implementation; revisit each sprint
 > See `references/refactor-guide.md` for step-by-step guidance when refactoring an existing module.
 
 ---
-
