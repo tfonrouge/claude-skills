@@ -8,6 +8,22 @@ This repo ships four independently versioned products. Each has its own section 
 
 Versioned via the `metadata.version` field in `business-blueprint-workflow/SKILL.md`.
 
+## 0.9.0
+
+- **Progressive-disclosure split.** `SKILL.md` (1499 lines — observed to truncate mid-load in real
+  sessions) now carries only the shared core (~390 lines): mode selection, mode→reference map,
+  INDEX/`.blueprint-status`/MAP, artifact overviews, navigation. The full step-by-step workflows
+  moved verbatim to `references/mode-module.md`, `references/mode-library.md`,
+  `references/mode-bridge.md` — **normative**, loaded per blueprint via the map. Shared
+  INDEX/status/MAP/navigation prompt patterns moved to `references/example-prompts.md`; the
+  "Why This Workflow" sales section was dropped.
+- **`(LIBRARY)` directory suffix.** LIBRARY blueprints now use `blueprints/<Name>(LIBRARY)/`;
+  `(MODULE)` remains valid for MODULE and, during the compatibility period, may denote a legacy
+  library — resolved via BRIEF `Mode` row → INDEX declaration → assume MODULE (see D7).
+- **BRIEF `Mode` header row** (fixed literal per mode) + INDEX registration added to every
+  Step 0/B0 Definition of Done. Absence in pre-existing BRIEFs is never an audit violation.
+- **INDEX section→mode map** documented: *Active Bridges* ⇒ BRIDGE; other sections declare nothing.
+
 ## 0.8.3
 
 - **Removes the last reference to an HTML/docs-build mechanism.** The Bridge teardown step
@@ -90,6 +106,22 @@ Predates this changelog. `0.1.0` was the initial systems skill (`f0e1a43`); `0.2
 # cathedral-premise (skill)
 
 Versioned via the `metadata.version` field in `cathedral-premise/SKILL.md`.
+
+## 1.2.0
+
+- **Mode Reconciliation procedure** added to `cathedral-core.md` §Shared Procedure: audits now
+  resolve each blueprint's mode *before* loading its artifact set, from three sources with fixed
+  precedence — BRIEF `Mode` > unambiguous suffix > INDEX declaration > ambiguous-suffix default —
+  with catalog validation first (foreign modes like a business `(FEATURE)` never classify and never
+  borrow another skill's contract; they yield an unclassified-blueprint finding). Disagreements
+  yield mode-drift findings; legacy `(MODULE)`-as-LIBRARY yields a legacy note, not a violation.
+- **Map-conditional artifact loading**: per-step Definitions of Done are read from the blueprint
+  skill's `references/mode-<mode>.md` when the skill declares a mode→reference map, else from its
+  `SKILL.md` — keeping audits of unsplit skills (systems) working unchanged. `cathedral-systems.md`
+  deliberately untouched.
+- `cathedral-business.md`: suffix table gains `(LIBRARY)` with legacy `(MODULE)` compat; blueprint
+  completeness cross-references the mode reference files; missing BRIEF `Mode` row is codified as
+  recommendation-only.
 
 ## 1.1.2
 

@@ -235,7 +235,7 @@ Recalculate variance and flag any requirements at risk of slipping.
 
 # LIBRARY MODE
 
-LIBRARY mode reuses `blueprints/<Name>(MODULE)/` but its prompts are library-specific:
+LIBRARY mode uses `blueprints/<Name>(LIBRARY)/` (legacy blueprints may still use `(MODULE)`) and its prompts are library-specific:
 the spec, flowchart, plan, and tests all carry platform/runtime and publication concerns
 that MODULE mode does not. API_CONTRACT.md is replaced by API_SURFACE.md, and VIEW_MAP.md
 is optional (only if the library ships UI components). Use these prompts, not the MODULE ones.
@@ -251,7 +251,7 @@ Context:
 - Consumer modules: [who will depend on it]
 - Published artifact coordinates: [group:artifact, package name]
 
-Create `blueprints/[LibraryName](MODULE)/` with BRIEF.md and `.blueprint-status`,
+Create `blueprints/[LibraryName](LIBRARY)/` with BRIEF.md and `.blueprint-status`,
 then flag any scope or platform-coverage gaps before we specify.
 ```
 
@@ -472,4 +472,46 @@ Summarize the blueprint from all its artifacts in a 1-page onboarding brief cove
 - Current implementation status
 - What they'll be working on first
 - Who to talk to for questions about each area
+```
+
+---
+
+# SHARED — INDEX / Status / MAP / Navigation
+
+Prompt patterns for the shared artifacts defined in SKILL.md (moved here from SKILL.md in v0.9.0).
+
+## Update blueprints/INDEX.md
+```
+Update blueprints/INDEX.md.
+New entry: [ModuleName or FeatureName], mode: [MODULE/LIBRARY/BRIDGE], status: [STATUS].
+[If bridge] Type: [Permanent/Temporary], connects: [ModuleA ↔ ModuleB].
+[If deprecated] Reason: [reason], date: [date].
+Source status from each blueprint's .blueprint-status file.
+Preserve all existing entries.
+```
+
+## Update a .blueprint-status file
+```
+Update the .blueprint-status file for blueprints/[Name](MODE)/.
+New status: [STATUS]: [optional reason].
+Then refresh the Status column for this entry in blueprints/INDEX.md.
+```
+
+## Update blueprints/MAP.md
+```
+Update blueprints/MAP.md.
+Current focus: [list FOCUSED blueprints].
+New blockers: [list].
+Upcoming work: [describe next items].
+North star change: [if any].
+Keep the dependency graph accurate — add/remove edges as needed.
+```
+
+## Navigation footer (append to any artifact-generation prompt)
+```
+After generating the artifact, add the navigation footer at the bottom.
+Bold the current file name. Link all artifacts that already exist in this
+blueprint directory. Render non-existent artifacts as plain text.
+Also update the footer of every previously generated .md artifact in this
+directory to add a link to the newly created file.
 ```

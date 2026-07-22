@@ -161,12 +161,49 @@ Follow the cathedral premise.
 When asked to **"run cathedral audit"**, Claude must:
 
 1. **Read the cathedral premise** from this skill and the project's `CLAUDE.md` config.
-2. **Read the designated blueprint skill's `SKILL.md`** to discover the expected
-   artifact set, step sequence, and mode-specific requirements.
+2. **Read the designated blueprint skill's `SKILL.md`** to discover the suffix catalog,
+   shared artifacts, and — **if the skill declares one** — the mode→reference-file map.
 3. **Locate all blueprint directories** under the configured blueprint root.
-4. **For each blueprint**, load every artifact that the skill defines for that
-   blueprint's mode, then evaluate against the **domain-specific audit checks**
+4. **For each blueprint**, **first** read the mode sources — directory suffix, `BRIEF.md`
+   (mode-independent, common to all modes), and the blueprint's INDEX row — and reconcile
+   per **Mode Reconciliation** below; **then** obtain the mode's artifact set and per-step
+   Definitions of Done **from the mode→reference map (`references/mode-<mode>.md`) when the
+   skill declares one, else from the skill's `SKILL.md` itself** (already read at step 2);
+   load the remaining artifacts and evaluate against the **domain-specific audit checks**
    (see the appropriate `cathedral-systems.md` or `cathedral-business.md` reference).
+
+### Mode Reconciliation
+
+**Catalog validation precedes reconciliation.** Check every mode source against the designated
+skill's own catalog; a source carrying an out-of-catalog value (foreign suffix, foreign BRIEF
+`Mode`, foreign INDEX Mode-column value) is **excluded from classification** and routes to the
+unclassified-blueprint finding — agreement among foreign sources never classifies, it only
+sharpens the finding (e.g. a `(FEATURE)` directory whose BRIEF also says FEATURE ⇒
+*unclassified, declared foreign mode FEATURE*). Never borrow another skill's contract for a
+foreign mode.
+
+Over the catalog-valid sources, precedence is:
+
+**BRIEF `Mode` > *unambiguous* directory suffix > INDEX declaration > ambiguous-suffix default**
+
+*In-directory beats aggregate; explicit beats conventional; an ambiguous suffix is not a
+declaration.* The blueprint skill's `SKILL.md` states which suffixes are ambiguous (business:
+legacy `(MODULE)` may be MODULE or a pre-`(LIBRARY)` library) and defines INDEX declarations —
+a Mode column value, or the skill's explicit section→mode map (e.g. *Active Bridges* ⇒ BRIDGE).
+Sections outside that map (Deferred, Deprecated, organizational groupings) declare nothing.
+
+| Catalog-valid sources present | Agreement | Result |
+|---|---|---|
+| Any ≥1 | all agree | classified |
+| ≥2 declarations (BRIEF / unambiguous suffix / INDEX) | disagree | classify per precedence + **mode-drift finding** naming the stale source |
+| Ambiguous suffix + INDEX (or BRIEF) declaration | — | classify per declaration + **legacy note** (not a violation); recommend rename or BRIEF `Mode` row |
+| Ambiguous suffix only | — | assume its default mode + low-severity note |
+| None — all sources foreign (validated out) | — | **unclassified-blueprint finding**, declared foreign mode named |
+| None — no source at all | — | unclassified-blueprint finding |
+
+A missing BRIEF `Mode` row is **always a low-severity recommendation, never a completeness
+violation** — enforcement of the row lives in the authoring workflow's Step 0 Definition of
+Done, not in the audit.
 
 ### Output Format
 

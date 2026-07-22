@@ -214,3 +214,46 @@ repo**, next to `cathedral-premise`. This repo is their **single source of truth
 **Reopen only if:** the blueprint skills acquire consumers or a release cadence independent of
 `cathedral-premise` — then split them into their own repo and depend on it explicitly (versioned),
 rather than relying on co-location.
+
+## D7 — Mode is resolved by reconciliation: BRIEF `Mode` > unambiguous suffix > INDEX declaration; libraries get `(LIBRARY)`
+
+**Status:** decided 2026-07-22 · introduced in business-blueprint-workflow v0.9.0 / cathedral-premise v1.2.0
+
+**Decision.** Business LIBRARY blueprints use a `(LIBRARY)` directory suffix (previously shared
+`(MODULE)` with modules). A blueprint's mode is resolved from three sources with fixed precedence —
+BRIEF `Mode` header row > *unambiguous* directory suffix > INDEX declaration (Mode column, or the
+skill's explicit section→mode map: *Active Bridges* ⇒ BRIDGE) — with legacy `(MODULE)` treated as
+ambiguous (never a declaration) during the compatibility period. Catalog validation precedes
+reconciliation: out-of-catalog values (e.g. `(FEATURE)` in a business project) never classify and
+never borrow another skill's contract; they produce an unclassified-blueprint finding. INDEX
+sections outside the section→mode map (Deferred, Deprecated, tiers) declare nothing. The required
+BRIEF `Mode` row is enforced only by the authoring Step 0/B0 DoD gate; audits treat its absence as
+a low-severity recommendation, never a violation (no cutoff metadata exists to date legacy BRIEFs).
+
+**Why.**
+
+- MODULE and LIBRARY sharing `(MODULE)` made the one genuine legacy library
+  (`MarketPlazeLib(MODULE)`) distinguishable only by its INDEX row; fresh BRIEF-only blueprints
+  had no discriminator at all. drydock (~45 blueprints) proves suffix-as-mode empirically.
+- Precedence rationale: *in-directory beats aggregate; explicit beats conventional* — mirrors the
+  existing `.blueprint-status`-over-INDEX authority pattern. Empirically, INDEX lags (mppArel's
+  INDEX self-reported a stale skill version).
+- Real `(FEATURE)` dirs in marketPlazeLib match neither the systems FEATURE contract nor each
+  other — tolerating foreign suffixes without a contract would silently under-audit.
+
+**Alternatives rejected.**
+
+- **Extend `.blueprint-status` with a `MODE:` line** — breaks the documented one-line contract with
+  ~75 conforming files in the wild and exact/prefix-content consumers.
+- **INDEX Mode column as sole authority** — leaves fresh unregistered blueprints unclassifiable and
+  inverts the per-directory-file-is-authoritative principle.
+- **Strict suffix-first short-circuit** — misclassifies the legacy library the compatibility rule
+  exists to protect.
+- **Date-based grandfather cutoff for the BRIEF `Mode` row** — undecidable: legacy BRIEFs carry no
+  creation date, marketPlazeLib's INDEX no skill-version header, this repo's CHANGELOG no dates.
+
+**Reopen when.** A business project legitimately needs a mode outside
+MODULE/LIBRARY/BRIDGE (e.g. persistent demand for FEATURE — deliberately *not* adopted now, left
+as an audit-flagged foreign mode per Owner decision 2026-07-22); or the compatibility period ends
+(no `(MODULE)`-as-LIBRARY blueprints remain anywhere), at which point `(MODULE)` becomes
+unambiguous and the reconciliation collapses to suffix-first.

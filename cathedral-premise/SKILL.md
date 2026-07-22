@@ -1,7 +1,7 @@
 ---
 name: cathedral-premise
 metadata:
-  version: 1.1.2
+  version: 1.2.0
 description: >
   Governance premise for principled software development. Enforces correctness-first
   design, clean abstractions, established patterns, blueprint alignment, and spike
@@ -75,9 +75,9 @@ When the user says **"run cathedral audit"** or **"auditoría catedral"**:
 1. Read `references/cathedral-core.md` (principles + shared procedure)
 2. Read the project's `CLAUDE.md` to get the blueprint skill and config
 3. Read the appropriate domain reference (`cathedral-systems.md` or `cathedral-business.md`)
-4. Read the designated blueprint skill's `SKILL.md` to know the expected artifacts per mode
+4. Read the designated blueprint skill's `SKILL.md` — suffix catalog, shared artifacts, and (if declared) the mode→reference map
 5. Scan all blueprint directories under the configured root
-6. For each blueprint: load artifacts, apply universal checks + domain-specific checks
+6. For each blueprint: resolve its mode per the **Mode Reconciliation** procedure in `cathedral-core.md`, load its mode's artifact set and Definitions of Done (from `references/mode-<mode>.md` when the skill declares a map, else from the skill's `SKILL.md`), apply universal checks + domain-specific checks
 7. Produce `CATHEDRAL_AUDIT_REPORT.md` in the project root using the format from `cathedral-core.md`
 
 ### Severity Guide

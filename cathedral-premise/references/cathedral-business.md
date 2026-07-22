@@ -10,11 +10,17 @@ These checks supplement the universal principles in `cathedral-core.md`.
 | Mode | Directory Suffix | Artifacts |
 |------|-----------------|-----------|
 | MODULE | `(MODULE)` | BRIEF, SPECIFICATION, FLOWCHART, API_CONTRACT, VIEW_MAP, IMPLEMENTATION_PLAN, TEST_PLAN, TRACEABILITY_MATRIX, AUDIT |
-| LIBRARY | `(MODULE)` | BRIEF, SPECIFICATION, FLOWCHART, API_SURFACE, VIEW_MAP (optional), IMPLEMENTATION_PLAN, TEST_PLAN, TRACEABILITY_MATRIX, AUDIT |
+| LIBRARY | `(LIBRARY)` — legacy: `(MODULE)` | BRIEF, SPECIFICATION, FLOWCHART, API_SURFACE, VIEW_MAP (optional), IMPLEMENTATION_PLAN, TEST_PLAN, TRACEABILITY_MATRIX, AUDIT |
 | BRIDGE | `(BRIDGE)` | BRIEF, ENTITY_DESCRIPTOR, SERVICE_CONTRACTS, VIEW_MAP, IMPLEMENTATION_ORDER, AUDIT, (ARCHIVED) |
 
 > A parenthesized artifact (e.g. `(ARCHIVED)`) is **conditional** — produced only when its trigger
 > fires. `ARCHIVED.md` is created when a Temporary bridge closes (see "Temporary bridge hygiene").
+
+**Mode resolution**: `(MODULE)` is ambiguous during the compatibility period — legacy LIBRARY
+blueprints may still use it. Classify each blueprint via the **Mode Reconciliation** procedure in
+`cathedral-core.md` before loading its artifact set; the artifact sets and per-step Definitions of
+Done live in the skill's `references/mode-{module,library,bridge}.md` (per its mode→reference map).
+A missing BRIEF `Mode` row is always a low-severity recommendation, never a violation.
 
 ---
 
@@ -64,7 +70,7 @@ These apply to every blueprint regardless of domain:
 | **Role/permission alignment** | If VIEW_MAP.md defines role-based access, verify that the actual permission implementation matches. Roles that exist in the artifact but not in code (or vice versa) are findings. |
 | **Data validation boundaries** | Entities should validate invariants at construction/mutation, not just at the API layer. Schema-only validation with no domain enforcement is a warning. |
 | **TRACEABILITY_MATRIX progress** | The living TRACEABILITY_MATRIX.md must reflect actual code state. Rows marked done without corresponding code (or shipped code with no row) are a violation. |
-| **Blueprint completeness** | Missing artifacts for the mode, empty sections, stale dates, TODOs that block implementation. Cross-reference against the skill's Definition of Done for each step. |
+| **Blueprint completeness** | Missing artifacts for the mode, empty sections, stale dates, TODOs that block implementation. Cross-reference against each step's Definition of Done in the mode's reference file (`references/mode-<mode>.md`). A missing BRIEF `Mode` row is a recommendation, not a violation. |
 | **AUDIT.md currency** | Every blueprint must have an AUDIT.md. Check that it was updated within the current sprint. |
 
 ### Business-Specific Checks — LIBRARY Mode
