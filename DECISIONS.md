@@ -257,3 +257,133 @@ MODULE/LIBRARY/BRIDGE (e.g. persistent demand for FEATURE — deliberately *not*
 as an audit-flagged foreign mode per Owner decision 2026-07-22); or the compatibility period ends
 (no `(MODULE)`-as-LIBRARY blueprints remain anywhere), at which point `(MODULE)` becomes
 unambiguous and the reconciliation collapses to suffix-first.
+
+---
+
+## D8 — v5 protocol additions are evidence-derived; recall stays uninstrumented and out-of-scope findings reuse the ledger
+
+**Status:** decided 2026-07-24 · introduced in owner-roar-protocol v5 · amended pre-landing
+2026-07-24 after adversarial review of the v5 draft itself (see *Corrected before landing*)
+
+**Decision.** v5 adds seven rules to the Owner/ROAR protocol — revision stamp, landing-impact
+classification, class-findings-over-instances, a scoped `REVIEW COMPLETE` terminal state, named
+audit axes for new harnesses, a constraint-convergence check for design threads, and a **mandatory
+implementer preflight**. Each traces to an observed failure in a 13-round review session on a live
+project (Drydock DDvm L21); nothing was added speculatively. Two boundaries are decided with them:
+a finding confirmed **out of scope** is promoted through the **existing** durable-record mechanism
+(a `LEDGER.md` entry or a spawned task, at Owner direction) and never a parallel findings list; and
+**recall stays
+uninstrumented** — no escape-tracking or seeded-defect machinery ships in the protocol block.
+
+**Why.**
+
+- The session gave measured cost/benefit: the protocol caught a harness deleting files it did not
+  create, a "manifest coverage" row that built artifacts and observed nothing, a cross-process
+  correlation, and four design proposals each routing around a standing Owner constraint. It also
+  spent most rounds rediscovering the *same class* of defect one axis at a time — class findings
+  and the preflight target exactly that waste, and would have collapsed ~4–5 of 13 rounds.
+- The block rides in **every** session's context in every project that installs it, so growth is a
+  permanent per-session cost. Each rule had to earn its place in the wire format specifically;
+  items that are practice rather than protocol were routed elsewhere (below).
+- Severity and landing impact are different axes. A LOW-severity wording defect that is
+  nonetheless a *false operational claim* misleads the next diagnosis — hence the Blocking clause
+  reads "changes implementation **or diagnostic** decisions."
+- Reviewer silence was becoming implicit approval. A terminal state fixes that only if it is
+  scoped: it names the reviewed diff and stated scope, and never authorizes commit or push
+  (D1's no-commit-authority rule is unchanged).
+
+**Corrected before landing.** The v5 draft was reviewed under v5's own rules across successive
+adversarial rounds. Everything recorded here was confirmed and fixed **while v5 was still an
+uncommitted draft** — none of it ever reached a released protocol version. ("Landed" below means
+applied to that draft, never released.) This section records the defect *classes* and their final
+mechanisms, deliberately **not** a running tally: an exhaustive count is invalidated by every
+further round, and three separate record-fidelity failures below were caused by exactly that.
+CHANGELOG carries the full per-rule sequence. The
+stamp took **two** rounds, recorded separately rather than compressed, because the second round
+refuted the first round's fix:
+
+- **The revision stamp did not identify content (round 1).** The draft allowed
+  `working-tree @ <ISO-time>`, which records *time*, not *bytes* — it cannot reconstruct or
+  compare what was reviewed, so it could falsely certify a finding as current and defeat the very
+  stale-review failure the stamp exists to close. Replaced with a content identity built on
+  `git stash create` (non-destructive, later inspectable).
+- **That stash-only stamp did not cover every cited location (round 2), so it too was rejected.**
+  `git stash create` silently omits untracked files, and in a tree whose *only* changes are
+  untracked it returns **empty** (verified by experiment) — leaving the stamp covering nothing
+  under review. Naming and quoting the untracked file was considered and refused: quoted lines
+  belong to no object, so nothing is comparable. Final wire format is
+  `<commit-hash>[ + worktree <object-hash>][ + untracked <path>@<blob-hash> …]`, untracked blobs
+  from `git hash-object` — read-only (no `-w`; verified to write nothing, remain stable, and
+  detect mutation) — under the explicit invariant that **every cited location must be covered by
+  some component of the stamp, or must not be cited**. Multi-repository reviews stamp each
+  repository on its own line.
+- **Asserted absences were not bound to the stamp.** The stamp covered *cited* locations, but an
+  absence finding cites none — so the corpus behind an empty result was unidentifiable and the
+  result irreproducible. Fixed in the kickoff prompt (where the absence rule has lived since v4)
+  by sanctioning only corpora the stamp covers: `git grep <pattern> <object-hash>` against the
+  stamped object, or `git grep` over the worktree (tracked content only — exactly what the commit
+  and worktree components cover), or an untracked-walking tool **only** if every untracked file in
+  the searched scope is hashed. A further round found that *pathname* claims escape content
+  hashing entirely — an empty untracked directory has no blob and appears in no Git tree, so every
+  other stamp component is byte-identical whether or not it exists (verified by experiment) —
+  adding the `+ paths@<digest>` component for path/directory existence claims.
+- **The classification schema was neither total nor exclusive.** `Deferred` was folded into the
+  landing-impact enum beside `Blocking`/`Non-blocking`, but scope and consequence are
+  **orthogonal** — an unsafe defect in an out-of-scope consumer is both, with no precedence to
+  resolve it — and the "exhaustive" implementer triage had no bucket for a confirmed-but-
+  out-of-scope finding, so it would land in `Confirmed: eligible to fix`, contradicting its own
+  definition. Additionally, `severity` was named as a required companion field but never defined
+  anywhere normative. Fixed (round 1) by splitting into two required independent axes (landing
+  impact × scope), splitting the triage bucket into `Confirmed (in scope)` /
+  `Confirmed (out of scope)`, tightening "act only on Confirmed" to "edit only on
+  **Confirmed (in scope)**", and demoting severity to explicitly optional, action-free context.
+- **The revised triage was still neither total nor exclusive (round 2).** Two gaps survived the
+  first fix: a verified in-scope finding whose *remedy* needs an Owner trade-off satisfied both
+  `Confirmed (in scope)` and `Needs owner decision` with no precedence; and the landing-stop rule
+  was stated only for the out-of-scope bucket, leaving `Blocking` + in-scope with no landing
+  action. Fixed by making the buckets **ordered, first match wins** (Unclear → Rejected → Stale →
+  Confirmed (out of scope) → Needs owner decision → Confirmed (in scope)), and by generalizing the
+  landing rule: **`Blocking` halts the landing from whichever bucket it lands in** — in scope →
+  fix or obtain an explicit Owner override; out of scope → surface and STOP; needs-owner-decision
+  → STOP. `Non-blocking` never halts a landing on its own.
+- **The durable record itself repeatedly drifted from the decided mechanism — one class, several instances.**
+  (a) The round-1 correction narrative was inserted with a first-occurrence text match and landed
+  inside **D1**, an unrelated decision, while D8 merely pointed back at it; (b) D8's title and
+  operative Decision still described the abandoned `Deferred` model after final v5 replaced it
+  with the independent `Out-of-scope` axis; (c) after the round-2 fixes landed in the draft, D8's own
+  correction bullets still recorded the *intermediate* stash-only stamp and the *round-1* triage
+  split as if final; and (d) the section simultaneously claimed everything was fixed "before
+  anything shipped" while describing round-2 fixes as having "shipped". These are all one class — a decision is not recorded until every
+  consumer surface carries the final version — and all three were caught by review rather than
+  by the author. D1 was restored (verified: zero deletions, one purely additive hunk), the
+  narrative moved into D8, every bullet above now states the final mechanism, and the fragile
+  exhaustive-tally phrasing that kept manufacturing this drift was removed.
+
+That the draft's own rules caught the draft's own defects is the strongest available evidence for
+the additions; it is recorded here rather than smoothed away. Two failure modes recur across the
+rounds and are worth naming: a schema asserted more complete than it was (what the preflight
+exists to prevent), and a durable record lagging the thing it documents — the latter hit this very
+entry repeatedly, including once by a careless scripted edit into a neighbouring decision.
+
+**Alternatives rejected.**
+
+- **Escape tracking / seeded-defect audits in the protocol block** — the honest gap is *recall*:
+  observed precision was high, but multiple rounds demonstrably missed defects present at review
+  time, so "the protocol earned its round-trips" cannot be claimed from catch-data alone. The
+  instrument is real but it is **telemetry, not wire format**; putting it in the block would tax
+  every session for a measurement almost no session performs. Left as an optional per-project
+  practice note.
+- **A parallel `Deferred` findings list** — would create a second tracker beside `LEDGER.md`,
+  inviting exactly the drift D1 and the ledger discipline exist to prevent. The L86/L87/L88 splits
+  in the source session are this pattern already working correctly.
+- **Deferring LOW-severity findings wholesale** — rejected on the round-8 counter-example above.
+- **Asking the reviewer to propose designs** when a design thread stalls — would forfeit the
+  read-only adversarial stance that produced the four refutations. The constraint-convergence
+  check gets the earlier signal while keeping the reviewer read-only.
+- **"One deep pass" as a request type** — kept the intent (named audit axes) but not the promise;
+  a single pass finding everything is unsupported by the session's own recall gaps.
+
+**Reopen when.** Escape data is actually being collected in some project and shows a recall gap
+that a wire-format rule (rather than practice) would close; or the block's per-session cost becomes
+a measured problem, at which point the axes lists are the first candidates to move into a
+`references/` file behind a pointer.

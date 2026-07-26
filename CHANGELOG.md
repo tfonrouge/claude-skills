@@ -155,6 +155,90 @@ five principles (Incremental Discipline plus the Decision Ledger with falsificat
 Versioned via the visible `Protocol version` line inside the installed block. Prior to v3 the
 protocol and its reviewer role used the acronym **RAR**; see v3 for the rename to **ROAR**.
 
+## v5
+
+Derived from a 13-round review session on a live project (Drydock DDvm L21), where the protocol
+caught real defects — a harness that deleted files it did not create, a "manifest coverage" row
+that built artifacts and observed nothing, a cross-process correlation, and four design proposals
+that each tried to route around a standing Owner constraint — but spent most rounds rediscovering
+the *same class* of defect one axis at a time. Every addition below traces to an observed failure
+in that session; none is speculative.
+
+- **Content-identifying revision stamp in the wire format.** The first line inside the block is
+  now `Reviewed at: <commit-hash>[ + worktree <object-hash>][ + untracked <path>@<blob-hash> …]`,
+  with the invariant that **every cited location is covered by some component of the stamp**.
+  Tracked modifications are identified by a `git stash create` object (non-destructive, later
+  inspectable with `git show`); cited untracked files by `git hash-object` (read-only, no `-w`).
+  Fixes the one observed false-positive mode: a round that reviewed a pre-commit draft and
+  reported findings already fixed in the landed file. Two forms were rejected during pre-landing
+  review: a wall-clock timestamp (**not an identity** — it cannot reconstruct or compare bytes),
+  and `git stash create` alone, which silently omits untracked files and returns **empty** in a
+  tree whose only changes are untracked — leaving the stamp covering nothing reviewed. Multi-repo
+  reviews stamp each repository on its own line.
+- **Asserted absences are bound to the stamp** (kickoff prompt, where the absence rule has lived
+  since v4). An absence cites no file, so the per-file untracked rule cannot cover it and an empty
+  result is meaningless once its corpus is unidentifiable. Sanctioned corpora are now exactly
+  those the stamp covers: `git grep <pattern> <object-hash>` against the stamped object, `git grep`
+  over the worktree (tracked content only), or an untracked-walking tool **only** with every
+  untracked file in scope hashed. Pathname claims get their own component — `+ paths@<digest>`
+  from a sorted listing — because an empty untracked directory has no blob and appears in no Git
+  tree, so every content component is byte-identical whether or not it exists. Commands are quoted
+  with their results; an absence whose corpus the stamp does not cover is not a verified absence.
+- **Two independent classification axes**, both required on every finding: **landing impact**
+  (`Blocking` — unsafe behavior, invalid gate, violated Owner constraint, or a false claim that
+  changes implementation **or diagnostic** decisions · `Non-blocking` — clarity/ergonomics with no
+  behavioral or decision consequence) and **scope** (`In-scope` / `Out-of-scope` relative to the
+  submitted work's contract). Severity alone mis-sorted a LOW-severity finding that was
+  nonetheless a false operational claim in a test message. A first draft folded scope into the
+  impact enum as a third value `Deferred`; pre-landing review showed the axes are orthogonal — an
+  unsafe defect in an out-of-scope consumer is *both* — so they were separated. Severity is now
+  explicitly optional, free-form context with no action of its own (it was previously referenced
+  as a required companion field while never being defined).
+- **Class findings over instances.** When findings share a root cause or instantiate a policy
+  (shared-path ownership, cross-process correlation, unverified activation), the reviewer names
+  the CLASS: the complete invariant the code must hold — not the local symptom — plus a bounded
+  sweep ("check every write/cleanup path in this harness"). One class finding replaces N
+  follow-up rounds; in the source session a single shared-path-ownership class finding would have
+  collapsed four sequential cleanup rounds into one.
+- **A scoped terminal state.** Zero findings has exactly one form —
+  `REVIEW COMPLETE — no claims to verify within the reviewed diff and stated scope.` It scopes to
+  that diff and stated scope, never asserts global cleanliness, and never authorizes commit or
+  push. Prevents reviewer silence from being read as approval without weakening the rule that
+  ROAR has no commit authority.
+- **Named audit axes for new test/harness submissions**: behavior, negative path,
+  cleanup/ownership, concurrency, process correlation, claim-to-oracle alignment. Naming them
+  prevents axis-by-axis rediscovery across rounds; explicitly *not* a promise that one pass finds
+  everything.
+- **Constraint-convergence check for design threads.** Before reviewing option mechanics, the
+  reviewer checks each option against already-decided constraints in the project's decision
+  ledger; repeated avoidance of a standing constraint across successive proposals is itself a
+  finding. The reviewer still does not generate designs.
+- **Implementer preflight — MANDATORY** before submitting a new test/harness or a design
+  recommendation for review (installed block, implementer section): every green row observes the
+  named behavior; every destructive write has ownership and concurrent-run reasoning; every
+  cross-process conclusion is same-process or explicitly correlated; every design carrier is
+  traced producer → transport → consumer; every standing approved/rejected constraint is listed
+  and checked against the proposal. This is the highest-leverage change — all five items map to
+  defects that reached review in the source session.
+- **The triage table is now total and non-overlapping, with a deterministic action for every
+  combination.** Buckets are **evaluated in order, first match wins** (Unclear → Rejected →
+  Stale → Confirmed (out of scope) → Needs owner decision → Confirmed (in scope)), which resolves
+  the overlap between a confirmed in-scope finding and one whose *remedy* needs an Owner
+  trade-off. `Confirmed` splits into in-scope (eligible to fix) and out-of-scope (do **not** edit
+  here; surface for Owner routing). Landing behavior is stated once and generally: **`Blocking`
+  halts the landing from whichever bucket it lands in** — in scope → fix or obtain an explicit
+  Owner override; out of scope → surface and STOP; needs-owner-decision → STOP — so a Blocking
+  finding can halt a landing without authorizing an out-of-scope edit. The implementer rule
+  tightened from "act only on Confirmed findings" (ambiguous once Confirmed split) to "edit only
+  on **Confirmed (in scope)**". An out-of-scope confirmed finding
+  is promoted like any durable record — a ledger entry or spawned task at Owner direction —
+  **never a parallel findings list**. Rationale in [`DECISIONS.md`](./DECISIONS.md) (D8), which
+  also records what was deliberately **left out**.
+- **Migration:** re-pasting v5 replaces a v3 or v4 block in place — markers unchanged (D2 holds).
+  Both prompts move to v5 in lockstep (D4). Reviewer sessions only gain v5 behavior once the
+  **updated** `roar-reviewer.prompt.md` is pasted; an older paste keeps producing v4-shaped
+  reviews.
+
 ## v4
 
 - **Adds a reviewer discipline rule to the kickoff prompt** (`roar-reviewer.prompt.md`): *verify

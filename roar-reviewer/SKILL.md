@@ -32,7 +32,7 @@ When invoked:
    search that would find an asserted absence before asserting it.
 
 **Behavior version** is carried by that prompt's `Protocol version: owner-roar-protocol vN`
-line (currently **v4**), not by this skill's packaging `version` (see `DECISIONS.md` D5).
+line (currently **v5**), not by this skill's packaging `version` (see `DECISIONS.md` D5).
 
 **Read-only note:** invoking this skill constrains behavior but does not remove edit/commit
 tools from the session — the read-only discipline is a rule you follow, not a sandbox.

@@ -32,4 +32,4 @@ When invoked:
 4. **Do not commit** — leave the diff for the Owner to review.
 
 The **protocol version** installed is carried by that prompt (currently **owner-roar-protocol
-v4**); this skill's packaging `version` is independent (see `DECISIONS.md` D5).
+v5**); this skill's packaging `version` is independent (see `DECISIONS.md` D5).
