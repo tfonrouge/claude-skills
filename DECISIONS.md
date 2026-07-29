@@ -414,6 +414,8 @@ external review — rejected by the Owner: the end-of-loop review is always warr
 decides whether the LOG suffices. (b) No cap / self-paced until done — rejected: risks unbounded
 grind on an unreachable goal with no forcing function for re-examination.
 
+**Depends on owner-roar-protocol v5+.** The skill references v5-introduced concepts (named test axes §2, content-identifying stamp §4, implementer preflight §6); on v4 those references dangle.
+
 **Reopen if.** The single-handoff cadence is shown to let a class of error survive that a cheap
 mid-loop check would have caught, or the default cap of 6 proves systematically wrong (too low to
 finish real goals, or too high to catch impractical ones) across several real uses.
