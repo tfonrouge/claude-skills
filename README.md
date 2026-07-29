@@ -29,6 +29,17 @@ Each skill module contains:
   is a packaging version, independent of the protocol version carried by the prompts. Rationale in
   [`DECISIONS.md`](./DECISIONS.md) (D5).
 
+- **[`owner-loop-goal`](./owner-loop-goal/)**: implementer working mode for **long, self-verified
+  cycles toward a goal**. Requires a specific, falsifiable GOAL with a measurable DoD — the skill
+  refuses to start without one (the name makes the requirement explicit). Each iteration runs the
+  implementer's own adversarial self-review (a checklist abstracted from real failure modes:
+  over-reach, sampled-not-full data, pass-shaped verification, contradicting already-gathered data,
+  untested negative controls) as the gate before advancing. The loop runs **without external review
+  inside**; the single handoff to ROAR/Owner happens **once, at loop end** — whether the GOAL was
+  reached, blocked, or hit the iteration cap (default 6, a *signal* the goal may need joint
+  re-examination, not just more iterations). Complements, does not replace, external review.
+  Manual-invoke only; must not auto-activate. Rationale in [`DECISIONS.md`](./DECISIONS.md) (D9).
+
 ## Owner/ROAR review prompts
 
 The two skills above each bundle a **paste-ready prompt** in `references/`. Beyond being invoked as skills

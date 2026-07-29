@@ -1,6 +1,35 @@
 # Changelog
 
-This repo ships four independently versioned products. Each has its own section below.
+This repo ships five independently versioned products. Each has its own section below.
+
+---
+
+# owner-loop-goal (skill)
+
+## 0.1.0 — 2026-07-28
+
+- Initial release. Implementer working mode for long, self-verified cycles toward a falsifiable
+  GOAL. Entry gate refuses to start without a specific GOAL + measurable DoD (state-and-proceed
+  once the gate passes — no ack wait). Per-iteration adversarial self-review checklist
+  (over-reach, full-vs-sampled data, falsifiable verification, cross-check against
+  already-gathered data, negative controls, citation/unit, DoD). No external review inside the
+  loop; single handoff to ROAR/Owner at loop end regardless of outcome (D9). Hard iteration cap
+  (default 6) surfaced as a signal the goal may need joint re-examination. Manual-invoke only,
+  per task — the guard is the first line of the description; the mode ends at the handoff, never
+  a standing session mode.
+- **Iteration is a defined, countable unit**: one DECLARE→LOG pass (targets named in the LOG
+  before advancing); fix cycles stay inside their iteration; iteration inflation is visible to
+  the final reviewer.
+- **Owner decisions mid-loop**: point decisions suspend-and-resume (park dependent criteria,
+  continue on independent ones); only GOAL-invalidating decisions terminate the loop.
+- **Composes with owner-roar-protocol v5**: the handoff runs the implementer preflight in full;
+  when the loop builds tests/harnesses, the protocol's named audit axes join the per-iteration
+  checklist rather than deferring to the handoff.
+- **LOG survivability + identity**: working LOG lives in a scratchpad file (never a repo file,
+  per D1) and closes with a content stamp (commit + worktree/untracked hashes per the protocol's
+  stamp rules).
+- **WIP-commit knob**: the Owner may grant per-iteration WIP commits on a work branch in the
+  invocation; default remains no commits.
 
 ---
 

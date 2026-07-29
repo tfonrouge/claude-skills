@@ -387,3 +387,33 @@ entry repeatedly, including once by a careless scripted edit into a neighbouring
 that a wire-format rule (rather than practice) would close; or the block's per-session cost becomes
 a measured problem, at which point the axes lists are the first candidates to move into a
 `references/` file behind a pointer.
+
+## D9 — owner-loop-goal: no external review inside the loop; single handoff at loop end; hard iteration cap
+
+**Status:** decided 2026-07-28 · introduced in owner-loop-goal 0.1.0
+
+**Decision.** The `owner-loop-goal` mode runs the implementer's self-review checklist every
+iteration but invokes **no external (ROAR) review during the loop**. The handoff to external review
+happens **exactly once, at loop end** — whether the GOAL was reached, the loop was blocked, or it hit
+the iteration cap. Mid-loop Owner *input* on point decisions (suspend-and-resume, skill §3) is not
+external review and does not break the single-handoff cadence; only a GOAL-invalidating decision
+terminates the loop early. A **hard default cap of 6 iterations** bounds the loop; reaching it is treated as a
+*signal that the GOAL may be unreachable or impractical and needs joint re-examination with the
+Owner*, not merely "more iterations needed".
+
+**Why.** The whole point of the mode is to lengthen implementation cycles so external review operates
+on a complete, coherent unit at a design/completeness level — not on fragments or on the author's
+script bugs. Interleaving ROAR mid-loop would re-fragment the cycle (the problem the mode exists to
+fix). The self-review checklist raises the floor for shallow errors; the single end-of-loop external
+review remains the gate for the deep, blind-spot errors the author cannot self-catch. The cap exists
+because a loop that will not converge is more often a symptom of a mis-framed or impractical GOAL than
+of insufficient effort — surfacing that for a joint decision is more valuable than grinding.
+
+**Rejected alternatives.** (a) Hybrid handoff where a "purely mechanical" DoD could self-close without
+external review — rejected by the Owner: the end-of-loop review is always warranted and the Owner
+decides whether the LOG suffices. (b) No cap / self-paced until done — rejected: risks unbounded
+grind on an unreachable goal with no forcing function for re-examination.
+
+**Reopen if.** The single-handoff cadence is shown to let a class of error survive that a cheap
+mid-loop check would have caught, or the default cap of 6 proves systematically wrong (too low to
+finish real goals, or too high to catch impractical ones) across several real uses.
