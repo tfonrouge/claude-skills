@@ -41,6 +41,13 @@ Each skill module contains:
   re-examination, not just more iterations). Complements, does not replace, external review.
   Manual-invoke only; must not auto-activate. Rationale in [`DECISIONS.md`](./DECISIONS.md) (D9).
 
+- **[`adopt-directive`](./adopt-directive/)**: thin wrapper that adopts `DIRECTIVE.md` on **one**
+  existing blueprint, in any project governed by either blueprint skill. It adds no rules — it
+  resolves the designated skill and the blueprint's mode, then follows that skill's documented
+  adoption procedure, presenting the packet for Owner approval in two parts (criteria first,
+  evidence second) and never conferring authority itself. Manual-invoke only; one blueprint per
+  run, because adoption is triggered by a substantive touch, not by a migration campaign.
+
 ## Owner/ROAR review prompts
 
 The two skills above each bundle a **paste-ready prompt** in `references/`. Beyond being invoked as skills

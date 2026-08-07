@@ -1,6 +1,23 @@
 # Changelog
 
-This repo ships five independently versioned products. Each has its own section below.
+This repo ships six independently versioned products. Each has its own section below.
+
+---
+
+# adopt-directive (skill)
+
+## 0.1.0 — 2026-08-07
+
+- Initial release. Thin wrapper (D5 pattern) over the adoption procedure already documented in
+  each blueprint skill's `references/legacy-migration.md` — **it adds no protocol rules**, so it
+  is packaging rather than a mechanism change under the D12 freeze. Resolves the project's
+  designated skill from `CLAUDE.md` and the blueprint's mode by reconciliation, stopping when the
+  mode is foreign or unresolvable. Presents the approval packet **in two parts** (Owner Directive
+  + Outcome Criteria alone, then coverage sets, `Advances:` mapping and baseline snapshot),
+  because approving bad criteria contaminates everything downstream. Never sets
+  `Authority: APPROVED` itself. Closes by running `blueprint-lint` and emitting the Producer
+  Coverage Census table. One blueprint per invocation — deliberately unable to run a batch
+  migration.
 
 ---
 
