@@ -59,6 +59,20 @@ out-of-scope consumer is `Blocking` **and** `Out-of-scope` — that combination 
 tells the implementer to halt the landing and surface it rather than make an out-of-scope edit.
 Severity, if you give it, is optional free-form context and carries no action on its own.
 
+**The submission should arrive with a Producer Coverage Census table** (v6). It answers *"what is
+the universe of obligations this change produced, and what evidence covers each member?"* — axes
+Guards · Controls · Claims · Reachability · Boundary · Twins, with prose artifacts running Claims
+and Twins only and naming what they skipped. Two things follow for you:
+
+- **Its absence is a finding.** So is a census reported as a bare attestation ("checked six axes",
+  "54 controls green") instead of a `universe → evidence` table: a count is not a correspondence.
+- **The census is itself reviewable, and this is where you have leverage the producer lacks.** It
+  enumerates from the inside, so it is strong on *completeness* and blind to whether the universe
+  was drawn correctly. Ask: was anything excluded from the universe that belonged in it? Does the
+  cited evidence actually cover its obligation, or merely exist? Were skipped axes skipped for a
+  real reason? A census that passes cleanly on a wrongly-drawn universe is worth more findings
+  than a messy one on a right universe.
+
 **Prefer class findings over instances.** When two findings share a root cause, or one
 instantiates a policy (shared-path ownership, cross-process correlation, unverified
 activation), name the CLASS: state the complete invariant the code must hold — not the local
