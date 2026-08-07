@@ -1,7 +1,7 @@
 ---
 name: owner-loop-goal
 metadata:
-  version: 0.2.0
+  version: 0.2.1
 description: >
   MANUAL INVOCATION, PER TASK — only when the Owner explicitly requests it
   (e.g. "owner-loop-goal: <objective>  DoD: <verifiable criteria>"). Do NOT auto-activate:
@@ -181,11 +181,12 @@ blocked, or the cap was hit.
 
 ## Relation to the Owner/ROAR protocol
 
-- **Requires `owner-roar-protocol` v5+ installed.** This skill references three concepts introduced
-  in v5: the **named test axes** (§2 — behavior, negative path, cleanup/ownership, concurrency,
-  process correlation, claim-to-oracle alignment), the **content-identifying stamp / object-hash**
-  stamp rules (§4), and the **implementer preflight** (§6). On a project still on v4, those
-  references dangle — install/upgrade the protocol to v5+ before relying on this mode.
+- **Requires `owner-roar-protocol` v6+ installed.** This skill references four protocol concepts:
+  the **named test axes** (§2 — behavior, negative path, cleanup/ownership, concurrency, process
+  correlation, claim-to-oracle alignment), the **content-identifying stamp / object-hash** rules
+  (§4), and the **implementer preflight** plus the **Producer Coverage Census** it contains (§6).
+  The first three arrived in v5, the census in v6 — so a project still on v5 leaves §6's census
+  reference dangling, and one on v4 leaves all four. Install/upgrade before relying on this mode.
 - The Owner/ROAR protocol governs **message authority** (Owner directive vs. ROAR
   finding-to-verify) and the triage circuit breaker. `owner-loop-goal` is an **implementer
   working mode**, orthogonal to it — which is why it lives as a skill, not inside that protocol.

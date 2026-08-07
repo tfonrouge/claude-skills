@@ -23,6 +23,12 @@ This repo ships six independently versioned products. Each has its own section b
 
 # owner-loop-goal (skill)
 
+## 0.2.1 — 2026-08-07
+
+- **Dependency declaration corrected to `owner-roar-protocol` v6+** (was v5+). §6 already required
+  the Producer Coverage Census, a v6 concept, so the declaration under-stated what the skill needs
+  and left that reference dangling on a v5 project. Same correction in `DECISIONS.md` D9.
+
 ## 0.2.0 — 2026-08-06
 
 - **Blueprint DIRECTIVE composition (D10)**: inside a blueprint with an APPROVED `DIRECTIVE.md`,
@@ -340,6 +346,20 @@ five principles (Incremental Discipline plus the Decision Ledger with falsificat
 ---
 
 # owner-roar-protocol (prompts)
+
+## v7
+
+- **Reviewer side of the census** (should have shipped as v7 with commit `b17275e`, which added it
+  to the kickoff without bumping — a D4 lockstep violation, corrected here): a submission arrives
+  with a census table, its absence is a finding, and so is a census reported as a bare attestation
+  instead of a `universe → evidence` table. The census is itself reviewable, and that is where the
+  reviewer has leverage the producer lacks — enumerating from the inside is strong on completeness
+  and blind to whether the universe was drawn correctly.
+- **Remedy rule for confirmed census findings**, in the triage section: ROAR *samples*, the census
+  claims *exhaustiveness*, so a demonstrated omission falsifies the whole axis rather than the one
+  member named. Re-run the affected axis and re-emit the table; patching the single item and
+  declaring the census clean is the natural failure mode this rule blocks. The six triage buckets
+  are unchanged — a census finding disposes like any other.
 
 ## v6
 

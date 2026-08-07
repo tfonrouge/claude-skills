@@ -1,6 +1,6 @@
 # ROAR Reviewer — session kickoff prompt
 
-**Protocol version:** owner-roar-protocol v6
+**Protocol version:** owner-roar-protocol v7
 
 > Paste this at the start of **each** Read-Only Adversarial Reviewer session.
 

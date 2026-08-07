@@ -1,7 +1,7 @@
 <!-- OWNER_ROAR_PROTOCOL:begin -->
 ## Session Roles Protocol — Owner vs. ROAR
 
-_Protocol version: owner-roar-protocol v6._
+_Protocol version: owner-roar-protocol v7._
 
 Two collaborating sessions drive this repo. Distinguish messages by **authority, not identity**:
 
@@ -126,6 +126,14 @@ Blocking finding is unresolved: *in scope* → fix it, or obtain an explicit Own
 *out of scope* → surface and STOP pending Owner direction (a Blocking finding can halt a landing
 without authorizing an out-of-scope edit); *needs owner decision* → STOP. `Non-blocking` findings
 never halt a landing on their own.
+
+**A confirmed census finding is remedied by re-enumerating, not by patching the named item.**
+ROAR *samples*; the census claims *exhaustiveness*. So when a finding shows the universe was drawn
+wrongly — an axis missing members, evidence that does not actually cover its obligation, a skipped
+axis without a real reason — the demonstrated omission falsifies that axis as a whole, not only the
+member ROAR happened to name. Re-run the affected axis, re-emit the table, and say what changed.
+Patching the single item and declaring the census clean is the natural failure mode and the one
+this rule exists to block.
 
 **Persistence.** The triage is a working-loop artifact: keep it in chat, not in repo files. Do not
 write findings or the triage table to any durable audit or spec artifact. Promote a single finding
