@@ -52,6 +52,9 @@ and list which consumer modules will depend on this library.
 ### Definition of Done
 - [ ] Directory created at `blueprints/<LibraryName>(LIBRARY)/`
 - [ ] `BRIEF.md` created and all fields populated, including the `| Mode | LIBRARY |` header row
+- [ ] `DIRECTIVE.md` created per `references/directive-template.md` — drafted `Authority: DRAFT`, then **Owner-approved** (`Authority: APPROVED`) before Step 1
+- [ ] *(cathedral projects)* `LEDGER.md` created (ID column, `L-###`) with the `DIRECTIVE R1:` adoption row
+- [ ] `.blueprint-execution` created (`Active: Step 0 (BRIEF/DIRECTIVE)`)
 - [ ] Registered in `blueprints/INDEX.md` — *Active Modules & Libraries* row with Mode column value
 - [ ] Consumer modules identified and notified
 - [ ] Published artifact coordinates defined (group:artifact)
@@ -222,6 +225,7 @@ Same as MODULE MODE, with these library-specific additions:
 ```markdown
 ## Phase N: [Name]
 - **Deliverable**: [publishable artifact or milestone]
+- **Advances**: OC-# (every phase and task maps to a DIRECTIVE outcome criterion — unmapped work is an audit finding)
 - **Build Units Affected**: [e.g. commonLib + shopifyLib | @scope/core | mylib.core]
 - **Target/Runtimes**: [e.g. commonMain/jvmMain | Node 18 CJS+ESM | Python 3.10+]
 - **Technical Objectives**: ...
@@ -283,13 +287,15 @@ Same as MODULE MODE (`TEST-[NNN]` format).
 
 ## Library TRACEABILITY_MATRIX.md and AUDIT.md
 
-Same structure as MODULE MODE.
+Same structure as MODULE MODE — including the **Advances** (`OC-#`) column in the Requirement
+Traceability table.
 
 ### Claude Code Prompt Pattern (initialize TRACEABILITY_MATRIX.md)
 ```
 Based on IMPLEMENTATION_PLAN.md for [LibraryName], generate TRACEABILITY_MATRIX.md.
 Initialize the Gantt with all phases and tasks from the plan.
-Initialize the Requirement Traceability table with all FR-IDs from SPECIFICATION.md.
+Initialize the Requirement Traceability table with all FR-IDs from SPECIFICATION.md,
+populating the Advances column with each requirement's OC-# from the plan's mappings.
 Set all statuses to "Not Started". Leave Test ID column blank — fill as tests are written.
 ```
 
@@ -314,6 +320,7 @@ blueprints/MAP.md          → create when ≥3 blueprints exist; update when fo
 
 Step 0: BRIEF.md → library name, platform/runtime targets, consumer modules
          └─ Create .blueprint-status (initial: PLANNING)
+         └─ Create .blueprint-execution (Active: Step 0) + DIRECTIVE.md (DRAFT → Owner APPROVED)
 Step 1: SPECIFICATION.md → functional requirements, entities, business rules
 Step 2: FLOWCHART.md → data flows, lifecycle diagrams, processing pipelines
 Step 3: API_SURFACE.md → public interfaces, types, functions, published artifact coordinates
@@ -326,7 +333,7 @@ AUDIT.md → create after initial implementation; revisit each sprint
 .blueprint-status → update on every status change
 
 Directory: blueprints/<LibraryName>(LIBRARY)/
-Footer: [← Index] · [Map] · BRIEF · SPEC · FLOWCHART · API SURFACE · [VIEWS] · PLAN · TESTS · MATRIX · AUDIT
+Footer: [← Index] · [Map] · DIRECTIVE · BRIEF · SPEC · FLOWCHART · API SURFACE · [VIEWS] · PLAN · TESTS · MATRIX · [LEDGER] · AUDIT
 ```
 
 ---

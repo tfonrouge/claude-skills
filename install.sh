@@ -95,3 +95,10 @@ done
 
 echo
 echo "Done. ${#SKILLS[@]} skill(s) $([ "$MODE" = link ] && echo linked || echo copied) into $DEST."
+
+# Guard: the two directive-template.md copies must stay byte-identical (see D10 docs)
+T1="$REPO_DIR/business-blueprint-workflow/references/directive-template.md"
+T2="$REPO_DIR/systems-blueprint-workflow/references/directive-template.md"
+if [ -f "$T1" ] && [ -f "$T2" ] && ! cmp -s "$T1" "$T2"; then
+  echo "WARNING: directive-template.md copies differ between blueprint skills — keep them byte-identical." >&2
+fi

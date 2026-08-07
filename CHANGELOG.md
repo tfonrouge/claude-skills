@@ -6,6 +6,14 @@ This repo ships five independently versioned products. Each has its own section 
 
 # owner-loop-goal (skill)
 
+## 0.2.0 — 2026-08-06
+
+- **Blueprint DIRECTIVE composition (D10)**: inside a blueprint with an APPROVED `DIRECTIVE.md`,
+  the loop GOAL declares `Advances: OC-#`; the DoD is a falsifiable refinement that may claim an
+  OC complete only by proving the whole criterion; excursion-loops cite the blocked OC and
+  persist in `.blueprint-execution`; DECLARE and the LOG cite OC-#s; the blueprint's working
+  gates remain in force inside the loop.
+
 ## 0.1.0 — 2026-07-28
 
 - Initial release. Implementer working mode for long, self-verified cycles toward a falsifiable
@@ -36,6 +44,31 @@ This repo ships five independently versioned products. Each has its own section 
 # business-blueprint-workflow (skill)
 
 Versioned via the `metadata.version` field in `business-blueprint-workflow/SKILL.md`.
+
+## 0.10.0
+
+- **DIRECTIVE mechanism (D10).** Every blueprint carries `DIRECTIVE.md` — the current,
+  authoritative Owner mandate (Owner Directive sentence, falsifiable `OC-#` outcome criteria,
+  non-goals, one-line ledger-cited constraints, amendment rule; authority lifecycle
+  DRAFT→APPROVED→REVOKED, ~30-line normative-body cap). BRIEF becomes the immutable origin
+  record with an authority banner at adoption. Three **working gates** (orientation /
+  focus-change / decision-completion) bind every implementer session — lines derived from reads
+  at the event, total grammar across legacy/DRAFT/revoked/design-phase branches; completion is
+  measured against every OC, never the latest resolved blocker.
+- **`.blueprint-execution`** operational dotfile (all modes, Step 0): standing Current Execution
+  block, one-line excursion frames, 7-line cap, excursion depth cap 3 with
+  tripwire→written-reassessment, tracked in git riding ordinary commits, re-orientation conflict
+  rule.
+- **`(LEDGER.md)`** enters all three mode catalogs as a conditional artifact (required under
+  cathedral governance). Plans/orders gain `Advances: OC-#`; footers gain DIRECTIVE + LEDGER
+  under the only-link-what-exists rule.
+- New `references/legacy-migration.md` (+ `directive-template.md`): migration tiers (required on next substantive touch
+  for FOCUSED/ACTIVE/PLANNING/resumed-PAUSED), five-step adoption procedure (draft + backfill →
+  Owner packet review → same-commit records), baseline-exemption snapshot (IDs / counted
+  section scopes), BRIEF banner text, and the **consolidated legacy-migration map** — every
+  on-next-touch rule for pre-current artifact shapes ((MODULE)-as-LIBRARY, missing Mode rows,
+  no-ID ledgers, pre-`Advances` plans, swollen status files) lives there, deliberately out of
+  the always-loaded skill core.
 
 ## 0.9.0
 
@@ -109,6 +142,16 @@ that lineage and is **not** restored; recover from history (`git show 00ab707:..
 
 Versioned via the `metadata.version` field in `systems-blueprint-workflow/SKILL.md`.
 
+## 0.3.0
+
+- **DIRECTIVE mechanism (D10)** — mirror of business-blueprint-workflow 0.10.0 for
+  SUBSYSTEM/FEATURE/PATCH: `DIRECTIVE.md` + `.blueprint-execution` + `(LEDGER.md)` in all three
+  catalogs and footers; compact in-SKILL contract (authority lifecycle, three working gates,
+  execution dotfile); `Advances: OC-#` in Phase templates and checklists; PATCH directives
+  explicitly minimal (one OC + blast-radius constraint). Canonical template + adoption
+  procedure + the consolidated legacy-migration map in new `references/legacy-migration.md` (canonical template in `references/directive-template.md`)
+  — migration content deliberately kept out of the always-loaded skill core.
+
 ## 0.2.2
 
 - **Footer nav rule clarified** (Artifact Navigation): `../MAP.md` is created only at 3+ blueprints,
@@ -135,6 +178,21 @@ Predates this changelog. `0.1.0` was the initial systems skill (`f0e1a43`); `0.2
 # cathedral-premise (skill)
 
 Versioned via the `metadata.version` field in `cathedral-premise/SKILL.md`.
+
+## 1.3.0
+
+- **Directive Integrity audit** (D10): eight per-blueprint checks in `cathedral-core.md` —
+  authority presence (violation for FOCUSED/ACTIVE, advisory for PLANNING/resumed-PAUSED — the
+  stated maximum file-decidable severity), record completeness (unique contiguous `DIRECTIVE
+  R<N>:` sequence; revocation record wins over an unflipped header), `OC-#` traceability with
+  baseline-exemption re-counts, displacement, provenance, completion-against-all-criteria,
+  abandoned-excursion staleness (config-tunable threshold), and `.blueprint-execution`
+  consistency (plan-item / design / idle modes, rework confirmation flag). The audit never
+  judges a directive against current reality.
+- **Canonical ledger schema gains an ID column** (`L-###`) and the `DIRECTIVE R<N>:`
+  attribution prefix; ledger-mandate wording aligned with the blueprint skills'
+  conditional-artifact rule; both domain adapters note the DIRECTIVE / `.blueprint-execution` /
+  `(LEDGER)` additions.
 
 ## 1.2.0
 

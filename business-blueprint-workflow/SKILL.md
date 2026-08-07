@@ -1,7 +1,7 @@
 ---
 name: business-blueprint-workflow
 metadata:
-  version: 0.9.0
+  version: 0.10.0
 description: >
   Artifact workflow for designing and tracking business software in Claude Code.
   Produces blueprints/ with Markdown specs, INDEX.md, and per-blueprint AUDIT.md.
@@ -21,6 +21,8 @@ description: >
 
   Artifacts: (MODULE) suffix for modules, (LIBRARY) for libraries, (BRIDGE) for bridge
   features. Step-by-step mode workflows live in references/mode-*.md (see mode map).
+  Each blueprint carries DIRECTIVE.md — the Owner's current objective authority — and
+  three working gates anchor every implementer session to it.
 ---
 
 # Business Module Workflow
@@ -119,6 +121,118 @@ BRIEF declaration.
 
 ---
 
+## DIRECTIVE.md — Per-Blueprint Objective Authority
+
+One per blueprint: the **current, authoritative Owner mandate**. It is *stable* — never a
+"living" document — changed only by explicit Owner amendment. The directional dual of
+`.blueprint-status`: status says where we are; DIRECTIVE says where we are going and what must
+not be violated getting there. **Hard cap: the normative body (title through Amendment Rule)
+fits one screen, ~30 lines.** Amendment History is cap-exempt; a history beyond ~5 entries is a
+directive-churn signal for Owner re-examination.
+
+### Template
+
+The canonical template lives in **`references/directive-template.md`** — load it at Step 0/B0
+creation and at legacy adoption. The rules of form (one-screen cap, constraint grammar, ledger
+reference grammar) travel with it; only the lifecycle rules the working gates consume every
+session remain below.
+
+### Authority lifecycle
+
+- **DRAFT confers nothing.** Owner approval is the act that confers authority; the header flip
+  to `APPROVED` records it. The header is a durable process record — not proof of cognition or
+  consent.
+- **Revocation is an amendment**: it increments Revision, records who/when/why in the amendment
+  store, and **flips the header to `REVOKED` in the same commit**. On disagreement between
+  record and header, **the revocation record wins** (fail toward absence of authority); the
+  mismatch is an audit synchronization finding. A REVOKED directive is never quoted as authority.
+- **`Revision: N` ⇒ N−1 recorded amendments**, and the R-sequence is **unique and contiguous**:
+  cathedral — ledger rows whose Decision cell begins with the literal `DIRECTIVE R<N>:`;
+  non-cathedral — Amendment History lines R1 (adoption) through RN, exactly once each.
+
+### Relationship to BRIEF.md
+
+BRIEF is the **immutable origin record** — why the work was opened, discovery evidence,
+stakeholders, initial conditions, the Mode row. At DIRECTIVE adoption, BRIEF gains a one-time
+authority banner (see `references/legacy-migration.md`) and is frozen thereafter except
+factual corrections explicitly labeled as such. Its Goal/scope/DoD language is historical, not
+authority.
+
+**Legacy blueprints** (any pre-directive artifact shape): all migration **procedures** —
+adoption, baseline rules, banner text, and the migration map — live in
+`references/legacy-migration.md`; read it before adopting or touching a legacy shape. The core
+retains only runtime **compatibility** (mode reconciliation, the gates' legacy branches).
+
+---
+
+## Working Gates — every implementer session
+
+Three act-gated rituals bind sessions to the directive. Their lines are emitted in chat —
+they activate behavior in-session and are **never audit oracles** (all audit oracles are
+file-based). Each line must be **derived from a read performed at that event, not from memory**.
+Read-only sessions (ROAR review, cathedral audit) perform the gate *reads* silently as
+evidence-gathering, emit no gate lines, and write nothing.
+
+1. **Orientation gate** — at session start/resume on a blueprint, and at every session boundary:
+   read DIRECTIVE + `.blueprint-execution`; emit:
+   `Directive: <"Owner Directive sentence, quoted" | DRAFT pending Owner approval (no authority) | REVOKED — no current authority | none adopted (legacy — BRIEF §Goal is historical)> · Active: <OC-# · plan item | Step N (<artifact>) | idle> · Resuming: <plan item | excursion | Step N artifact>`
+   For legacy blueprints with no dotfile, `Active`/`Resuming` fall back to approximate pipeline
+   inference (`~Step N (inferred)`, confirmed in-session). Quoting forces loading.
+2. **Focus-change gate** — when switching plan item, moving between pipeline steps, or entering
+   a blocker; emit one of:
+   `Serves OC-# via <plan item>`
+   `Serves directive (design phase) via Step N (<artifact>)`
+   `Serves pipeline Step N (pre-adoption legacy | approval pending | revoked)`
+   `EXCURSION: <problem> — blocks <OC-# | directive (design phase) | pipeline (legacy | approval pending | revoked)>; return when <verifiable condition>`
+   Update `.blueprint-execution` in the same move.
+   **`approval pending` and `revoked` are holding states, not licenses.** Approval-pending
+   permits only completing the adoption packet (or explicit Owner direction); after revocation,
+   substantive work **stops and surfaces to the Owner** for re-approval, amendment, or a new
+   directive — only Owner-directed remediation proceeds.
+3. **Decision/completion gate** — when proposing a design choice or claiming done: read the
+   premise checklist (where configured) and the ledger — every entry cited in Governing
+   Constraints, a scan for rejections relevant to the proposal, **and a scan of APPROVED entries
+   for fired falsification conditions** (the ledger rule is bidirectional; a fired falsifier is
+   flagged due-for-review, never silently inherited). Emit:
+   `Decision gate: serves <OC-# | pipeline Step N (pre-adoption legacy | approval pending | revoked)> · premise: <aligned | violation + why | none configured> · ledger: honors <refs> | none relevant (checked) | none exists · reopened: <none | ref> · falsifiers: <none fired | fired: <ref> — flagged due-for-review>`
+   **Completion is measured against every OC-#, never against the latest resolved blocker** —
+   a completion claim enumerates all criteria with status, and is therefore **only possible
+   under an APPROVED directive**: with no criteria in force (DRAFT, REVOKED, legacy), there is
+   nothing to measure done against — surface to the Owner instead.
+
+---
+
+## `.blueprint-execution` — Standing Execution State
+
+A per-blueprint operational dotfile, sibling of `.blueprint-status`, identical in every mode.
+Created at Step 0 (and at DIRECTIVE adoption for existing blueprints). It is operational state —
+never part of any mode's content requirements, never in navigation footers, never merged into
+DIRECTIVE or `.blueprint-status`. This is the sanctioned home for the "current work" narrative
+that otherwise swells status files past their one-line contract.
+
+```markdown
+## Current Execution
+- Active: <OC-02 · plan item P3 | Step 2 (FLOWCHART) | idle>   <!-- always present -->
+- Excursion[1]: <problem> · opened <date> · return when: <verifiable check> · resume at: P3.2
+```
+
+- **Hard cap 7 lines**; excursion frames are one line each; **excursion depth hard cap 3**.
+- Updated at every focus-change gate; excursion frames **persist on open** (session-boundary
+  crossing is ex-ante undecidable) and clear on close.
+- **Tripwire → semantic reassessment**: at depth ≥2, a session boundary with an open excursion,
+  or expansion beyond the mapped plan item, answer in writing, one line each: does this change
+  the Directive or its criteria? exceed approved scope? require an Owner trade-off? lack a
+  bounded return condition? The answers determine escalation — **except depth >3, which always
+  stops the work and surfaces to the Owner** (accumulated distance from the directive is itself
+  the finding).
+- **Version control: tracked, riding ordinary commits** — never gitignored, never forcing its
+  own commits. Concurrent-implementer conflicts are resolved by **re-orientation, never textual
+  merge**: re-derive the Active line from plan and reality, re-open only verified-open
+  excursions as one parent-consistent stack; two branches claiming different active excursions
+  is a disagreement for the Owner.
+
+---
+
 ## Overview of Artifacts
 
 ### Root (`blueprints/`)
@@ -131,6 +245,9 @@ BRIEF declaration.
 | Step | Artifact | Purpose |
 |------|----------|---------|
 | — | `.blueprint-status` | Single-line status file; source of truth for INDEX.md |
+| — | `.blueprint-execution` | Standing operational state: active OC/plan item, excursion stack |
+| — | `DIRECTIVE.md` | Current Owner mandate: outcome criteria (OC-#), non-goals, constraints |
+| — | `(LEDGER.md)` | Conditional — required when cathedral-governed: decisions, adoption + amendment provenance |
 | 0 | `BRIEF.md` | Context, owner, justification |
 | 1 | `SPECIFICATION.md` | What the module does |
 | 2 | `FLOWCHART.md` | How it flows (Mermaid diagrams) |
@@ -145,6 +262,9 @@ BRIEF declaration.
 | Step | Artifact | Purpose |
 |------|----------|---------|
 | — | `.blueprint-status` | Single-line status file; source of truth for INDEX.md |
+| — | `.blueprint-execution` | Standing operational state: active OC/plan item, excursion stack |
+| — | `DIRECTIVE.md` | Current Owner mandate: outcome criteria (OC-#), non-goals, constraints |
+| — | `(LEDGER.md)` | Conditional — required when cathedral-governed: decisions, adoption + amendment provenance |
 | 0 | `BRIEF.md` | Context, owner, library scope, platform/runtime targets, consumer modules |
 | 1 | `SPECIFICATION.md` | What the library provides — functional requirements, entities, constraints |
 | 2 | `FLOWCHART.md` | Data flows, processing pipelines, async patterns, lifecycle diagrams |
@@ -159,6 +279,9 @@ BRIEF declaration.
 | Step | Artifact | Purpose |
 |------|----------|---------|
 | — | `.blueprint-status` | Single-line status file; source of truth for INDEX.md |
+| — | `.blueprint-execution` | Standing operational state: active OC/plan item, excursion stack |
+| — | `DIRECTIVE.md` | Current Owner mandate: outcome criteria (OC-#), non-goals, constraints |
+| — | `(LEDGER.md)` | Conditional — required when cathedral-governed: decisions, adoption + amendment provenance |
 | B0 | `BRIEF.md` | Scope, actors, affected modules, lifecycle type |
 | B1 | `ENTITY_DESCRIPTOR.md` | New entity/entities: states, rules, data model |
 | B2 | `SERVICE_CONTRACTS.md` | API / service boundaries between touched modules |
@@ -349,7 +472,7 @@ Every `.md` artifact must include a navigation footer so readers can jump betwee
 
 1. **Always at the bottom** — the nav block is the very last content in the file, after all sections.
 2. **Current artifact is bold and not a link** — so the reader knows where they are.
-3. **Only link artifacts that already exist** — if an artifact hasn't been generated yet, render it as plain text (no brackets, no link). This includes `../MAP.md`.
+3. **Only link artifacts that already exist** — if an artifact hasn't been generated yet, render it as plain text (no brackets, no link). This includes `../MAP.md`, and it is how `DIRECTIVE` and `LEDGER` behave on legacy blueprints that never adopt them: plain text, never a broken link.
 4. **Always include the INDEX link; include the MAP link once it exists** — `INDEX.md` exists from the first blueprint, so `Index` is always a link. `MAP.md` is created only at ≥3 blueprints; until then render `Map` as plain text.
 5. **Regenerate when a new artifact is created** — when generating artifact N, update the footer of all previously generated artifacts in the same blueprint directory to add the new link.
 
@@ -357,21 +480,21 @@ Every `.md` artifact must include a navigation footer so readers can jump betwee
 
 ```markdown
 ---
-[← Index](../INDEX.md) · [Map](../MAP.md) · **BRIEF** · [SPEC](SPECIFICATION.md) · [FLOWCHART](FLOWCHART.md) · [API](API_CONTRACT.md) · [VIEWS](VIEW_MAP.md) · [PLAN](IMPLEMENTATION_PLAN.md) · [TESTS](TEST_PLAN.md) · [MATRIX](TRACEABILITY_MATRIX.md) · [AUDIT](AUDIT.md)
+[← Index](../INDEX.md) · [Map](../MAP.md) · [DIRECTIVE](DIRECTIVE.md) · **BRIEF** · [SPEC](SPECIFICATION.md) · [FLOWCHART](FLOWCHART.md) · [API](API_CONTRACT.md) · [VIEWS](VIEW_MAP.md) · [PLAN](IMPLEMENTATION_PLAN.md) · [TESTS](TEST_PLAN.md) · [MATRIX](TRACEABILITY_MATRIX.md) · [LEDGER](LEDGER.md) · [AUDIT](AUDIT.md)
 ```
 
 Replace **BRIEF** with the name of the current file in bold. Files not yet created appear as plain text without brackets:
 
 ```markdown
 ---
-[← Index](../INDEX.md) · Map · [BRIEF](BRIEF.md) · **SPEC** · FLOWCHART · API · VIEWS · PLAN · TESTS · MATRIX · AUDIT
+[← Index](../INDEX.md) · Map · [DIRECTIVE](DIRECTIVE.md) · [BRIEF](BRIEF.md) · **SPEC** · FLOWCHART · API · VIEWS · PLAN · TESTS · MATRIX · Ledger · AUDIT
 ```
 
 ### LIBRARY MODE footer template
 
 ```markdown
 ---
-[← Index](../INDEX.md) · [Map](../MAP.md) · **BRIEF** · [SPEC](SPECIFICATION.md) · [FLOWCHART](FLOWCHART.md) · [API SURFACE](API_SURFACE.md) · [VIEWS](VIEW_MAP.md) · [PLAN](IMPLEMENTATION_PLAN.md) · [TESTS](TEST_PLAN.md) · [MATRIX](TRACEABILITY_MATRIX.md) · [AUDIT](AUDIT.md)
+[← Index](../INDEX.md) · [Map](../MAP.md) · [DIRECTIVE](DIRECTIVE.md) · **BRIEF** · [SPEC](SPECIFICATION.md) · [FLOWCHART](FLOWCHART.md) · [API SURFACE](API_SURFACE.md) · [VIEWS](VIEW_MAP.md) · [PLAN](IMPLEMENTATION_PLAN.md) · [TESTS](TEST_PLAN.md) · [MATRIX](TRACEABILITY_MATRIX.md) · [LEDGER](LEDGER.md) · [AUDIT](AUDIT.md)
 ```
 
 `VIEW_MAP.md` is optional in LIBRARY MODE — if the library provides no UI components, omit it from the footer.
@@ -380,7 +503,7 @@ Replace **BRIEF** with the name of the current file in bold. Files not yet creat
 
 ```markdown
 ---
-[← Index](../INDEX.md) · [Map](../MAP.md) · **BRIEF** · [ENTITY](ENTITY_DESCRIPTOR.md) · [CONTRACTS](SERVICE_CONTRACTS.md) · [VIEWS](VIEW_MAP.md) · [ORDER](IMPLEMENTATION_ORDER.md) · [AUDIT](AUDIT.md)
+[← Index](../INDEX.md) · [Map](../MAP.md) · [DIRECTIVE](DIRECTIVE.md) · **BRIEF** · [ENTITY](ENTITY_DESCRIPTOR.md) · [CONTRACTS](SERVICE_CONTRACTS.md) · [VIEWS](VIEW_MAP.md) · [ORDER](IMPLEMENTATION_ORDER.md) · [LEDGER](LEDGER.md) · [AUDIT](AUDIT.md)
 ```
 
 ---

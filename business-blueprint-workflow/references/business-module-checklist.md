@@ -14,6 +14,9 @@ Artifact names, order, and layout follow the canonical MODULE flow in `SKILL.md`
 ## Step 0 — BRIEF.md (Kickoff)
 - [ ] Directory created: `blueprints/<ModuleName>(MODULE)/`
 - [ ] `.blueprint-status` file created (single-line status; source of truth for INDEX.md)
+- [ ] `.blueprint-execution` created (`Active: Step 0 (BRIEF/DIRECTIVE)`)
+- [ ] `DIRECTIVE.md` drafted (`Authority: DRAFT`) and **Owner-approved** (`Authority: APPROVED`) before Step 1
+- [ ] *(cathedral projects)* `LEDGER.md` created (ID column, `L-###`) with the `DIRECTIVE R1:` adoption row
 - [ ] Module name confirmed (PascalCase)
 - [ ] Business owner identified
 - [ ] Business justification documented
@@ -80,6 +83,7 @@ Artifact names, order, and layout follow the canonical MODULE flow in `SKILL.md`
 - [ ] Resource allocation documented
 - [ ] Risk register has ≥3 entries with mitigations
 - [ ] All spec requirements mapped to a phase
+- [ ] Every phase and task carries `Advances: OC-#`
 - [ ] **TRACEABILITY_MATRIX.md initialized** ✓ Date: ___________
 - [ ] **Tech lead and project owner sign-off** ✓ Date: ___________
 
@@ -100,6 +104,7 @@ Artifact names, order, and layout follow the canonical MODULE flow in `SKILL.md`
 
 ## Step 7 — TRACEABILITY_MATRIX.md (Living)
 - [ ] Initialized with all REQ-IDs (status: Not Started)
+- [ ] Advances column populated (OC-# per requirement, from the plan's mappings)
 - [ ] Milestone tracker pre-populated
 - [ ] Updated after Sprint 1
 - [ ] Updated after Sprint 2

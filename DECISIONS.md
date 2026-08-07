@@ -419,3 +419,58 @@ grind on an unreachable goal with no forcing function for re-examination.
 **Reopen if.** The single-handoff cadence is shown to let a class of error survive that a cheap
 mid-loop check would have caught, or the default cap of 6 proves systematically wrong (too low to
 finish real goals, or too high to catch impractical ones) across several real uses.
+
+## D10 — DIRECTIVE.md is the per-blueprint objective authority; three act-gated rituals anchor sessions to it
+
+**Status:** decided 2026-08-06 · introduced in business-blueprint-workflow 0.10.0 / systems-blueprint-workflow 0.3.0 / cathedral-premise 1.3.0 / owner-loop-goal 0.2.0
+
+**Decision.** Every blueprint carries `DIRECTIVE.md` — the current, authoritative Owner mandate:
+one-sentence Owner Directive, falsifiable Outcome Criteria (`OC-#`), Non-Goals, one-line Governing
+Constraints (ledger-cited where a ledger exists), an Amendment Rule, and an Authority lifecycle
+`DRAFT → APPROVED → REVOKED` in which **Owner approval is the act that confers authority** and
+revocation is an amendment (record + header flip, same commit; record wins on disagreement).
+BRIEF becomes the immutable origin record (authority banner at adoption; frozen after). LEDGER
+enters both blueprint skills' catalogs as a conditional artifact (required under cathedral
+governance) with an ID column (`L-###`) and the `DIRECTIVE R<N>:` attribution prefix (unique,
+contiguous R-sequence). Three working gates — orientation (quote the directive), focus-change
+(serves-line or excursion declaration), decision/completion (bidirectional ledger read; done is
+measured against every OC) — bind implementer sessions; read-only sessions read silently.
+`.blueprint-execution`, a tracked operational dotfile sibling of `.blueprint-status`, holds the
+standing Current Execution block (active OC/plan item, one-line excursion frames, depth cap 3,
+7-line cap). Plans/orders/changesets carry `Advances: OC-#`; cathedral audits gain eight
+Directive Integrity checks. Migration is tiered (required on next substantive touch for
+FOCUSED/ACTIVE/PLANNING/resumed-PAUSED; recommendation for STABLE/CLOSED) with a five-step
+adoption procedure and a baseline-exemption snapshot.
+
+**Why.** Observed failure pattern in real sessions: goal displacement by trouble-in-the-middle
+problems, re-proposal of rejected designs, premise non-application — all sharing one mechanism:
+guidance is pull-based and read-once while action is driven by recent context, and prescribed
+checks (cathedral's "check the ledger before proposing") were unenforced because nothing
+observable proved they ran. No standardized artifact carried current objective authority
+(directive content leaked into 400+-word `.blueprint-status` files and organic north-star docs).
+What demonstrably works in this repo is act-gated ritual (ROAR triage, content stamps, loop
+DECLARE); the mechanism converts the load-bearing checks into three gates whose lines must be
+derived from reads at the event.
+
+**Alternatives rejected.**
+- *Rename/merge BRIEF into DIRECTIVE*: 83 INDEX references, all footers, Step-0 DoDs, and the
+  mode-reconciliation contract (BRIEF Mode row, v0.9.0/v1.2.0) are load-bearing; and merging
+  kickoff context regrows the file past always-loadable size.
+- *Copy LEDGER decisions into DIRECTIVE constraints*: duplicates authority, creates a drift
+  surface; constraints are one-line invariants + citations only.
+- *Per-mode execution-artifact homes for Current Execution* (TRACEABILITY etc.): forced
+  sentinel-only early creation, corrupting the pipeline signal — replaced by the dotfile.
+- *Date-based grandfathering, per-heading BRIEF markers, union-merge of excursion stacks,
+  depth-as-escalation-verdict, "living" vocabulary*: each rejected during the ten-round
+  adversarial review (see CHANGELOG entries for the surviving forms).
+
+**Accepted residuals (deliberate).** Advisory-only severity for pre-adoption PLANNING touches
+(no file records touch-time); count-preserving transition pairs invisible to counted section
+scopes (per-row IDs close it for high-rigor blueprints); unrecorded out-of-band revocation
+invisible to audits (revocation must be recorded to exist for the system). Threat model:
+honest-but-drifting sessions, not adversarial evasion.
+
+**Reopen if.** The gates measurably fail to reduce goal displacement / rejection revival in real
+projects; or gate ceremony proves heavier than the drift it prevents on small blueprints (then
+consider a PATCH-mode gate reduction); or a project needs multi-directive blueprints (split the
+blueprint instead — one mandate per blueprint is the model).

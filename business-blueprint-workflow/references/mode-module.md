@@ -39,6 +39,9 @@ Help me validate this scope is well-defined before we write the specification.
 ### Definition of Done
 - [ ] Directory created at `blueprints/<ModuleName>(MODULE)/`
 - [ ] `BRIEF.md` created and all kickoff fields populated, including the `| Mode | MODULE |` header row
+- [ ] `DIRECTIVE.md` created per `references/directive-template.md` — drafted `Authority: DRAFT`, then **Owner-approved** (`Authority: APPROVED`) before Step 1
+- [ ] *(cathedral projects)* `LEDGER.md` created (ID column, `L-###`) with the `DIRECTIVE R1:` adoption row
+- [ ] `.blueprint-execution` created (`Active: Step 0 (BRIEF/DIRECTIVE)`)
 - [ ] Registered in `blueprints/INDEX.md` — *Active Modules & Libraries* row with Mode column value
 - [ ] Business owner has reviewed and signed off on justification and scope
 - [ ] Integration surface identified at a high level
@@ -215,6 +218,7 @@ Break the specification into buildable phases with clear milestones, dependencie
 ```markdown
 ## Phase N: [Name]
 - **Deliverable**: ...
+- **Advances**: OC-# (every phase and task maps to a DIRECTIVE outcome criterion — unmapped work is an audit finding)
 - **Technical Objectives**: ...
 - **Dependencies**: (phases or external items that must complete first)
 - **Estimated Effort**: X dev-days
@@ -293,8 +297,11 @@ gantt
 > Task states: `done` = completed, `active` = in progress, `crit` = blocked/at risk, *(none)* = not started.
 
 ## Requirement Traceability
-| REQ-ID | Description | Phase | Status | Test ID | Notes |
-|--------|-------------|-------|--------|---------|-------|
+| REQ-ID | Description | Advances | Phase | Status | Test ID | Notes |
+|--------|-------------|----------|-------|--------|---------|-------|
+
+> The **Advances** column carries the DIRECTIVE outcome criterion (`OC-#`) each requirement
+> serves — the durable oracle for the orphan-work audit check.
 
 ## Milestone Tracker
 | Milestone | Planned | Actual | Delta | Owner | Blockers |
@@ -365,6 +372,7 @@ blueprints/INDEX.md        → create on first module/bridge; refresh status fro
 blueprints/MAP.md          → create when ≥3 blueprints exist; update when focus or blockers change
 
 Step 0: Kickoff → confirm scope, create directory, create .blueprint-status (initial: PLANNING)
+         └─ Create .blueprint-execution (Active: Step 0) + DIRECTIVE.md (DRAFT → Owner APPROVED)
 Step 1: SPECIFICATION.md → what the module does
 Step 2: FLOWCHART.md → how it flows
 Step 3: API_CONTRACT.md → how it connects (share with other teams)

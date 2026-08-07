@@ -13,6 +13,15 @@ These checks supplement the universal principles in `cathedral-core.md`.
 | FEATURE | `(FEATURE)` | BRIEF, DESIGN, C_API, IMPLEMENTATION_PLAN, TEST_PLAN, AUDIT |
 | PATCH | `(PATCH)` | BRIEF, CHANGESET, TEST_PLAN, AUDIT |
 
+**All modes additionally carry** `DIRECTIVE.md` (current Owner mandate — audit per the
+Directive Integrity checks in `cathedral-core.md`), `.blueprint-execution` (standing operational
+state), and — under cathedral governance — `LEDGER.md` with the ID column and `DIRECTIVE R<N>:`
+attribution prefix. *DIRECTIVE and `.blueprint-execution` are post-adoption only* — on legacy
+non-adopters their absence is governed by Directive Integrity check 1 (tiered severity), never
+by blueprint completeness. **LEDGER is not**: cathedral-core requires it of every
+cathedral-governed blueprint regardless of directive adoption, and its absence remains its own
+finding.
+
 ---
 
 ## Established Patterns Reference

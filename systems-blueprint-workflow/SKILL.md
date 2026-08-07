@@ -1,7 +1,7 @@
 ---
 name: systems-blueprint-workflow
 metadata:
-  version: 0.2.2
+  version: 0.3.0
 description: >
   Artifact workflow for designing and tracking systems-level software in Claude Code:
   compilers, VMs, runtimes, databases, OS kernels, language toolchains, embedded firmware.
@@ -219,6 +219,59 @@ Directory: `blueprints/<Name>(PATCH)/`
 
 ---
 
+## DIRECTIVE.md, Working Gates, and `.blueprint-execution`
+
+Every blueprint carries **`DIRECTIVE.md`** — the current, authoritative Owner mandate: one
+sentence of Owner Directive, falsifiable **Outcome Criteria (`OC-#`)**, Non-Goals, one-line
+Governing Constraints (`binding: <ledger ref>` where a ledger exists), and an Amendment Rule.
+**Authority lifecycle `DRAFT | APPROVED | REVOKED`**: a draft confers nothing — Owner approval
+confers authority; revocation is an amendment (record + header flip, same commit; on
+disagreement the record wins) and a REVOKED directive is never quoted as authority.
+`Revision: N` ⇒ N−1 recorded amendments with a unique contiguous R-sequence (cathedral: ledger
+rows prefixed `DIRECTIVE R<N>:`; non-cathedral: Amendment History lines from the R1 adoption
+record). Normative body caps at one screen (~30 lines); Amendment History is cap-exempt. The full
+canonical template lives in `references/directive-template.md` (identical contract in both
+blueprint skills).
+
+**Three working gates** bind every implementer session (chat lines derived from a read at that
+event — never from memory, never audit oracles; read-only sessions read silently, emit nothing,
+write nothing):
+
+1. **Orientation** (session start/resume/boundary): read DIRECTIVE + `.blueprint-execution`;
+   emit `Directive: <quoted sentence | DRAFT pending | REVOKED — no authority | none adopted (legacy)> · Active: <OC-# · plan item | Step N (<artifact>) | idle> · Resuming: <plan item | excursion | Step N artifact>`.
+2. **Focus change** (plan item switch / pipeline step move / blocker): emit
+   `Serves OC-# via <item>` | `Serves directive (design phase) via Step N` |
+   `Serves pipeline Step N (pre-adoption legacy | approval pending | revoked)` |
+   `EXCURSION: <problem> — blocks <OC-# | directive (design phase) | pipeline (legacy | approval pending | revoked)>; return when <verifiable condition>`; update
+   `.blueprint-execution` in the same move. **`approval pending` and `revoked` are holding
+   states, not licenses**: approval-pending permits only completing the adoption packet (or
+   explicit Owner direction); after revocation, substantive work stops and surfaces to the
+   Owner.
+3. **Decision/completion** (design proposal / claiming done): read premise + ledger
+   bidirectionally (cited constraints, relevant rejections, **APPROVED entries with fired
+   falsifiers**); emit:
+   `Decision gate: serves <OC-# | pipeline Step N (pre-adoption legacy | approval pending | revoked)> · premise: <aligned | violation + why | none configured> · ledger: honors <refs> | none relevant (checked) | none exists · reopened: <none | ref> · falsifiers: <none fired | fired: <ref> — flagged due-for-review>`
+   **Completion is measured against every OC-#, never the latest resolved blocker** — and is
+   only possible under an APPROVED directive; with no criteria in force, surface to the Owner
+   instead of claiming done.
+
+**`.blueprint-execution`** — per-blueprint operational dotfile, sibling of `.blueprint-status`,
+created at Step 0 (or at adoption): a capped Current Execution block (≤7 lines) holding
+`Active: <OC-# · plan item | Step N | idle>` plus one-line excursion frames
+(`Excursion[k]: <problem> · opened <date> · return when: <check> · resume at: <point>`).
+Excursion depth ≥2 triggers a written four-question reassessment (changes the directive? exceeds
+scope? Owner trade-off? unbounded return?); **depth >3 always stops and surfaces to the Owner**.
+Tracked in git, riding ordinary commits; conflicts resolve by re-orientation, never textual
+merge. Every IMPLEMENTATION_PLAN phase, flat-checklist item, and CHANGESET entry carries
+`Advances: OC-#` — unmapped work is an audit finding.
+
+**Legacy blueprints**: all migration **procedures** — adoption, baseline rules, and the
+migration map — live in `references/legacy-migration.md`; **read it before adopting or
+touching any legacy shape**. The core retains only runtime **compatibility** (the gates'
+legacy branches).
+
+---
+
 ## Artifact Overview
 
 ### Root (`blueprints/`)
@@ -231,6 +284,9 @@ Directory: `blueprints/<Name>(PATCH)/`
 | Step | Artifact | Purpose |
 |------|----------|---------|
 | — | `.blueprint-status` | Single-line status; source of truth for INDEX.md |
+| — | `.blueprint-execution` | Standing operational state: active OC/plan item, excursion stack |
+| — | `DIRECTIVE.md` | Current Owner mandate: outcome criteria (OC-#), non-goals, constraints |
+| — | `(LEDGER.md)` | Conditional — required when cathedral-governed: decisions, adoption + amendment provenance |
 | 0 | `BRIEF.md` | Scope, motivation, affected components, compatibility stance |
 | 1 | `DESIGN.md` | What changes: structs, memory layout, dispatch, registration |
 | 2 | `ARCHITECTURE.md` | How it flows: call graphs, data flow, execution paths (Mermaid) |
@@ -245,6 +301,9 @@ Directory: `blueprints/<Name>(PATCH)/`
 | Step | Artifact | Purpose |
 |------|----------|---------|
 | — | `.blueprint-status` | Single-line status |
+| — | `.blueprint-execution` | Standing operational state: active OC/plan item, excursion stack |
+| — | `DIRECTIVE.md` | Current Owner mandate: outcome criteria (OC-#), non-goals, constraints |
+| — | `(LEDGER.md)` | Conditional — required when cathedral-governed: decisions, adoption + amendment provenance |
 | F0 | `BRIEF.md` | Scope, motivation, integration points |
 | F1 | `DESIGN.md` | What the feature does, internal design decisions |
 | F2 | `C_API.md` | Public interface: function signatures, new opcodes, new syntax |
@@ -256,6 +315,9 @@ Directory: `blueprints/<Name>(PATCH)/`
 | Step | Artifact | Purpose |
 |------|----------|---------|
 | — | `.blueprint-status` | Single-line status |
+| — | `.blueprint-execution` | Standing operational state: active OC/plan item, excursion stack |
+| — | `DIRECTIVE.md` | Current Owner mandate: outcome criteria (OC-#), non-goals, constraints |
+| — | `(LEDGER.md)` | Conditional — required when cathedral-governed: decisions, adoption + amendment provenance |
 | P0 | `BRIEF.md` | What, why, blast radius, rollback plan |
 | P1 | `CHANGESET.md` | Exact files and functions affected, before/after |
 | P2 | `TEST_PLAN.md` | Regression tests proving the fix and no side effects |
@@ -274,19 +336,19 @@ the first blueprint and is always a link. (The templates below show the fully-po
 ### SUBSYSTEM footer
 ```markdown
 ---
-[← Index](../INDEX.md) · [Map](../MAP.md) · **BRIEF** · [DESIGN](DESIGN.md) · [ARCH](ARCHITECTURE.md) · [API](C_API.md) · [COMPAT](COMPAT.md) · [PLAN](IMPLEMENTATION_PLAN.md) · [TESTS](TEST_PLAN.md) · [MATRIX](TRACEABILITY.md) · [AUDIT](AUDIT.md)
+[← Index](../INDEX.md) · [Map](../MAP.md) · [DIRECTIVE](DIRECTIVE.md) · **BRIEF** · [DESIGN](DESIGN.md) · [ARCH](ARCHITECTURE.md) · [API](C_API.md) · [COMPAT](COMPAT.md) · [PLAN](IMPLEMENTATION_PLAN.md) · [TESTS](TEST_PLAN.md) · [MATRIX](TRACEABILITY.md) · [LEDGER](LEDGER.md) · [AUDIT](AUDIT.md)
 ```
 
 ### FEATURE footer
 ```markdown
 ---
-[← Index](../INDEX.md) · [Map](../MAP.md) · **BRIEF** · [DESIGN](DESIGN.md) · [API](C_API.md) · [PLAN](IMPLEMENTATION_PLAN.md) · [TESTS](TEST_PLAN.md) · [AUDIT](AUDIT.md)
+[← Index](../INDEX.md) · [Map](../MAP.md) · [DIRECTIVE](DIRECTIVE.md) · **BRIEF** · [DESIGN](DESIGN.md) · [API](C_API.md) · [PLAN](IMPLEMENTATION_PLAN.md) · [TESTS](TEST_PLAN.md) · [LEDGER](LEDGER.md) · [AUDIT](AUDIT.md)
 ```
 
 ### PATCH footer
 ```markdown
 ---
-[← Index](../INDEX.md) · [Map](../MAP.md) · **BRIEF** · [CHANGESET](CHANGESET.md) · [TESTS](TEST_PLAN.md) · [AUDIT](AUDIT.md)
+[← Index](../INDEX.md) · [Map](../MAP.md) · [DIRECTIVE](DIRECTIVE.md) · **BRIEF** · [CHANGESET](CHANGESET.md) · [TESTS](TEST_PLAN.md) · [LEDGER](LEDGER.md) · [AUDIT](AUDIT.md)
 ```
 
 ---
@@ -326,6 +388,9 @@ Help me write BRIEF.md. Identify risks and flag anything underspecified.
 
 ### Definition of Done
 - [ ] All fields populated
+- [ ] `DIRECTIVE.md` created per `references/directive-template.md` — drafted `Authority: DRAFT`, then **Owner-approved** (`Authority: APPROVED`) before Step 1
+- [ ] *(cathedral projects)* `LEDGER.md` created (ID column, `L-###`) with the `DIRECTIVE R1:` adoption row
+- [ ] `.blueprint-execution` created (`Active: Step 0 (BRIEF/DIRECTIVE)`)
 - [ ] Affected files verified to exist
 - [ ] Compatibility stance is specific (not "best effort")
 - [ ] Dependencies identified and checked against INDEX.md
@@ -533,6 +598,7 @@ a compilable, testable state — no phase leaves the build broken.
 ```markdown
 ## Phase N: [Name]
 - **Milestone**: [what is true when this phase is done]
+- **Advances**: OC-# (every phase and checklist item maps to a DIRECTIVE outcome criterion)
 - **Files touched**: [list]
 - **Build verification**: [project build & test command]
 - **Performance checkpoint**: [benchmark command or "N/A"]
@@ -610,10 +676,10 @@ gantt
 ```
 
 ## Design → Code → Test
-| Design Item | Phase | File:Function | Status | Test ID |
-|-------------|-------|---------------|--------|---------|
-| Scalar class registration | 1 | classes.c:hb_clsInit | Done | TEST-001 |
-| hb_objGetScalarClass() | 1 | classes.c:hb_objGetScalarClass | In Progress | TEST-002 |
+| Design Item | Advances | Phase | File:Function | Status | Test ID |
+|-------------|----------|-------|---------------|--------|---------|
+| Scalar class registration | OC-01 | 1 | classes.c:hb_clsInit | Done | TEST-001 |
+| hb_objGetScalarClass() | OC-01 | 1 | classes.c:hb_objGetScalarClass | In Progress | TEST-002 |
 
 ## Open Issues
 | Issue | Impact | Target |
@@ -679,12 +745,14 @@ Follow steps F0-F4 using the same artifact formats as SUBSYSTEM mode but with
 these differences:
 
 - **BRIEF.md** — simpler: no "Affected Structs" or "Compatibility Stance" unless the
-  feature introduces new keywords or changes dispatch.
+  feature introduces new keywords or changes dispatch. `DIRECTIVE.md` (Owner-approved) and
+  `.blueprint-execution` are still required at F0, same as Step 0.
 - **DESIGN.md** — focus on the new feature's internal design, not the system's current state.
   Include a "Integration Points" section showing where the feature hooks in.
 - **C_API.md** — only new symbols. No "Changed" or "Removed" sections unless the
   feature deprecates something.
-- **IMPLEMENTATION_PLAN.md** — can be a flat checklist instead of phases if scope is small.
+- **IMPLEMENTATION_PLAN.md** — can be a flat checklist instead of phases if scope is small;
+  each item still carries `· Advances: OC-#`.
 - **TEST_PLAN.md** — focus on new behavior tests. Regression tests only for the
   integration points.
 
@@ -702,7 +770,9 @@ If during DESIGN you discover that the feature requires:
 
 # PATCH MODE — Targeted Fixes
 
-Minimal overhead. Three artifacts max.
+Minimal overhead. Three artifacts max — plus `DIRECTIVE.md` (Owner-approved; for a patch it is
+typically 3–4 lines of body: one OC, the blast-radius constraint) and `.blueprint-execution`,
+both created at P0.
 
 ### P0: BRIEF.md
 
@@ -725,6 +795,7 @@ what was, what will be, and why.
 **Before**: Validation checks disabled with `#if 0`
 **After**: Checks re-enabled with proper error handling
 **Why**: Disabled checks hide NULL pointer bugs in realloc paths
+**Advances**: OC-01
 ```
 
 ### P2: TEST_PLAN.md
@@ -763,6 +834,7 @@ blueprints/MAP.md          → create at 3+ blueprints; update when focus/blocke
 
 SUBSYSTEM MODE (deep structural change):
   Step 0: BRIEF.md          → scope, motivation, compatibility stance
+           └─ Create .blueprint-execution (Active: Step 0) + DIRECTIVE.md (DRAFT → Owner APPROVED)
   Step 1: DESIGN.md         → structs, functions, memory layout, dispatch
   Step 2: ARCHITECTURE.md   → call graphs, data flow, hot paths (Mermaid)
   Step 3: C_API.md          → public interface changes, ABI impact
@@ -775,6 +847,7 @@ SUBSYSTEM MODE (deep structural change):
 
 FEATURE MODE (self-contained addition):
   F0: BRIEF.md              → scope, integration points
+           └─ Create .blueprint-execution + DIRECTIVE.md (DRAFT → Owner APPROVED)
   F1: DESIGN.md             → feature design, hook points
   F2: C_API.md              → new public symbols
   F3: IMPLEMENTATION_PLAN.md → build order (flat checklist OK)
@@ -783,6 +856,7 @@ FEATURE MODE (self-contained addition):
 
 PATCH MODE (targeted fix):
   P0: BRIEF.md              → problem, root cause, fix, blast radius
+           └─ Create .blueprint-execution + DIRECTIVE.md (minimal: one OC + blast-radius constraint)
   P1: CHANGESET.md          → before/after for every change
   P2: TEST_PLAN.md          → regression proof
   AUDIT.md                  → required (lightweight): fix matches changeset, no scope creep

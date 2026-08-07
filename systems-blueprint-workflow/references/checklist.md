@@ -16,6 +16,9 @@ Print or copy for each workstream.
 ### Step 0 — BRIEF.md
 - [ ] Directory created: `blueprints/<Name>(SUBSYSTEM)/`
 - [ ] `.blueprint-status` created (initial: PLANNING)
+- [ ] `.blueprint-execution` created (`Active: Step 0 (BRIEF/DIRECTIVE)`)
+- [ ] `DIRECTIVE.md` drafted (`Authority: DRAFT`) and **Owner-approved** (`Authority: APPROVED`) before Step 1
+- [ ] *(cathedral projects)* `LEDGER.md` created (ID column, `L-###`) with the `DIRECTIVE R1:` adoption row
 - [ ] Component identified
 - [ ] Affected files listed and verified to exist
 - [ ] Affected structs listed
@@ -65,6 +68,7 @@ Print or copy for each workstream.
 - [ ] Performance checkpoint for hot-path phases
 - [ ] Rollback strategy per phase
 - [ ] Risk register has 3+ entries
+- [ ] Every phase carries `Advances: OC-#`
 - [ ] TRACEABILITY.md initialized
 - [ ] `.blueprint-status` updated → ACTIVE
 
@@ -77,7 +81,7 @@ Print or copy for each workstream.
 
 ### Step 7 — TRACEABILITY.md
 - [ ] Gantt initialized with all phases
-- [ ] Design→Code→Test table populated
+- [ ] Design→Code→Test table populated (incl. Advances column, OC-# per item)
 - [ ] Updated after last merge/commit
 
 ### AUDIT.md
@@ -93,6 +97,9 @@ Print or copy for each workstream.
 ### F0 — BRIEF.md
 - [ ] Directory created: `blueprints/<Name>(FEATURE)/`
 - [ ] `.blueprint-status` created (initial: PLANNING)
+- [ ] `.blueprint-execution` created (`Active: Step 0 (BRIEF/DIRECTIVE)`)
+- [ ] `DIRECTIVE.md` drafted (`Authority: DRAFT`) and **Owner-approved** before F1
+- [ ] *(cathedral projects)* `LEDGER.md` created with the `DIRECTIVE R1:` adoption row
 - [ ] Integration points identified and verified
 
 ### F1 — DESIGN.md
@@ -107,6 +114,7 @@ Print or copy for each workstream.
 
 ### F3 — IMPLEMENTATION_PLAN.md
 - [ ] Build order defined (phases or flat checklist)
+- [ ] Every item carries `Advances: OC-#`
 - [ ] Each step leaves build green
 
 ### F4 — TEST_PLAN.md
@@ -119,12 +127,16 @@ Print or copy for each workstream.
 
 ### P0 — BRIEF.md
 - [ ] Directory created: `blueprints/<Name>(PATCH)/`
+- [ ] `.blueprint-execution` created (`Active: Step 0 (BRIEF/DIRECTIVE)`)
+- [ ] `DIRECTIVE.md` drafted and **Owner-approved** (minimal: one OC + blast-radius constraint)
+- [ ] *(cathedral projects)* `LEDGER.md` created with the `DIRECTIVE R1:` adoption row
 - [ ] Root cause identified with file:line
 - [ ] Blast radius assessed
 - [ ] Rollback strategy defined
 
 ### P1 — CHANGESET.md
 - [ ] Before/after for every change
+- [ ] Every entry carries `Advances: OC-#`
 - [ ] No unrelated changes included
 
 ### P2 — TEST_PLAN.md

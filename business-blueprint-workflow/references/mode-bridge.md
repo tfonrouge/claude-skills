@@ -62,6 +62,9 @@ Declare the lifecycle type (Permanent or Temporary) and, if Temporary, define th
 
 ### Definition of Done
 - [ ] All fields filled, including the `| Mode | BRIDGE |` header row
+- [ ] `DIRECTIVE.md` created per `references/directive-template.md` — drafted `Authority: DRAFT`, then **Owner-approved** (`Authority: APPROVED`) before B1
+- [ ] *(cathedral projects)* `LEDGER.md` created (ID column, `L-###`) with the `DIRECTIVE R1:` adoption row
+- [ ] `.blueprint-execution` created (`Active: Step 0 (BRIEF/DIRECTIVE)`)
 - [ ] Registered in `blueprints/INDEX.md` — *Active Bridges* row
 - [ ] Lifecycle type declared (Permanent or Temporary)
 - [ ] If Temporary: expiry condition is specific and measurable, not vague
@@ -210,24 +213,24 @@ Not phases, not sprints — just the order that respects dependencies so nothing
 ## Checklist
 
 ### Layer 1 — Data
-- [ ] B4-01 · Create migration for [EntityName] table
-- [ ] B4-02 · Add FK [field] to [ExistingTable]
+- [ ] B4-01 · Create migration for [EntityName] table · Advances: OC-#
+- [ ] B4-02 · Add FK [field] to [ExistingTable] · Advances: OC-#
 
 ### Layer 2 — Business Logic
-- [ ] B4-03 · Implement [EntityName] service
-- [ ] B4-04 · Unit tests for state machine transitions
+- [ ] B4-03 · Implement [EntityName] service · Advances: OC-#
+- [ ] B4-04 · Unit tests for state machine transitions · Advances: OC-#
 
 ### Layer 3 — Integration
-- [ ] B4-05 · Implement contract: [FeatureName] → [ModuleA].[method]
-- [ ] B4-06 · Integration tests for contracts
+- [ ] B4-05 · Implement contract: [FeatureName] → [ModuleA].[method] · Advances: OC-#
+- [ ] B4-06 · Integration tests for contracts · Advances: OC-#
 
 ### Layer 4 — UI
-- [ ] B4-07 · Create view: [NewViewName]
-- [ ] B4-08 · Modify view: [ExistingViewName] (delta: [description])
+- [ ] B4-07 · Create view: [NewViewName] · Advances: OC-#
+- [ ] B4-08 · Modify view: [ExistingViewName] (delta: [description]) · Advances: OC-#
 
 ### Layer 5 — Validation
-- [ ] B4-09 · End-to-end test: [happy path]
-- [ ] B4-10 · Smoke test in staging
+- [ ] B4-09 · End-to-end test: [happy path] · Advances: OC-#
+- [ ] B4-10 · Smoke test in staging · Advances: OC-#
 ```
 
 ### Claude Code Prompt Pattern (generate)
@@ -289,6 +292,7 @@ Do **not** delete the bridge directory — `ARCHIVED.md` serves as the permanent
 ```
 B0: BRIEF.md               → confirm scope, lifecycle type, affected modules, out-of-scope
                                └─ Create .blueprint-status (initial: PLANNING)
+                               └─ Create .blueprint-execution (Active: Step 0) + DIRECTIVE.md (DRAFT → Owner APPROVED)
 B1: ENTITY_DESCRIPTOR.md   → states, rules, data model, integration flow diagram
 B2: SERVICE_CONTRACTS.md   → API/service boundaries (share with other teams before coding)
 B3: VIEW_MAP.md            → new views + existing views to modify

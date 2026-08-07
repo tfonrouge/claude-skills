@@ -49,10 +49,21 @@ a hypothesis with a tripwire.
 
 ## The Decision Ledger
 
-Every blueprint maintains `LEDGER.md` recording decisions symmetrically:
+Every blueprint in a cathedral-governed project maintains `LEDGER.md` (the blueprint skills
+list it as a conditional artifact — required exactly when cathedral governs) recording
+decisions symmetrically:
 
-| Date | Decision | Type | Rationale | Evidence required to revisit |
-|------|----------|------|-----------|------------------------------|
+| ID | Date | Decision | Type | Rationale | Evidence required to revisit |
+|----|------|----------|------|-----------|------------------------------|
+
+- **IDs use the `L-###` namespace** (L-001 upward). Legacy ledgers without an ID column gain
+  IDs opportunistically on next touch, never by bulk rewrite; until then they are cited by
+  `<date> "<first eight words of the Decision cell, verbatim>"` — fewer only if the cell is
+  shorter; on a same-date prefix collision, extend by whole words to the shortest
+  disambiguating length.
+- **Directive attribution**: a row that adopts or amends the blueprint's `DIRECTIVE.md` begins
+  its Decision cell with the literal prefix **`DIRECTIVE R<N>:`**. The R-sequence must be
+  unique and contiguous, and its highest value must equal the DIRECTIVE header's Revision.
 
 Every **APPROVED** entry must carry a non-empty falsification condition — the
 evidence that would force a revisit. Without it, an approval is not a decision;
@@ -169,7 +180,8 @@ When asked to **"run cathedral audit"**, Claude must:
    per **Mode Reconciliation** below; **then** obtain the mode's artifact set and per-step
    Definitions of Done **from the mode→reference map (`references/mode-<mode>.md`) when the
    skill declares one, else from the skill's `SKILL.md` itself** (already read at step 2);
-   load the remaining artifacts and evaluate against the **domain-specific audit checks**
+   load the remaining artifacts and evaluate against the **Directive Integrity checks** (below)
+   plus the **domain-specific audit checks**
    (see the appropriate `cathedral-systems.md` or `cathedral-business.md` reference).
 
 ### Mode Reconciliation
@@ -207,6 +219,57 @@ Sections outside that map (Deferred, Deprecated, organizational groupings) decla
 A missing BRIEF `Mode` row is **always a low-severity recommendation, never a completeness
 violation** — enforcement of the row lives in the authoring workflow's Step 0 Definition of
 Done, not in the audit.
+
+### Directive Integrity
+
+Applied per blueprint after mode classification. **Non-adopter guard:** checks 2–8 apply only
+where `DIRECTIVE.md` exists; for any blueprint that has not adopted (whatever its status),
+check 1 alone applies at its tiered severity and checks 2–8 are a defined
+no-op — absence of the directive-mechanism files on a non-adopter is **never** a
+blueprint-completeness finding. The audit **never judges the directive against current
+reality** — a directive describes the required end-state, and "matching reality" is
+goalpost-moving. All oracles are file-based; gate chat lines are never audit evidence.
+
+1. **Presence**: `DIRECTIVE.md` with `Authority: APPROVED`. The adoption trigger is
+   action-based and total — *any* legacy blueprint adopts before its next substantive touch;
+   **status determines urgency, not applicability**. Severity accordingly: FOCUSED/ACTIVE —
+   **violation** (presumed due now); STABLE/CLOSED/archived — **recommendation only** (a note,
+   never a finding); **any other non-terminal or unknown status** (PLANNING, PAUSED, BLOCKED,
+   DRIFTED, custom legacy values) — **advisory** ("adoption due at next substantive touch" —
+   no file records touch-time; that is the maximum file-decidable severity,
+   accepted deliberately: enforcement lives in the working gates and Owner review, and the
+   threat model is honest-but-drifting sessions, not adversarial evasion).
+2. **Authority record complete**: header not `REVOKED`-contradicted; `Revision: N` ⇒ N−1
+   recorded amendments — cathedral: ledger rows prefixed `DIRECTIVE R<N>:`; non-cathedral:
+   Amendment History lines — with a **unique, contiguous R-sequence** through N, each
+   Owner-approved per its record. A revocation record with an unflipped header is a
+   **synchronization finding** and the revocation wins.
+3. **Traceability**: every plan/traceability item maps to an `OC-#`, falls under the adoption
+   record's `baseline-exempt` snapshot (re-count counted section scopes — a count mismatch is
+   itself a finding), or carries an explicit `unmapped — Owner: … pending` flag. **Mapping
+   carriers** are plan/order/changeset items and the Requirement Traceability / Design→Code→Test
+   tables; rendered views (Gantt bars, progress charts) inherit their mapping from the source
+   items they visualize and are never independently flagged — but they must render **only**
+   source items: a rendered element with no corresponding plan/table item is matrix drift (an
+   ordinary drift finding, detected by comparing the rendered set against the source set), not
+   orphan work. Unmapped and
+   unlisted = **orphan-work finding** (goal displacement detected post-hoc); flagged =
+   needs-Owner finding.
+4. **Displacement**: has implementation advanced/satisfied criteria, or silently displaced them?
+5. **Provenance**: where BRIEF and DIRECTIVE differ, the divergence is covered by the adoption
+   baseline or a post-adoption amendment.
+6. **Completion honesty**: any completion claim is evaluated against **all** current OC-#s,
+   never the latest resolved blocker.
+7. **Abandoned excursion**: an excursion frame older than the project's staleness threshold
+   (default 14 days; optional `Excursion staleness threshold:` field in the CLAUDE.md cathedral
+   config) — or, where the return condition is repository-checkable, satisfied but uncleared.
+   A signal for examination, not a violation.
+8. **Execution-state consistency** (`.blueprint-execution`): *plan-item mode* — the item exists,
+   is open, and its `Advances:` includes the Active OC; *design mode* — the predecessor artifact
+   exists (vacuous at Step 0), and artifacts beyond the claimed step draw a **confirmation flag**
+   (legitimate during rework, drift otherwise); *idle* — false if open excursion frames or open
+   mapped items exist. Disagreement = **execution-drift finding** (low severity; remedy is
+   updating the dotfile at next orientation, not editing the plan).
 
 ### Output Format
 

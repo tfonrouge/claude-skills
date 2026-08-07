@@ -515,3 +515,22 @@ blueprint directory. Render non-existent artifacts as plain text.
 Also update the footer of every previously generated .md artifact in this
 directory to add a link to the newly created file.
 ```
+
+## Adopt DIRECTIVE.md on an existing blueprint
+```
+Adopt DIRECTIVE.md for blueprints/[Name](MODE)/ per references/legacy-migration.md.
+Draft v1 (Authority: DRAFT) from BRIEF + .blueprint-status + LEDGER (where one exists).
+Create .blueprint-execution with the actual current state.
+Map every open item in the mapping carriers — plan/order items and the traceability tables;
+skip rendered Gantt/progress views (Advances: OC-# or unmapped — Owner pending) — and
+assemble the baseline-exempt list. Present me the full packet — draft + mapping table +
+exemptions — for approval. Do not flip Authority: APPROVED until I approve.
+```
+
+## Session orientation on a blueprint
+```
+We're working blueprints/[Name](MODE)/. Run the orientation gate: read DIRECTIVE.md and
+.blueprint-execution (where they exist), quote the Owner Directive — or state its
+DRAFT/REVOKED/legacy branch if there is no APPROVED directive — and state the active
+criterion and resume point before touching anything.
+```

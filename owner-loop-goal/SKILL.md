@@ -1,7 +1,7 @@
 ---
 name: owner-loop-goal
 metadata:
-  version: 0.1.0
+  version: 0.2.0
 description: >
   MANUAL INVOCATION, PER TASK — only when the Owner explicitly requests it
   (e.g. "owner-loop-goal: <objective>  DoD: <verifiable criteria>"). Do NOT auto-activate:
@@ -47,6 +47,11 @@ completeness**, not script typos or over-claiming.
    that "done" is judged against agreed criteria, not against my judgment. **If the gate passed
    (specific + falsifiable), state it and proceed — do not wait for an acknowledgment.** Stop
    only when the gate fails.
+4. **Inside a blueprint with an APPROVED `DIRECTIVE.md`**, the GOAL additionally declares
+   `Advances: OC-#`. The DoD must be a **falsifiable refinement** of that bounded contribution —
+   it may claim an OC complete only if the DoD proves the whole criterion. A loop that is an
+   excursion cites the blocked OC and its return condition (and the excursion is persisted in
+   `.blueprint-execution` per the blueprint skill).
 
 ---
 
@@ -121,7 +126,8 @@ Keep the working LOG **in a scratchpad file during the loop** — never in a rep
 and triage stay out of durable artifacts) — so it survives long sessions and context
 summarization. Deliver its contents in chat at the handoff.
 
-Per iteration: the **declared target criteria**, **which checks ran and their results**, and
+Per iteration: the **declared target criteria** (citing `OC-#`s where the loop runs inside a
+directive-governed blueprint), **which checks ran and their results**, and
 **what stayed out of scope / unverified**. The external reviewer uses it to know what to trust
 and **where to look** — the self-review declares its limits, it does not hide them.
 
@@ -184,3 +190,6 @@ blocked, or the cap was hit.
 - The ROAR enters **at the end** of the loop (§6); its block is processed with the protocol's
   normal triage, and its Confirmed findings open — if the Owner so directs — a **new**
   `owner-loop-goal` (with its own GOAL/DoD), not a mid-loop review of the previous one.
+- **Blueprint DIRECTIVE composition**: the loop's GOAL/DoD compose with the blueprint skills'
+  directive mechanism via `Advances: OC-#` (§0.4); the loop's DECLARE step and LOG cite OC-#s,
+  and the blueprint's working gates remain in force inside the loop.
