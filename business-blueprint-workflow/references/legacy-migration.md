@@ -28,7 +28,7 @@ stated identically in `cathedral-core.md`.
 | BRIEF without a `Mode` header row | Add the mode's fixed literal | Next touch — absence is never a violation | Row present per the recognizer | 0.9.0 |
 | LEDGER without an ID column | Add `L-###` IDs; until then cite `<date> "<first eight words, verbatim>"` | Next touch — never bulk renumber | ID column present, IDs unique | cathedral 1.3.0 |
 | Plan/order/matrix without `Advances: OC-#` | Backfill open items (adoption step 2); completed items covered by the baseline-exempt snapshot | At DIRECTIVE adoption | Every open carrier item mapped or Owner-flagged; snapshot recorded | 0.10.0 |
-| Narrative-swollen `.blueprint-status` | Move the "current work" narrative into `.blueprint-execution` | At DIRECTIVE adoption | Status file is one line; dotfile represents the active work | 0.10.0 |
+| Narrative-swollen `.blueprint-status` (>60 words) | Move the "current work" narrative into `.blueprint-execution` | At DIRECTIVE adoption | Status file is one line **and under 60 words** (soft cap; >150 words is a hard error once adopted — a status is a status, not a changelog); the narrative lives in AUDIT/LEDGER and current work in `.blueprint-execution` | 0.10.0 |
 
 "Introduced in" is historical metadata only — migration triggers are always the observed
 artifact shape, never a version stamp.
@@ -59,9 +59,18 @@ core must not accrete dead compat.
      is incomplete and feeds its revision.
    The same pass assembles the **`baseline-exempt` list** — the completed-item complement — by
    item ID where IDs exist, else by **counted section scope**
-   (`§"<section>" — N completed rows as of adoption`).
+   (`FILE.md §"<section>" — N completed rows as of adoption` — **name the host artifact**; the validator resolves the section inside it and falls back to the carrier only when the filename is omitted; **count physical rows**, never normalized
+   or compound identifiers — real matrices compress ids like `FR-11/12` into one row, and a
+   snapshot is only useful if a dumb re-count reproduces it).
+   **It also drafts one coverage set per OC** — the obligations that prove each criterion — and
+   the resulting `## Directive Completeness` rollup. **The baseline exemption never exempts an
+   OC from having a coverage set**: it exempts completed historical items from individual
+   `Advances:` backfilling only. Otherwise a fully historical blueprint adopts N criteria while
+   exempting all the evidence that proves them. Coverage sets are **Owner-approved semantic
+   input, never implementer-derived from OC text** — name similarity is not evidence.
 3. **Owner reviews the full packet — draft + complete mapping table (every open item → OC-# or
-   flag) + baseline-exempt list — and approves.** Approval is the act that confers authority;
+   flag) + baseline-exempt list + one coverage set per OC with its assurance class — and
+   approves.** Approval is the act that confers authority;
    the header flips to APPROVED. Wrong-but-valid mappings are semantic errors only the Owner
    catches (audits verify mapping *existence*, never correctness), and the exemption set alters
    audit coverage — both must be among the approved inputs, never introduced after approval.

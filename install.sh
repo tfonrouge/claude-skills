@@ -90,6 +90,9 @@ for s in "${SKILLS[@]}"; do
     run ln -s "$src" "$dst"
   else
     run cp -R "$src" "$dst"
+    # development-only fixtures must not land in the installed skill: they contain deliberately
+    # malformed DIRECTIVE/LEDGER files that a session grepping ~/.claude/skills could read as guidance
+    [ "$DRY_RUN" = 1 ] && echo "  - $dst/tools/tests (dev fixtures)" || rm -rf "$dst/tools/tests"
   fi
 done
 

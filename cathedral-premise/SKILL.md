@@ -1,7 +1,7 @@
 ---
 name: cathedral-premise
 metadata:
-  version: 1.3.0
+  version: 1.4.0
 description: >
   Governance premise for principled software development. Enforces correctness-first
   design, clean abstractions, established patterns, blueprint alignment, and spike

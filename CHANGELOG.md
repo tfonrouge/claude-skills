@@ -45,6 +45,68 @@ This repo ships five independently versioned products. Each has its own section 
 
 Versioned via the `metadata.version` field in `business-blueprint-workflow/SKILL.md`.
 
+## 0.11.0
+
+- **`cathedral-premise/tools/blueprint-lint.py`** — deterministic validator, shipped *inside the
+  skill* so `install.sh` distributes it (a root-level `tools/` copy was unreachable from installed
+  audits and target projects). Versioned negative-control fixtures + `tests/run-tests.sh`: the
+  harness fails if any guard stops firing, which it did twice during this change. **Scope stated
+  honestly in the tool's own docstring**: it re-derives the completeness *denominator* by
+  resolving obligations against carrier rows, but **not the numerator** — "verified" vocabularies
+  are project-specific and undeclared, so verified counts remain self-reported and are flagged.
+  An earlier claim that the tool "re-derives" completeness was an overclaim and is corrected here
+  and in `cathedral-core.md`; free-text obligations are **counted but never resolved** (no oracle
+  for prose). **Explicit severity policy**: ERROR is reserved for DIRECTIVE-protocol contract
+  violations on `APPROVED` blueprints; pre-existing workflow conventions (footer hygiene) report
+  WARN regardless of adoption — an earlier draft grandfathered footers behind an invented
+  "migration trigger" that the maps never contained. Narrative `.blueprint-status` keeps an
+  adoption-gated ERROR because it *is* a documented migration row.
+  Self-review pass added regression fixtures for **12 guards that had none** (authority-schema
+  gaps, lineage absence, duplicate R numbers, duplicate rollup rows, unclassified blueprints,
+  missing dotfiles) — harness now at 53 controls; removed one **unreachable branch** and one
+  **dead function** the coverage audit exposed; `install.sh` now **excludes `tools/tests/`** so
+  deliberately malformed fixtures never land in `~/.claude/skills`.
+  Carriers are resolved by **mode** (directory suffix), not "first file that exists"; "adopted"
+  means `Authority: APPROVED`, so DRAFT/REVOKED no longer inherit post-adoption guards while a
+  completion claim resting on non-APPROVED authority is now an error. Thresholds are documented in both migration maps, not
+  only in code. Also owns the *mechanical* half of
+  Directive Integrity (schema, unique OC ids, R-sequence contiguity, state/assurance
+  vocabularies, `Verified ≤ obligations`, physical row counts, dotfile caps and excursion depth,
+  ledger-section placement, footer targets, completion-vs-lifecycle gating). Cathedral now
+  instructs auditors to **run it and interpret failures** rather than re-perform those checks in
+  prose — two implementations of one rule drift, which is the dual-source-of-truth failure the
+  protocol exists to prevent. Semantic judgment (does this coverage set prove its OC?) stays with
+  the Owner and ROAR. Negative-control tested; first real run found 14 genuine footer-drift
+  findings in drydock.
+- **OC quality rubric** in `directive-template.md`: a valid criterion names observable end-state,
+  verification method, boundary/environment, failure condition, and no subjective term without a
+  measurable reading — with valid/invalid worked examples. Bad criteria make every downstream
+  artifact confidently wrong.
+- **`## Validity / Review Triggers`** (optional): the directive's *premises* can expire even
+  though an OC is an outcome, not a hypothesis — so review triggers attach to the directive as a
+  whole, never a falsifier per criterion.
+- **Blocker & dependency registers** (pilot-scoped) in the mapping carrier, with derivation rules
+  — rollup `BLOCKED`, dotfile citation, `.blueprint-status`, MAP and INDEX all *derive* from the
+  registers instead of restating the same word in four places.
+- **Corrected D11's coverage-set asymmetry**: additions are *not* automatically safe (they expand
+  scope, cost and required proof). Every change needs Owner approval + ledger record; narrowing
+  additionally takes the amendment path; additions carry a scope/cost impact note.
+- Gate 3's premise clause now names which principles were checked
+  (`premise: checked P2/P4 — no conflict`) instead of asserting a bare `aligned`.
+
+- **Criterion-side completeness (D11).** `## Directive Completeness` rollup in each mode's
+  mapping carrier (MODULE/LIBRARY → TRACEABILITY_MATRIX, BRIDGE → IMPLEMENTATION_ORDER): one row
+  per OC with an **Owner-approved coverage set**, a **derived state**
+  (`UNMAPPED`/`NOT STARTED`/`IN PROGRESS`/`BLOCKED`/`FAILED`/`MET`) and an independent
+  **assurance axis** (`REPLAYABLE`/`ATTESTED`/`MIXED`). Status stays out of `DIRECTIVE.md` —
+  amendment-only, and a ticked box is self-attestation, not an oracle.
+- Gate 3 now **reads the rollup**: a completion claim enumerates every OC with state and
+  assurance; `FAILED`/`BLOCKED`/`UNMAPPED` blocks the claim; `MET · ATTESTED` is never reported
+  as reproduced.
+- Adoption packet gains **one coverage set per OC** — the baseline exemption covers `Advances:`
+  backfilling on completed items, **never** an OC's coverage set. Counted section scopes now
+  specify **physical rows**, never normalized/compound identifiers.
+
 ## 0.10.0
 
 - **DIRECTIVE mechanism (D10).** Every blueprint carries `DIRECTIVE.md` — the current,
@@ -142,6 +204,13 @@ that lineage and is **not** restored; recover from history (`git show 00ab707:..
 
 Versioned via the `metadata.version` field in `systems-blueprint-workflow/SKILL.md`.
 
+## 0.4.0
+
+- **Criterion-side completeness (D11)** — mirror of business 0.11.0: `## Directive Completeness`
+  rollup in each carrier (SUBSYSTEM → TRACEABILITY, FEATURE → IMPLEMENTATION_PLAN, PATCH →
+  CHANGESET), closed state model + assurance axis, gate 3 consumes the rollup, coverage sets in
+  the adoption packet, physical-row counting for baseline snapshots.
+
 ## 0.3.0
 
 - **DIRECTIVE mechanism (D10)** — mirror of business-blueprint-workflow 0.10.0 for
@@ -178,6 +247,22 @@ Predates this changelog. `0.1.0` was the initial systems skill (`f0e1a43`); `0.2
 # cathedral-premise (skill)
 
 Versioned via the `metadata.version` field in `cathedral-premise/SKILL.md`.
+
+## 1.4.0
+
+- **Directive Integrity check 3 is now bidirectional (D11)** — **3a** no orphan work (unchanged)
+  · **3b** no uncovered criterion: every OC needs an Owner-approved coverage set and a derived
+  state in the mapping carrier; "≥1 mapped item" is explicitly insufficient; `UNMAPPED` is a
+  violation. The audit **re-derives** each state from the obligations' rows — a mismatch is a
+  finding. Check 4 now consumes 3b's rollup as its evidence base; check 6 evaluates completion
+  claims against it and rejects claims standing on `FAILED`/`BLOCKED`/`UNMAPPED`.
+- **Assurance axis** (`REPLAYABLE`/`ATTESTED`/`MIXED`) independent of state, so externally
+  observable outcomes (deployment, stakeholder acceptance) can reach `MET` while the audit still
+  reports `MET · ATTESTED` distinctly from `MET · REPLAYABLE`. Attestations require actor, date,
+  exact result, environment and a content-stamp identity.
+- **Coverage-set integrity**: additions are ordinary ledger entries; removals/narrowings require
+  the amendment path. **Baseline exemptions never exempt criterion coverage.** Counted scopes
+  count **physical rows**.
 
 ## 1.3.0
 
@@ -238,6 +323,29 @@ five principles (Incremental Discipline plus the Decision Ledger with falsificat
 ---
 
 # owner-roar-protocol (prompts)
+
+## v6
+
+- **Producer Coverage Census** added to the implementer preflight (D12): run once, after a change
+  is finished and before ROAR is requested. Its question is *"what is the universe of obligations
+  this change produced, and what evidence covers each member?"* — axes Guards · Controls · Claims ·
+  Reachability · Boundary · Twins, with prose artifacts running Claims and Twins only and naming
+  what they skip. **Its output is a reviewable table** (`axis | universe | evidence |
+  skipped/result`), never a "checked six axes" attestation — the first census left holes of its
+  own, so its result must be attackable evidence.
+  Empirical basis, stated honestly: a first census over artifacts that had already passed **nine
+  adversarial review rounds** still surfaced six omissions (twelve uncovered guards, an
+  unreachable branch, a dead function, dev fixtures leaking into an installed skill, a stale
+  installed copy, an over-specific expectation). That is **repeated evidence that census and
+  review cover different failures — not a controlled experiment, and not a claim of disjoint
+  classes**; overlap is possible. The census finds omissions, never errors of judgment, and ROAR
+  may challenge whether the universe was enumerated correctly.
+- Validator fixes the census itself had missed: INDEX rows are now matched on the **first cell**
+  (a substring match let any row that merely *mentioned* a blueprint speak for it) and the **Mode
+  column is header-driven** (positional guessing read Owner/Status values as foreign modes); an
+  `OC-#` can no longer appear as its own obligation.
+- Kickoff and installed block bumped in lockstep per D4; consumers (`owner-loop-goal` §6, both
+  blueprint decision/completion gates) reference it without duplicating the text.
 
 Versioned via the visible `Protocol version` line inside the installed block. Prior to v3 the
 protocol and its reviewer role used the acronym **RAR**; see v3 for the rename to **ROAR**.

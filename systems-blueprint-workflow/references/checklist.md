@@ -82,6 +82,7 @@ Print or copy for each workstream.
 ### Step 7 — TRACEABILITY.md
 - [ ] Gantt initialized with all phases
 - [ ] Design→Code→Test table populated (incl. Advances column, OC-# per item)
+- [ ] `## Directive Completeness` rollup present: one row per OC with Owner-approved coverage set, derived state and assurance
 - [ ] Updated after last merge/commit
 
 ### AUDIT.md

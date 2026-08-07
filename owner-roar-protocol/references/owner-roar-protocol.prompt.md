@@ -1,6 +1,6 @@
 # Owner/ROAR Protocol — installer prompt
 
-**Protocol version:** owner-roar-protocol v5
+**Protocol version:** owner-roar-protocol v6
 
 > Paste this entire file into a project's **implementer** session, once per project.
 > Re-paste any time to upgrade the protocol in place.
@@ -26,7 +26,7 @@ so upgrades replace cleanly):
 <!-- OWNER_ROAR_PROTOCOL:begin -->
 ## Session Roles Protocol — Owner vs. ROAR
 
-_Protocol version: owner-roar-protocol v5._
+_Protocol version: owner-roar-protocol v6._
 
 Two collaborating sessions drive this repo. Distinguish messages by **authority, not identity**:
 
@@ -114,6 +114,41 @@ recommendation for review.** Assert, having actually checked:
 3. every cross-process conclusion is same-process or explicitly correlated;
 4. every design carrier is traced producer → transport → consumer;
 5. every standing approved/rejected constraint is listed and checked against the proposal.
+
+**Producer Coverage Census — MANDATORY, once, after the change is finished and before ROAR is
+requested.** The preflight asks *"is what I built sound?"*; the census asks a different question:
+
+> **What is the universe of obligations this change produced, and what evidence covers each member?**
+
+Only the producer can answer it — enumerating the complete set from the inside is not something a
+reviewer reading from outside can do cheaply. This is **not** a claim that the two find disjoint
+classes; it is repeated evidence that they cover **different failures**: a first census run on
+artifacts that had already passed nine adversarial review rounds still surfaced six omissions
+(twelve guards with no regression control, an unreachable branch, a dead function, development
+fixtures leaking into an installed artifact), while the round immediately before it had found
+semantic defects no census would reach. Overlap is possible; those rounds were not controlled
+conditions.
+
+**Its output is a reviewable table, never a "I checked six axes" attestation** — the census itself
+has already been caught leaving holes (a substring INDEX match, non-Mode columns read as modes,
+a criterion admitted as its own evidence). Emit:
+
+| Applicable axis | Universe enumerated | Evidence | Skipped / result |
+|---|---|---|---|
+| Guards | N emitted checks/rules | the test that fires each one | — |
+| Controls | N expectations | each fails if its guard is removed | — |
+| Claims | N documented assertions | the code path backing each | — |
+| Reachability | N branches / functions | none unreachable or uncalled | — |
+| Boundary | installed/exported tree | manifest or comparison | — |
+| Twins | explicit list | `cmp` | — |
+
+**Prose artifacts run Claims and Twins only**; code runs all six *where each exists*. Name the
+skipped axes and why — a vacuous pass reported as a pass is worse than an omission, because it
+buys false confidence.
+
+The census never replaces external review: it finds **omissions**, never errors of judgment. ROAR
+stays independent and may challenge the census itself — most usefully by asking whether the
+universe was enumerated correctly.
 
 **ROAR triage (circuit breaker).** Before any substantial edit, when a block has ≥1 actionable
 finding, emit this first (skip only for zero-finding reviews). Buckets are **evaluated in the

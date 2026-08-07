@@ -1,7 +1,7 @@
 ---
 name: business-blueprint-workflow
 metadata:
-  version: 0.10.0
+  version: 0.11.0
 description: >
   Artifact workflow for designing and tracking business software in Claude Code.
   Produces blueprints/ with Markdown specs, INDEX.md, and per-blueprint AUDIT.md.
@@ -150,6 +150,24 @@ session remain below.
   cathedral — ledger rows whose Decision cell begins with the literal `DIRECTIVE R<N>:`;
   non-cathedral — Amendment History lines R1 (adoption) through RN, exactly once each.
 
+### Directive Completeness — criterion-side rollup
+
+Every OC needs an **Owner-approved coverage set** and a **derived state**, in a
+`## Directive Completeness` section of the mode's mapping carrier — never in DIRECTIVE.md
+(status is mutable, DIRECTIVE is amendment-only, and a ticked box is self-attestation).
+Carriers: MODULE/LIBRARY `TRACEABILITY_MATRIX.md` · BRIDGE `IMPLEMENTATION_ORDER.md` ·
+SUBSYSTEM `TRACEABILITY.md` · FEATURE `IMPLEMENTATION_PLAN.md` · PATCH `CHANGESET.md`.
+
+- **States** (closed): `UNMAPPED` (violation) · `NOT STARTED` · `IN PROGRESS` · `BLOCKED` ·
+  `FAILED` · `MET`. `DEFERRED`/`NOT APPLICABLE` require a DIRECTIVE amendment.
+- **Assurance** (independent axis): `REPLAYABLE` · `ATTESTED` · `MIXED`. `MET` is reachable on
+  attested evidence; audits report `MET · ATTESTED` distinctly from `MET · REPLAYABLE`.
+- **Derived, never declared.** `FAILED` (latest applicable verification disproves the
+  criterion) and `BLOCKED`/`UNMAPPED` block completion claims.
+
+Table schema, attestation fields, worked example and coverage-set integrity rules:
+`references/directive-template.md` §Completeness rollup.
+
 ### Relationship to BRIEF.md
 
 BRIEF is the **immutable origin record** — why the work was opened, discovery evidence,
@@ -194,11 +212,17 @@ evidence-gathering, emit no gate lines, and write nothing.
    Constraints, a scan for rejections relevant to the proposal, **and a scan of APPROVED entries
    for fired falsification conditions** (the ledger rule is bidirectional; a fired falsifier is
    flagged due-for-review, never silently inherited). Emit:
-   `Decision gate: serves <OC-# | pipeline Step N (pre-adoption legacy | approval pending | revoked)> · premise: <aligned | violation + why | none configured> · ledger: honors <refs> | none relevant (checked) | none exists · reopened: <none | ref> · falsifiers: <none fired | fired: <ref> — flagged due-for-review>`
+   `Decision gate: serves <OC-# | pipeline Step N (pre-adoption legacy | approval pending | revoked)> · premise: checked P#/P# — <no conflict | violation + why> | none configured · ledger: honors <refs> | none relevant (checked) | none exists · reopened: <none | ref> · falsifiers: <none fired | fired: <ref> — flagged due-for-review>`
+   Any submission for review — a completion claim, a design proposal, a protocol or tooling change —
+   goes through the Owner/ROAR implementer preflight, which contains the Producer Coverage Census.
+   Reference the census table you already produced; do not re-run it per gate.
    **Completion is measured against every OC-#, never against the latest resolved blocker** —
-   a completion claim enumerates all criteria with status, and is therefore **only possible
-   under an APPROVED directive**: with no criteria in force (DRAFT, REVOKED, legacy), there is
-   nothing to measure done against — surface to the Owner instead.
+   a completion claim **reads the §Directive Completeness rollup and enumerates all criteria
+   with state and assurance**, and is therefore **only possible under an APPROVED directive**:
+   with no criteria in force (DRAFT, REVOKED, legacy), there is nothing to measure done against
+   — surface to the Owner instead. Any OC in `FAILED`, `BLOCKED` or `UNMAPPED` **blocks the
+   claim**; an OC resting on `ATTESTED` obligations is reported as `MET · ATTESTED`, never as
+   reproduced.
 
 ---
 

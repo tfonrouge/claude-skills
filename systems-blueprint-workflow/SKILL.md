@@ -1,7 +1,7 @@
 ---
 name: systems-blueprint-workflow
 metadata:
-  version: 0.3.0
+  version: 0.4.0
 description: >
   Artifact workflow for designing and tracking systems-level software in Claude Code:
   compilers, VMs, runtimes, databases, OS kernels, language toolchains, embedded firmware.
@@ -250,10 +250,15 @@ write nothing):
 3. **Decision/completion** (design proposal / claiming done): read premise + ledger
    bidirectionally (cited constraints, relevant rejections, **APPROVED entries with fired
    falsifiers**); emit:
-   `Decision gate: serves <OC-# | pipeline Step N (pre-adoption legacy | approval pending | revoked)> · premise: <aligned | violation + why | none configured> · ledger: honors <refs> | none relevant (checked) | none exists · reopened: <none | ref> · falsifiers: <none fired | fired: <ref> — flagged due-for-review>`
-   **Completion is measured against every OC-#, never the latest resolved blocker** — and is
-   only possible under an APPROVED directive; with no criteria in force, surface to the Owner
-   instead of claiming done.
+   `Decision gate: serves <OC-# | pipeline Step N (pre-adoption legacy | approval pending | revoked)> · premise: checked P#/P# — <no conflict | violation + why> | none configured · ledger: honors <refs> | none relevant (checked) | none exists · reopened: <none | ref> · falsifiers: <none fired | fired: <ref> — flagged due-for-review>`
+   Any submission for review — a completion claim, a design proposal, a protocol or tooling change —
+   goes through the Owner/ROAR implementer preflight, which contains the Producer Coverage Census.
+   Reference the census table you already produced; do not re-run it per gate.
+   **Completion is measured against every OC-#, never the latest resolved blocker** — the claim
+   reads the §Directive Completeness rollup and enumerates every criterion with state and
+   assurance. Only possible under an APPROVED directive; `FAILED`/`BLOCKED`/`UNMAPPED` on any OC
+   blocks the claim; `MET · ATTESTED` is never reported as reproduced. With no criteria in
+   force, surface to the Owner instead of claiming done.
 
 **`.blueprint-execution`** — per-blueprint operational dotfile, sibling of `.blueprint-status`,
 created at Step 0 (or at adoption): a capped Current Execution block (≤7 lines) holding
@@ -264,6 +269,24 @@ scope? Owner trade-off? unbounded return?); **depth >3 always stops and surfaces
 Tracked in git, riding ordinary commits; conflicts resolve by re-orientation, never textual
 merge. Every IMPLEMENTATION_PLAN phase, flat-checklist item, and CHANGESET entry carries
 `Advances: OC-#` — unmapped work is an audit finding.
+
+### Directive Completeness — criterion-side rollup
+
+Every OC needs an **Owner-approved coverage set** and a **derived state**, in a
+`## Directive Completeness` section of the mode's mapping carrier — never in DIRECTIVE.md
+(status is mutable, DIRECTIVE is amendment-only, and a ticked box is self-attestation).
+Carriers: MODULE/LIBRARY `TRACEABILITY_MATRIX.md` · BRIDGE `IMPLEMENTATION_ORDER.md` ·
+SUBSYSTEM `TRACEABILITY.md` · FEATURE `IMPLEMENTATION_PLAN.md` · PATCH `CHANGESET.md`.
+
+- **States** (closed): `UNMAPPED` (violation) · `NOT STARTED` · `IN PROGRESS` · `BLOCKED` ·
+  `FAILED` · `MET`. `DEFERRED`/`NOT APPLICABLE` require a DIRECTIVE amendment.
+- **Assurance** (independent axis): `REPLAYABLE` · `ATTESTED` · `MIXED`. `MET` is reachable on
+  attested evidence; audits report `MET · ATTESTED` distinctly from `MET · REPLAYABLE`.
+- **Derived, never declared.** `FAILED` (latest applicable verification disproves the
+  criterion) and `BLOCKED`/`UNMAPPED` block completion claims.
+
+Table schema, attestation fields, worked example and coverage-set integrity rules:
+`references/directive-template.md` §Completeness rollup.
 
 **Legacy blueprints**: all migration **procedures** — adoption, baseline rules, and the
 migration map — live in `references/legacy-migration.md`; **read it before adopting or

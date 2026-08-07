@@ -1,7 +1,7 @@
 <!-- OWNER_ROAR_PROTOCOL:begin -->
 ## Session Roles Protocol — Owner vs. ROAR
 
-_Protocol version: owner-roar-protocol v5._
+_Protocol version: owner-roar-protocol v6._
 
 Two collaborating sessions drive this repo. Distinguish messages by **authority, not identity**:
 
@@ -89,6 +89,20 @@ recommendation for review.** Assert, having actually checked:
 3. every cross-process conclusion is same-process or explicitly correlated;
 4. every design carrier is traced producer → transport → consumer;
 5. every standing approved/rejected constraint is listed and checked against the proposal.
+
+**Producer Coverage Census — MANDATORY, once, after the change is finished and before ROAR is
+requested.** Not "is this correct?" but: **what is the universe of obligations this change
+produced, and what evidence covers each member?** Emit a **reviewable table** — `axis | universe
+enumerated | evidence | skipped/result` — never a "checked six axes" attestation, since the census
+itself has been caught leaving holes. Axes: **Guards** (emitted checks → test that fires each) ·
+**Controls** (expectations → each fails if its guard is removed) · **Claims** (documented
+assertions → backing code path) · **Reachability** (unreachable branches, uncalled functions) ·
+**Boundary** (installed/exported tree vs intent) · **Twins** (`cmp`). Prose artifacts run Claims
+and Twins only; name the skipped axes rather than reporting a vacuous pass. Evidence for the rule:
+a first census over artifacts that had already passed nine review rounds still surfaced six
+omissions — repeated evidence that census and review cover **different failures**, not a claim of
+disjoint classes. It finds omissions, never errors of judgment; ROAR stays independent and may
+challenge whether the universe itself was enumerated correctly.
 
 **ROAR triage (circuit breaker).** Before any substantial edit, when a block has ≥1 actionable
 finding, emit this first (skip only for zero-finding reviews). Buckets are **evaluated in the

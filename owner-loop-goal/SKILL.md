@@ -164,8 +164,10 @@ blocked, or the cap was hit.
 
 - **No external review during the loop** — that is the mode's premise (long cycles; the ROAR
   reviews the complete unit at once, not fragments).
-- **The handoff is a submission for review: the Owner/ROAR implementer preflight applies in
-  full.** Run it before submitting.
+- **The handoff is a submission for review: the Owner/ROAR implementer preflight applies in full,
+  including the Producer Coverage Census it contains.** Run it once, after the loop ends and
+  before requesting ROAR, and deliver the census **table** with the LOG. A loop that ran clean for
+  six iterations is exactly where omissions accumulate unseen.
 - **`owner-loop-goal` never closes on its own.** The final handoff is mandatory even with an
   apparently mechanical DoD; the Owner decides whether the result needs ROAR or the LOG suffices.
 - Respect the repo's flows (blueprint/spec/commit); no commit/push unless the DoD or the Owner

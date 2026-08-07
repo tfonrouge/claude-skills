@@ -25,7 +25,7 @@ stated identically in `cathedral-core.md`.
 | No `DIRECTIVE.md` / `.blueprint-execution` | Adoption procedure below | Next substantive touch | `Authority: APPROVED`, dotfile present, BRIEF banner + adoption record committed | 0.3.0 |
 | LEDGER without an ID column | Add `L-###` IDs; until then cite `<date> "<first eight words, verbatim>"` | Next touch — never bulk renumber | ID column present, IDs unique | cathedral 1.3.0 |
 | Plan/changeset/matrix without `Advances: OC-#` | Backfill open items (adoption step 2); completed items covered by the baseline-exempt snapshot | At DIRECTIVE adoption | Every open carrier item mapped or Owner-flagged; snapshot recorded | 0.3.0 |
-| Narrative-swollen `.blueprint-status` | Move the "current work" narrative into `.blueprint-execution` | At DIRECTIVE adoption | Status file is one line; dotfile represents the active work | 0.3.0 |
+| Narrative-swollen `.blueprint-status` (>60 words) | Move the "current work" narrative into `.blueprint-execution` | At DIRECTIVE adoption | Status file is one line **and under 60 words** (soft cap; >150 words is a hard error once adopted — a status is a status, not a changelog); the narrative lives in AUDIT/LEDGER and current work in `.blueprint-execution` | 0.3.0 |
 
 "Introduced in" is historical metadata only — migration triggers are always the observed
 artifact shape, never a version stamp.
@@ -48,9 +48,13 @@ skill core is removed **in the same change**.
    or `unmapped — Owner: <defer | cancel | amend-directive> pending` (never force a mapping —
    an unmappable item is evidence the draft is incomplete and feeds its revision). Assemble the
    `baseline-exempt` list for completed items — by ID, else counted section scope
-   (`§"<section>" — N completed rows as of adoption`).
-3. **Owner reviews the full packet** — draft + complete mapping table + baseline-exempt list —
-   **and approves** (header → APPROVED). Wrong-but-valid mappings and the exemption set are
+   (`FILE.md §"<section>" — N completed rows as of adoption` — **name the host artifact**; the validator resolves the section inside it and falls back to the carrier only when the filename is omitted; **count physical rows**, never normalized
+   or compound identifiers). **Also draft one coverage set per OC** + the
+   `## Directive Completeness` rollup: the baseline exemption covers `Advances:` backfilling on
+   completed items, **never an OC's coverage set**. Coverage sets are Owner-approved semantic
+   input, never derived from OC text.
+3. **Owner reviews the full packet** — draft + complete mapping table + baseline-exempt list +
+   one coverage set per OC with its assurance class — **and approves** (header → APPROVED). Wrong-but-valid mappings and the exemption set are
    exactly what only the Owner can catch; both are approved inputs, never post-approval additions.
 4. **Same commit**: BRIEF authority banner (below) + adoption record — cathedral: ledger entry
    prefixed `DIRECTIVE R1:` (creating `LEDGER.md` with an ID column at `L-001` if missing);

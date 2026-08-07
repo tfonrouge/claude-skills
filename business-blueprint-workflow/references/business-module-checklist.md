@@ -105,6 +105,7 @@ Artifact names, order, and layout follow the canonical MODULE flow in `SKILL.md`
 ## Step 7 — TRACEABILITY_MATRIX.md (Living)
 - [ ] Initialized with all REQ-IDs (status: Not Started)
 - [ ] Advances column populated (OC-# per requirement, from the plan's mappings)
+- [ ] `## Directive Completeness` rollup present: one row per OC with Owner-approved coverage set, derived state and assurance
 - [ ] Milestone tracker pre-populated
 - [ ] Updated after Sprint 1
 - [ ] Updated after Sprint 2

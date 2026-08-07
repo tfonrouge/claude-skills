@@ -1,0 +1,2 @@
+| 2026-08-01 | DIRECTIVE R1: x |
+| 2026-08-02 | DIRECTIVE R3: salto |

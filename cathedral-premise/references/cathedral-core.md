@@ -222,6 +222,30 @@ Done, not in the audit.
 
 ### Directive Integrity
 
+**Run `<skill-root>/cathedral-premise/tools/blueprint-lint.py <blueprint-root>` first and
+interpret its findings** (it ships inside this skill, so `install.sh` distributes it). It reads the
+project's `CLAUDE.md` to learn the **designated blueprint skill** and classifies modes against that
+catalog only — a suffix from the other skill is reported *unclassified*, never silently accepted. The
+deterministic half of these checks — schema, unique OC ids, R-sequence contiguity, state and
+assurance vocabularies, `Verified ≤ obligations`, physical row counts, citation/footer targets,
+ledger-section placement, completion-vs-lifecycle gating, and the **denominator** of each OC's
+completeness fraction (obligations resolved against carrier rows) — **is owned by the validator,
+not by prose.** The validator explicitly does **not** re-derive the *numerator*: "verified"
+vocabularies are project-specific and undeclared, so verified counts stay self-reported and the
+tool flags them as such. Do not re-perform them by reading: two implementations of one rule drift, which is the
+dual-source-of-truth failure this protocol exists to prevent. What remains below for human and
+agent judgment is the **semantic** half: whether a coverage set actually proves its OC, whether
+an attestation is credible, whether implementation displaced the criteria, whether the premise
+was really applied. A validator pass is necessary and never sufficient.
+
+**Severity policy.** The validator reserves **ERROR** for violations of the DIRECTIVE protocol's
+own contract on blueprints whose authority is `APPROVED`. Pre-existing **workflow conventions**
+that predate this mechanism — navigation-footer hygiene above all — report **WARN** regardless of
+adoption: they are real and worth fixing, but a corpus that never opted in is not in violation of
+a contract it never signed. Narrative-`.blueprint-status` is the one convention with a genuine
+migration trigger (it is a documented row in the migration map), so it escalates to ERROR once the
+blueprint has adopted.
+
 Applied per blueprint after mode classification. **Non-adopter guard:** checks 2–8 apply only
 where `DIRECTIVE.md` exists; for any blueprint that has not adopted (whatever its status),
 check 1 alone applies at its tiered severity and checks 2–8 are a defined
@@ -244,22 +268,66 @@ goalpost-moving. All oracles are file-based; gate chat lines are never audit evi
    Amendment History lines — with a **unique, contiguous R-sequence** through N, each
    Owner-approved per its record. A revocation record with an unflipped header is a
    **synchronization finding** and the revocation wins.
-3. **Traceability**: every plan/traceability item maps to an `OC-#`, falls under the adoption
-   record's `baseline-exempt` snapshot (re-count counted section scopes — a count mismatch is
-   itself a finding), or carries an explicit `unmapped — Owner: … pending` flag. **Mapping
+3. **Traceability — bidirectional.** Coverage is checked in both directions; either direction
+   alone is blind to half the failure space.
+
+   **3a — no orphan work** (work → criterion): every plan/traceability item maps to an `OC-#`,
+   falls under the adoption record's `baseline-exempt` snapshot (**re-count counted section
+   scopes — count *physical rows*, never normalized or compound identifiers; a mismatch is
+   itself a finding**), or carries an explicit `unmapped — Owner: … pending` flag. **Mapping
    carriers** are plan/order/changeset items and the Requirement Traceability / Design→Code→Test
    tables; rendered views (Gantt bars, progress charts) inherit their mapping from the source
    items they visualize and are never independently flagged — but they must render **only**
    source items: a rendered element with no corresponding plan/table item is matrix drift (an
    ordinary drift finding, detected by comparing the rendered set against the source set), not
-   orphan work. Unmapped and
-   unlisted = **orphan-work finding** (goal displacement detected post-hoc); flagged =
-   needs-Owner finding.
+   orphan work. Unmapped and unlisted = **orphan-work finding** (goal displacement detected
+   post-hoc); flagged = needs-Owner finding.
+
+   **3b — no uncovered criterion** (criterion → work/evidence): every current `OC-#` has an
+   **Owner-approved coverage set** of verification obligations, and a **derived completeness
+   state** in the mode's mapping carrier (§Directive Completeness). "At least one mapped item"
+   is insufficient — a composite criterion can go green on one trivial task. An OC with no
+   approved coverage set is `UNMAPPED` = **violation**. The rollup is never trusted as a source:
+   the audit **re-derives each state from the obligations' own rows**, and a mismatch between
+   the recorded and re-derived state is a finding. **The `baseline-exempt` snapshot exempts
+   individual `Advances:` backfilling on completed historical items — it never exempts an OC
+   from having a coverage set** (otherwise a fully historical blueprint adopts N criteria while
+   exempting all the evidence that proves them).
+
+   **State model** (closed): `UNMAPPED` · `NOT STARTED` · `IN PROGRESS` · `BLOCKED` · `FAILED` ·
+   `MET`. `DEFERRED` and `NOT APPLICABLE` are **not** execution states — they require a
+   DIRECTIVE amendment. `FAILED` = at least one required obligation's **latest applicable**
+   verification disproves the criterion, with no later superseding successful evidence (a stale
+   failure never poisons an OC after a valid rerun); it is a **violation** and blocks completion
+   claims. `BLOCKED` also prevents completion; `FAILED` is stronger — evidence currently
+   contradicts the target.
+
+   **Assurance axis** (independent of state): `REPLAYABLE` (a repository command/test reproduces
+   it) · `ATTESTED` (a named authority records an external observation) · `MIXED` (both
+   required). An OC may reach `MET` on attested evidence where the directive permits external
+   evidence — otherwise deployment, physical validation and stakeholder acceptance could never
+   complete. Report the conclusion by axis: `MET · REPLAYABLE` = independently reproduced ·
+   `MET · ATTESTED` = a durable, internally consistent attestation exists; the underlying event
+   was **not** independently reproduced · `MET · MIXED` = replayable portion verified, external
+   portion attested. An attestation must record **actor, date, exact result, environment, and
+   revision/deploy identity** — the last a content stamp (`owner-roar-protocol` v5), never a
+   wall-clock date alone; a missing field makes the obligation unverifiable, not `MET`.
+
+   **Coverage-set integrity**: **every** change needs Owner approval and a ledger record —
+   additions are not automatically safe (they expand scope, cost and the proof required, and can
+   make an OC unreachable). **Removals or narrowings additionally follow the DIRECTIVE amendment
+   path** with a recorded rationale, since they make `MET` trivially reachable with no OC text
+   change. Additions require an explicit scope/cost impact note but no `Revision` bump when the
+   OC's meaning is unchanged.
 4. **Displacement**: has implementation advanced/satisfied criteria, or silently displaced them?
+   This remains a **semantic** review, but it now consumes 3b's re-derived rollup as its
+   evidence base rather than reasoning from scratch.
 5. **Provenance**: where BRIEF and DIRECTIVE differ, the divergence is covered by the adoption
    baseline or a post-adoption amendment.
-6. **Completion honesty**: any completion claim is evaluated against **all** current OC-#s,
-   never the latest resolved blocker.
+6. **Completion honesty**: any completion claim is evaluated against **all** current OC-#s via
+   3b's rollup — never the latest resolved blocker. A claim standing while any OC is `FAILED`,
+   `BLOCKED` or `UNMAPPED` is a **violation**; a claim resting on `MET · ATTESTED` obligations
+   must say so rather than presenting them as reproduced.
 7. **Abandoned excursion**: an excursion frame older than the project's staleness threshold
    (default 14 days; optional `Excursion staleness threshold:` field in the CLAUDE.md cathedral
    config) — or, where the return condition is repository-checkable, satisfied but uncleared.

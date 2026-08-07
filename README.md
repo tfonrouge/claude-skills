@@ -7,6 +7,7 @@ A centralized collection of skill definitions for AI-assisted software developme
 Each skill module contains:
 
 - **`SKILL.md`**: The core instruction set — agent constraints, operational context, mode selection, and shared artifacts. For split skills it also carries a **mode→reference map** naming the file to load per mode.
+- **`tools/`** *(cathedral-premise only)*: `blueprint-lint.py`, the deterministic validator that owns the mechanical half of Directive Integrity (schema, vocabularies, sequence, arithmetic it can re-derive, link targets). It ships inside the skill so `install.sh` distributes it; its `tools/tests/` fixtures are development-only and are **excluded from installs** — they contain deliberately malformed artifacts. Run `cathedral-premise/tools/tests/run-tests.sh` after touching it: the harness fails if any guard stops firing, which has caught several real regressions.
 - **`references/`**: Supplementary context (checklists, prompt libraries, domain guidelines) — and, for split skills, the **mandatory per-mode instruction bodies** (`references/mode-*.md`): normative step-by-step workflows and Definitions of Done, loaded via the mode→reference map. A split skill's `SKILL.md` is not sufficient on its own to work a blueprint.
 
 ### Active Skills

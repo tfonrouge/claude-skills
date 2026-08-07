@@ -474,3 +474,124 @@ honest-but-drifting sessions, not adversarial evasion.
 projects; or gate ceremony proves heavier than the drift it prevents on small blueprints (then
 consider a PATCH-mode gate reduction); or a project needs multi-directive blueprints (split the
 blueprint instead — one mandate per blueprint is the model).
+
+## D11 — Criterion coverage is bidirectional; assurance is an axis, not a state; coverage sets are goalpost-protected
+
+**Status:** decided 2026-08-07 · introduced in business-blueprint-workflow 0.11.0 / systems-blueprint-workflow 0.4.0 / cathedral-premise 1.4.0
+
+**Decision.** Directive Integrity check 3 becomes **bidirectional**:
+
+- **3a — no orphan work** (unchanged): every work item maps to an `OC-#`, falls under the
+  adoption `baseline-exempt` snapshot, or carries an `unmapped — Owner: … pending` flag.
+- **3b — no uncovered criterion** (new): every current OC has an **Owner-approved coverage set**
+  of verification obligations, and a **derived completeness state** in the mode's mapping
+  carrier. "At least one mapped item" is explicitly insufficient — a composite criterion could
+  go green on one trivial task.
+
+State model, closed: `UNMAPPED` (no approved coverage set) · `NOT STARTED` · `IN PROGRESS` ·
+`BLOCKED` · `FAILED` · `MET`. `DEFERRED` and `NOT APPLICABLE` are **not** execution states —
+they require a DIRECTIVE amendment. `FAILED` = at least one required obligation's *latest
+applicable* verification disproves the criterion with no later superseding successful evidence
+(so a stale failure cannot poison an OC after a valid rerun); it blocks completion at gate 3 and
+is a cathedral **violation**. `BLOCKED` also prevents completion; `FAILED` is stronger because
+evidence currently contradicts the target.
+
+**Assurance is an independent axis**, not a state: `REPLAYABLE` (a repository command/test
+reproduces it) · `ATTESTED` (a named authority records an external observation) · `MIXED` (both
+required). An OC reaches `MET` with attested evidence where the directive permits external
+evidence — otherwise deployment, physical validation and stakeholder acceptance could never
+complete. The audit conclusion differs by axis: `MET · REPLAYABLE` = independently reproduced;
+`MET · ATTESTED` = durable attestation exists and is internally consistent, underlying event not
+independently reproduced; `MET · MIXED` = replayable portion verified, external portion
+attested. An attestation records **actor, date, exact result, environment, and revision/deploy
+identity** — the last is a content stamp per `owner-roar-protocol` v5, never a wall-clock date
+alone.
+
+**Coverage sets are goalpost-protected.** OC *text* is amendment-protected; without this rule the
+*coverage set* is not, so narrowing it would make `MET` trivially reachable with no text change
+and no `Revision` bump. Therefore: **every change requires Owner approval and a ledger record** —
+additions are *not* automatically safe, since they expand scope, cost and required proof and can
+render an OC unreachable. **Removals or narrowings additionally follow the amendment approval
+path** with a recorded rationale; **additions** carry a scope/cost impact note but no `Revision`
+bump when the OC's meaning is unchanged. *(Corrected 2026-08-07: the original entry called
+additions "safe".)*
+
+**Baseline exemption never exempts criterion coverage.** At legacy adoption, completed historical
+items may stay exempt from individual `Advances:` backfilling, but **every OC must still receive
+a compact Owner-approved coverage/evidence set, inside the adoption approval packet**. Otherwise
+a fully historical blueprint adopts N criteria while exempting all the evidence that supposedly
+proves them.
+
+**Counted section scopes count physical rows**, never normalized or compound identifiers — a
+snapshot is only useful if a dumb re-count reproduces it, and real matrices compress identifiers
+(`FR-11/12`) into single rows.
+
+**Why.** The shipped mechanism enforced work → criterion exhaustively and mechanically, but
+criterion → work only semantically (check 4 asks whether criteria were advanced or displaced,
+with no deterministic comparison) or conditionally (check 6 fires only on a completion claim).
+So an OC with zero obligations, or one whose obligations are all open, was invisible in a
+blueprint where nobody claimed done. The gap was a conservative over-correction of the rule that
+the audit *never judges the directive against current reality*: measuring satisfaction is not
+redefining the target, and the safeguard is that the rollup is derived and re-derivable while
+criteria text stays amendment-only.
+
+**Alternatives rejected.**
+- *Status checkboxes in `DIRECTIVE.md`*: collides with the amendment rule (either every tick
+  becomes a fake amendment polluting the R-sequence, or the file becomes routinely editable and
+  moving an OC's text becomes indistinguishable from ticking its box); a hand-ticked box is
+  self-attestation without an oracle; and it breaks the one-screen cap on the most-loaded file.
+- *A ninth audit check*: 3a/3b keeps coverage in one place and lets checks 4 and 6 consume the
+  rollup rather than duplicating it.
+- *`file` vs `attested` evidence taxonomy* (an earlier draft): conflates storage medium with
+  assurance — an attestation is also stored in a file — and would have made externally
+  observable outcomes permanently unreachable.
+
+**Reopen if.** Derived states prove unmaintainable in practice (rollup drifting from its rows
+faster than audits re-derive it), or a project needs an OC whose evidence is neither replayable
+nor attributable to a named authority.
+
+## D12 — Producer Coverage Census: a mandatory, evidence-emitting pre-review pass
+
+**Status:** decided 2026-08-07 · introduced in owner-roar-protocol v6
+
+**Decision.** Every submission for review runs the **Producer Coverage Census** once, after the
+change is finished and before ROAR is requested. Its question is not *"is this correct?"* but
+**"what is the universe of obligations this change produced, and what evidence covers each
+member?"** It lives in the implementer preflight of `owner-roar-protocol` — a generic pre-review
+technique, **not** per-blueprint ceremony. Axes: Guards · Controls · Claims · Reachability ·
+Boundary · Twins; prose artifacts run Claims and Twins only, naming the axes they skip.
+
+**Its output is a reviewable table** (`axis | universe enumerated | evidence | skipped/result`),
+never an "I checked six axes" attestation. This is load-bearing: the first census still left holes
+of its own — a substring INDEX match, non-Mode columns read as modes, a criterion admitted as its
+own evidence — so its result must be evidence a reviewer can attack, not a fresh self-attestation.
+
+**Why.** A first census, run on artifacts that had already passed **nine adversarial review
+rounds**, surfaced six omissions those rounds had not: twelve validator guards with no regression
+control, an unreachable branch, a dead function, development fixtures leaking into the installed
+skill, an installed copy out of sync with source, and an over-specific test expectation. The
+reason is structural rather than effort — a reviewer reads from outside and samples; enumerating
+every `add()` site, every function, every file `install.sh` copies requires the producer's inside
+view. **Stated honestly: this is repeated evidence that the two cover different failures, not a
+controlled experiment and not a claim of disjoint classes.** Those rounds were not controlled
+conditions and overlap is possible; the round immediately prior found semantic defects (a source
+silently discarding unknown values, a computed-but-unconsumed result, an enum matched by
+substring) that no census would have reached.
+
+**Alternatives rejected.**
+- *Add census axes to the blueprint skills*: category error — it applies to any produced artifact,
+  including protocol, tooling and documentation changes. Gate 3 therefore only **references** the
+  preflight already performed; it does not repeat the axes nor limit them to completion claims.
+- *Report it as a checklist assertion*: rejected for the reason above — the census has already been
+  shown to leave holes, so a bare pass would buy false confidence.
+- *Treat it as reducing the need for external review*: the evidence points the other way; ROAR
+  stays independent and may challenge whether the universe was enumerated correctly.
+
+**Freeze exception (explicit and narrow).** v6 adds a **pre-ROAR verification technique based on
+observed evidence; it adds no per-blueprint artifact and no per-session ceremony.** Nothing else
+joins the protocol before the pilot reports.
+
+**Reopen if.** The pilot shows the cost outweighs the findings. Measure: census cost per change ·
+findings the census caught · **findings ROAR later caught that the census should have caught**
+(the sharpest signal) · false positives. Reopen also if census and review start finding the same
+things, meaning one is redundant.
