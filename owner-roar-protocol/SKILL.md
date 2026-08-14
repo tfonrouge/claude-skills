@@ -1,7 +1,7 @@
 ---
 name: owner-roar-protocol
 metadata:
-  version: 0.1.0
+  version: 0.1.1
 description: >
   Installs or upgrades the Owner/ROAR Session Roles Protocol block in a project's
   CLAUDE.md (or AGENTS.md / equivalent), delimited by the stable `OWNER_ROAR_PROTOCOL`
@@ -31,5 +31,7 @@ When invoked:
 3. Copy the block **verbatim** between the markers. Change nothing else.
 4. **Do not commit** — leave the diff for the Owner to review.
 
-The **protocol version** installed is carried by that prompt (currently **owner-roar-protocol
-v5**); this skill's packaging `version` is independent (see `DECISIONS.md` D5).
+The **protocol version** installed is whatever the bundled prompt's `Protocol version:` line says
+— read it there, never from here. This skill's packaging `version` is independent (see
+`DECISIONS.md` D5). *This paragraph deliberately does not name the version: a copied version
+number is a third place to maintain, and it drifted twice before being removed.*

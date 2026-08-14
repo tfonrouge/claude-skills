@@ -347,6 +347,13 @@ five principles (Incremental Discipline plus the Decision Ledger with falsificat
 
 # owner-roar-protocol (prompts)
 
+> Wrapper-skill packaging versions (`owner-roar-protocol/SKILL.md`, `roar-reviewer/SKILL.md`) are
+> independent of the protocol version below. Both bumped to **0.1.1** on 2026-08-07: they stated
+> "currently vN" in prose, which drifted twice (stuck at v4 through the v5 bump, then at v5 through
+> v6 and v7) until an implementer session reported the contradiction. The version number is no
+> longer copied into the wrappers at all — they point at the prompt's `Protocol version:` line, per
+> D5's amended "no duplicated text" rule.
+
 ## v7
 
 - **Reviewer side of the census** (should have shipped as v7 with commit `b17275e`, which added it

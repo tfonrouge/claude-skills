@@ -180,6 +180,13 @@ tool-agnostic reviewer/installer text is unchanged.
 its own behavior version), or the paste-able form proves to have no users (then collapse the prompt inline
 into `SKILL.md` and drop `references/`).
 
+**Amendment 2026-08-07 — "no duplicated text" includes the version number.** Both wrappers used to
+say "currently vN" in prose. That is copied content by another name: it created a third place to
+maintain alongside the two prompts, and it drifted twice (left at v4 through the v5 bump, then at
+v5 through v6 and v7) before an implementer session caught the contradiction. The wrappers now
+point at the prompt's `Protocol version:` line and name no version at all, which makes the drift
+structurally impossible rather than fixing it once.
+
 ## D6 — The blueprint-workflow skills live in this repo, alongside their cathedral adapters
 
 **Status:** decided 2026-07-21 · reverses the eviction in `2c7c792`

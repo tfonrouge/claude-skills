@@ -1,7 +1,7 @@
 ---
 name: roar-reviewer
 metadata:
-  version: 0.1.0
+  version: 0.1.1
 description: >
   Session-kickoff wrapper that puts the CURRENT session into Read-Only Adversarial
   Reviewer (ROAR) mode for the Owner/ROAR review protocol: verdict + critique only,
@@ -32,7 +32,9 @@ When invoked:
    search that would find an asserted absence before asserting it.
 
 **Behavior version** is carried by that prompt's `Protocol version: owner-roar-protocol vN`
-line (currently **v5**), not by this skill's packaging `version` (see `DECISIONS.md` D5).
+line — read it there, never from here. It is not this skill's packaging `version` (see
+`DECISIONS.md` D5). *This paragraph deliberately does not name the version: a copied version
+number is a third place to maintain, and it drifted twice before being removed.*
 
 **Read-only note:** invoking this skill constrains behavior but does not remove edit/commit
 tools from the session — the read-only discipline is a rule you follow, not a sandbox.
