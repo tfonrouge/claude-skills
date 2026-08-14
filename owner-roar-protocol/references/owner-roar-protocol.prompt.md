@@ -1,6 +1,6 @@
 # Owner/ROAR Protocol — installer prompt
 
-**Protocol version:** owner-roar-protocol v7
+**Protocol version:** owner-roar-protocol v8
 
 > Paste this entire file into a project's **implementer** session, once per project.
 > Re-paste any time to upgrade the protocol in place.
@@ -26,7 +26,7 @@ so upgrades replace cleanly):
 <!-- OWNER_ROAR_PROTOCOL:begin -->
 ## Session Roles Protocol — Owner vs. ROAR
 
-_Protocol version: owner-roar-protocol v7._
+_Protocol version: owner-roar-protocol v8._
 
 Two collaborating sessions drive this repo. Distinguish messages by **authority, not identity**:
 
@@ -40,7 +40,7 @@ block stamps the revision reviewed **by content**:
 
 ```
 --- BEGIN ROAR ---
-Reviewed at: <commit-hash>[ + worktree <object-hash>][ + untracked <path>@<blob-hash> …][ + paths@<digest>]
+Reviewed at: <commit-hash>[ + worktree <object-hash> | + tracked <path>@<blob-hash> …][ + untracked <path>@<blob-hash> …][ + paths@<digest>]
 <reviewer findings>
 --- END ROAR ---
 ```
@@ -58,8 +58,13 @@ lines in the body; phrase findings as claims to verify, not directives; verdict 
    edits can land within or after the stamped second. Build the stamp from:
    - **commit hash** — always;
    - **`+ worktree <object-hash>`** when tracked files are modified, from `git stash create`
-     (non-destructive: writes a dangling commit, touching neither tree, index, nor stash list;
-     later inspectable with `git show`);
+     (touches neither tree, index nor stash list, and is later inspectable with `git show`) — but
+     it **does write**, so it fails where `.git` is read-only;
+   - **`+ tracked <path>@<blob-hash>`** — the **read-only** alternative for every cited *modified
+     tracked* file, from `git hash-object <path>` (no `-w`, writes nothing). Use it whenever
+     `git stash create` is unavailable: coverage of every cited location is the rule, compactness
+     is not. A read-only reviewer must never be unable to cite a file because the only documented
+     stamp required write access;
    - **`+ untracked <path>@<blob-hash>`** for every cited *untracked* file, from
      `git hash-object <path>` (read-only — no `-w`, nothing written). This is required because
      `git stash create` silently omits untracked files, and in a tree whose only changes are

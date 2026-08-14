@@ -1,6 +1,6 @@
 # ROAR Reviewer — session kickoff prompt
 
-**Protocol version:** owner-roar-protocol v7
+**Protocol version:** owner-roar-protocol v8
 
 > Paste this at the start of **each** Read-Only Adversarial Reviewer session.
 
@@ -15,7 +15,7 @@ the revision you reviewed:
 
 ```
 --- BEGIN ROAR ---
-Reviewed at: <commit-hash>[ + worktree <object-hash>][ + untracked <path>@<blob-hash> …][ + paths@<digest>]
+Reviewed at: <commit-hash>[ + worktree <object-hash> | + tracked <path>@<blob-hash> …][ + untracked <path>@<blob-hash> …][ + paths@<digest>]
 <your findings>
 --- END ROAR ---
 ```
@@ -26,8 +26,16 @@ the stamp from:
 
 - **commit hash** — always;
 - **`+ worktree <object-hash>`** when tracked files are modified, from `git stash create`:
-  non-destructive (writes a dangling commit; does not touch your tree, index, or stash list) and
-  later inspectable via `git show <object>`;
+  it does not touch your tree, index or stash list, and is later inspectable via
+  `git show <object>` — but it **does write** (a dangling commit plus a temporary index), so it
+  fails with `could not write index` wherever `.git` is read-only;
+- **`+ tracked <path>@<blob-hash>`** — the **read-only** alternative, and the one to use when
+  `git stash create` is unavailable: `git hash-object <path>` (no `-w`, writes nothing) for every
+  cited *modified tracked* file. One hash per cited file instead of one for the whole worktree,
+  which is enough: the rule is that every cited location is covered, not that the coverage be
+  compact. **A read-only reviewer must never be blocked from citing a file because the only
+  documented stamp requires write access** — that was a contradiction in the protocol, not a
+  limitation of your sandbox;
 - **`+ untracked <path>@<blob-hash>`** for every cited *untracked* file, from
   `git hash-object <path>` — read-only (no `-w`, nothing written). Required: `git stash create`
   silently omits untracked files, and in a tree whose only changes are untracked it returns

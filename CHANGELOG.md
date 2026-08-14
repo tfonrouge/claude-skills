@@ -354,6 +354,19 @@ five principles (Incremental Discipline plus the Decision Ledger with falsificat
 > longer copied into the wrappers at all — they point at the prompt's `Protocol version:` line, per
 > D5's amended "no duplicated text" rule.
 
+## v8
+
+- **Read-only stamp for modified tracked files.** v5–v7 documented exactly one way to stamp a dirty
+  worktree — `git stash create` — described as "non-destructive". It is non-destructive but **not
+  read-only**: it writes a dangling commit and a temporary index, so it fails with
+  `could not write index` wherever `.git` is read-only. A ROAR session reported exactly that and
+  concluded it could no longer cite modified tracked files under v7. The protocol was wrong, not
+  the sandbox: **it required a read-only reviewer to run a writing command.**
+  Added `+ tracked <path>@<blob-hash>` from `git hash-object <path>` (no `-w`, verified to write
+  nothing) as the read-only alternative — one hash per cited file rather than one for the whole
+  worktree, which satisfies the actual rule that every cited location be covered. Compactness was
+  never the requirement. The wire format now shows both forms.
+
 ## v7
 
 - **Reviewer side of the census** (should have shipped as v7 with commit `b17275e`, which added it
