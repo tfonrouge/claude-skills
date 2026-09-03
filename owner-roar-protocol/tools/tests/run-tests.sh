@@ -87,6 +87,81 @@ run --verify --root "$CLEAN" --quiet;                           check "quiet pri
 run --verify --root "$CLEAN"; D1=$(printf '%s\n' "$OUT" | grep 'inventory digest'); run --verify --root "$CLEAN"; D2=$(printf '%s\n' "$OUT" | grep 'inventory digest')
 [ -n "$D1" ] && [ "$D1" = "$D2" ] && { PASS=$((PASS+1)); echo "PASS  inventory digest is deterministic"; } || { FAIL=$((FAIL+1)); echo "FAIL  inventory digest is deterministic"; echo "      | $D1"; echo "      | $D2"; }
 
+
+# ---- receiver mode: exactly one named file, no corpus, no recursion (0.1.3)
+CAP="Protocol capabilities: advisory-v1"
+mkrecv() {  # mkrecv FILE VARIANT
+  mkdir -p "$(dirname "$1")"
+  case "$2" in
+    ok)         { echo "$RB"; echo "_Protocol version: owner-roar-protocol v9._"; echo "$CAP"; echo "body"; echo "$RE"; } > "$1" ;;
+    multi)      { echo "$RB"; echo "_Protocol version: owner-roar-protocol v9._"; echo "Protocol capabilities: advisory-v1 future-v2"; echo "$RE"; } > "$1" ;;
+    nocap)      { echo "$RB"; echo "_Protocol version: owner-roar-protocol v9._"; echo "$RE"; } > "$1" ;;
+    twocap)     { echo "$RB"; echo "$CAP"; echo "$CAP"; echo "$RE"; } > "$1" ;;
+    capoutside) { echo "$CAP"; echo "$RB"; echo "_Protocol version: owner-roar-protocol v9._"; echo "$RE"; } > "$1" ;;
+    othercap)   { echo "$RB"; echo "Protocol capabilities: something-else"; echo "$RE"; } > "$1" ;;
+    noblock)    echo "# nothing here" > "$1" ;;
+    legacy)     { echo "<!-- OWNER_RAR_PROTOCOL:begin -->"; echo "old"; echo "<!-- OWNER_RAR_PROTOCOL:end -->"; } > "$1" ;;
+    orphanend)  { echo "<!-- OWNER_RAR_PROTOCOL:end -->"; echo "$RB"; echo "$CAP"; echo "$RE"; } > "$1" ;;
+    orphanbegin){ echo "<!-- OWNER_RAR_PROTOCOL:begin -->"; echo "$RB"; echo "$CAP"; echo "$RE"; } > "$1" ;;
+    inverted)   { echo "$RE"; echo "x"; echo "$RB"; echo "$CAP"; } > "$1" ;;
+    truncated)  { echo "$RB"; echo "$CAP"; echo "no end"; } > "$1" ;;
+    dupblock)   { echo "$RB"; echo "$CAP"; echo "$RE"; echo "$RB"; echo "$CAP"; echo "$RE"; } > "$1" ;;
+  esac
+}
+R="$W/recv"
+for v in ok multi nocap twocap capoutside othercap noblock legacy orphanend orphanbegin inverted truncated dupblock; do mkrecv "$R/$v/CLAUDE.md" "$v"; done
+
+run --receiver "$R/ok/CLAUDE.md" --require-capability advisory-v1
+check "receiver: capability declared" 0 "receiver: OK" "capability advisory-v1 declared" "block v9"
+run --receiver "$R/multi/CLAUDE.md" --require-capability advisory-v1
+check "receiver: capability among several" 0 "receiver: OK"
+run --receiver "$R/ok/CLAUDE.md"
+check "receiver: no capability required" 0 "receiver: OK"
+run --receiver "$R/nocap/CLAUDE.md" --require-capability advisory-v1
+check "receiver: no capability line" 1 "no 'Protocol capabilities:' line"
+run --receiver "$R/twocap/CLAUDE.md" --require-capability advisory-v1
+check "receiver: two capability lines" 1 "exactly one is required"
+run --receiver "$R/capoutside/CLAUDE.md" --require-capability advisory-v1
+check "receiver: capability outside the block" 1 "no 'Protocol capabilities:' line"
+run --receiver "$R/othercap/CLAUDE.md" --require-capability advisory-v1
+check "receiver: different capability token" 1 "not declared"
+run --receiver "$R/noblock/CLAUDE.md" --require-capability advisory-v1
+check "receiver: file without a block" 1 "no OWNER_ROAR_PROTOCOL block"
+run --receiver "$R/legacy/CLAUDE.md" --require-capability advisory-v1
+check "receiver: legacy block" 1 "legacy OWNER_RAR_PROTOCOL marker present"
+run --receiver "$R/orphanend/CLAUDE.md" --require-capability advisory-v1
+check "receiver: orphan legacy end marker" 1 "legacy OWNER_RAR_PROTOCOL marker present"
+run --receiver "$R/orphanbegin/CLAUDE.md" --require-capability advisory-v1
+check "receiver: orphan legacy begin marker" 1 "legacy OWNER_RAR_PROTOCOL marker present"
+run --receiver "$R/inverted/CLAUDE.md" --require-capability advisory-v1
+check "receiver: inverted markers" 1 "out of order"
+run --receiver "$R/truncated/CLAUDE.md" --require-capability advisory-v1
+check "receiver: truncated block" 1 "not well formed"
+run --receiver "$R/dupblock/CLAUDE.md" --require-capability advisory-v1
+check "receiver: duplicated block" 1 "not well formed"
+run --receiver "$R/missing/CLAUDE.md" --require-capability advisory-v1
+check "receiver: file does not exist" 1 "file does not exist"
+run --receiver "relative/CLAUDE.md" --require-capability advisory-v1
+check "receiver: relative path refused" 2 "absolute path"
+run --receiver "$R/ok/CLAUDE.md" --check
+check "receiver: corpus option refused" 2 "cannot be combined"
+run --receiver "$R/ok/CLAUDE.md" --root "$R"
+check "receiver: --root refused" 2 "cannot be combined"
+run --require-capability advisory-v1 --check --root "$CLEAN"
+check "capability without receiver refused" 2 "only valid with --receiver"
+mkrecv "$R/nested-root/CLAUDE.md" noblock; mkrecv "$R/nested-root/sub/CLAUDE.md" ok
+run --receiver "$R/nested-root/CLAUDE.md" --require-capability advisory-v1
+check "receiver: a nested file cannot satisfy the root" 1 "no OWNER_ROAR_PROTOCOL block"
+run --receiver "$R/ok/CLAUDE.md" --require-capability "advisory-v1 --root /etc"
+check "receiver: capability token must be a single token" 2 "single token matching"
+run --receiver "$R/ok/CLAUDE.md" --require-capability "bad token!"
+check "receiver: capability token rejects punctuation" 2 "single token matching"
+run --receiver "$R/ok/CLAUDE.md" --require-capability advisory-v1 --canonical /nonexistent
+check "receiver: --canonical refused rather than ignored" 2 "no effect in receiver mode"
+mkrecv "$R/spaced dir/CLAUDE.md" ok
+run --receiver "$R/spaced dir/CLAUDE.md" --require-capability advisory-v1
+check "receiver: path with spaces" 0 "receiver: OK"
+
 if [ "$(id -u)" = 0 ]; then
   echo "SKIP  access error (running as root, permissions are not enforced)"
 else

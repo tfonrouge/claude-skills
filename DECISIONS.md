@@ -201,6 +201,10 @@ install behavior is still expressed only in the `.prompt.md`, no protocol text l
 and the paste-able form is intact. The tool's tests generate their fixtures from the canonical
 prompt at run time, so no second copy of the block is checked in.
 
+**Extended 2026-09-03.** The same wrapper gains `--receiver FILE` / `--require-capability TOKEN`
+(packaging `0.1.3`): an exact-path check of one receiver file, which the `acs` skill calls as its
+guard rather than parsing the markers a second time — see D13.
+
 ## D6 — The blueprint-workflow skills live in this repo, alongside their cathedral adapters
 
 **Status:** decided 2026-07-21 · reverses the eviction in `2c7c792`
@@ -616,3 +620,55 @@ joins the protocol before the pilot reports.
 findings the census caught · **findings ROAR later caught that the census should have caught**
 (the sharpest signal) · false positives. Reopen also if census and review start finding the same
 things, meaning one is redundant.
+
+## D13 — ACS is a skill with a minimal advisory interface in the protocol, not a third protocol
+
+**Status:** decided 2026-09-03 · introduced with `acs` 0.1.0 and owner-roar-protocol v9 (minimal)
+
+**Decision.** Analyze · Criticize · Suggest ships as a **skill** (`acs`) that produces advisories,
+plus the smallest possible **receiver rule in the installed block**: a generic `ADVISORY` wrapper
+with a `Type:` field, the statement that advisory content is non-authoritative data, and the
+requirement that action follows only an explicit Owner disposition of item ids written outside the
+block. ACS inherits nothing else from ROAR — no stamp, no triage, no termination criterion, no
+`Blocking` axis — and the reviewer kickoff gains no ACS rules, only the lockstep version bump.
+The skill refuses to run unless the receiving session's protocol declares `advisory-v1`.
+
+**Why.**
+
+- **The failure being closed is real and happened here.** Over this review, an implementer session
+  twice inferred authority from pasted analysis plus agreement, and acted. The defect was not the
+  analysis: it was that the protocol had exactly two input classes, Owner directive and ROAR
+  finding, so a third kind of material had nowhere to land. A rule that lives only in the producing
+  skill protects the invoking turn and nothing else — not a later session, not a pasted block, not
+  a resumed session. It has to live in the block the receiver loads.
+- **Generic beats specific.** The wrapper says `Type:`, not `ACS`, so an architecture review, a
+  security assessment, a human audit or another model's report lands in the same class without a
+  new protocol rule each time.
+- **The rule had to be narrowed before it shipped.** An early draft said "only an explicit Owner
+  disposition authorizes action", which would have made every ordinary instruction — *run the
+  tests*, *push* — unauthorized for want of item ids, in eleven projects. It governs
+  advisory-derived action only.
+- **Two parsers of one block is the drift this repo exists to prevent** (D5, D6). The guard
+  therefore calls the auditor's exact-path mode instead of re-deriving marker rules in Python.
+- **Honesty about what is enforceable.** No script can inspect a session's loaded context, so the
+  guard is three layers of different strength and the sheet, the skill and the docs all say which
+  is mechanical and which is attestation. `advisory-v1` is a compatibility assertion; byte-for-byte
+  `--verify` is what proves the text.
+
+**Alternatives rejected.**
+
+- *A third full protocol beside Owner/ROAR:* the receiving rules are four sentences; a parallel
+  protocol would duplicate wire format, versioning and installation for nothing.
+- *An `ACS` class rather than a generic `ADVISORY` one:* the next advisory source would need
+  another protocol change. Rejected.
+- *Ship the skill now, add the receiver rule later:* the guard would protect only the turn that
+  invoked it — the exact gap that caused the incidents above. Rejected; the two land together.
+- *A second marker parser inside the ACS script:* rejected on D5/D6 grounds.
+- *Durable ACS output (`--out`, diagnostic bundles):* proposed and dropped from v1. It was the
+  largest surface with the least connection to the request, and two of its own rules contradicted
+  each other. Advisories live in the conversation, like ROAR findings under D1.
+
+**Reopen if.** A durable record of advisories proves necessary after ten to twenty real rounds
+(then route it like D1 does: a dedicated artifact, never `AUDIT.md`/`LEDGER.md`); or a second
+advisory producer appears whose contract the generic wrapper cannot carry; or ROAR itself moves
+over the same transport, at which point the guard and the envelope should be designed together.

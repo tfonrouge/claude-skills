@@ -1,7 +1,7 @@
 ---
 name: owner-roar-protocol
 metadata:
-  version: 0.1.2
+  version: 0.1.3
 description: >
   Installs or upgrades the Owner/ROAR Session Roles Protocol block in a project's
   CLAUDE.md (or AGENTS.md / equivalent), delimited by the stable `OWNER_ROAR_PROTOCOL`
@@ -65,6 +65,14 @@ audited projects; it only uses a temporary directory that it removes on exit.
 - `--verify` — additionally extract each block and compare it byte for byte with the canonical
   block in `references/owner-roar-protocol.prompt.md`, reporting drift — and reporting when the
   canonical itself disagrees with most installs, because the canonical has drifted before.
+
+- `--receiver FILE` — a different question: not "what is installed across projects?" but "is *this
+  exact file* a valid receiver?". It examines only the named absolute path, with no discovery and
+  no recursion, and requires exactly one well-formed block; with `--require-capability TOKEN` it
+  also requires exactly one `Protocol capabilities:` line **inside** that block carrying the token.
+  Exit `0` when all of that holds, `1` when the file exists but fails a requirement, `2` for usage
+  or an unreadable file. It cannot be combined with the corpus options. The `acs` skill uses this
+  mode as its receiver guard, so the marker rules have one implementation rather than two.
 
 It prints its corpus (roots, exclusions, depth, files scanned, access errors), accepts an
 `--expected` list of project directories so an absent install is reported rather than silently

@@ -30,6 +30,16 @@ Each skill module contains:
   is a packaging version, independent of the protocol version carried by the prompts. Rationale in
   [`DECISIONS.md`](./DECISIONS.md) (D5).
 
+- **[`acs`](./acs/)**: **Analyze · Criticize · Suggest** — an advisory pass over the current
+  checkout, delegated to the local Codex CLI and returned to the invoking session as an
+  `ADVISORY` block plus an empty `@Owner-Disposition` template. It is the counterpart of ROAR, not
+  a replacement: ROAR asks whether a submitted change is safe to land, ACS asks whether the
+  approach is right and what else the Owner should weigh. Its output has **no authority** — items
+  become instructions only when the Owner disposes them by id — and it never carries `Blocking`.
+  Read-only, manual-invoke only, and it refuses to run unless the receiving session's protocol
+  block declares `advisory-v1`. Full workflow in
+  [`docs/ROAR-ACS-CODEX-WORKFLOW.md`](./docs/ROAR-ACS-CODEX-WORKFLOW.md).
+
 - **[`owner-loop-goal`](./owner-loop-goal/)**: implementer working mode for **long, self-verified
   cycles toward a goal**. Requires a specific, falsifiable GOAL with a measurable DoD — the skill
   refuses to start without one (the name makes the requirement explicit). Each iteration runs the
@@ -68,13 +78,32 @@ Lifecycle:
 
 1. **Once per project** — paste `owner-roar-protocol.prompt.md` into the implementer session. It installs a versioned, marker-delimited block in `CLAUDE.md`; re-paste a newer version to replace it in place.
 2. **Each reviewer session** — paste `roar-reviewer.prompt.md` into the ROAR session so it wraps output correctly from the first message.
-3. **Each review** — copy ROAR's wrapped output into the implementer; the implementer triages each finding (Confirmed / Rejected / Stale / Needs owner decision / Unclear) before changing anything.
+3. **Each review** — copy ROAR's wrapped output into the implementer; the implementer triages each finding (Unclear / Rejected / Stale / Confirmed out-of-scope / Needs owner decision / Confirmed in-scope) before changing anything.
+
+For the ACS side of the same picture — when to use which loop, how Claude calls Codex, what Codex
+reads, and how the Owner disposes advisory items — see
+[`docs/ROAR-ACS-CODEX-WORKFLOW.md`](./docs/ROAR-ACS-CODEX-WORKFLOW.md).
 
 ## How to Use
 
 1. **Install** the skills into your agent's workspace. Run [`./install.sh`](./install.sh) to sync every skill in this repo into `~/.claude/skills/` (`--link` to symlink instead of copy so repo edits take effect live; `--dry-run` to preview). This repo is the source of truth — the script only ever writes *downstream*, never back.
 2. **Configure** the project's `CLAUDE.md` with the appropriate premise and blueprint skill (see `cathedral-premise/references/cathedral-core.md` for the config template).
 3. **Invoke** the skill by trigger phrase (e.g., "run cathedral audit", "premise check") or let the agent activate it automatically when it detects relevant context.
+
+## Checking a change before it lands
+
+`git diff --check` only inspects **tracked** files, so a new skill's files escape it entirely. Cover
+both sides before calling a change clean:
+
+```bash
+git diff --check
+git status --porcelain | awk '$1=="??"{print $2}' | xargs -I{} find {} -type f \
+  | while IFS= read -r f; do git diff --no-index --check /dev/null "$f" \
+      | grep -E 'whitespace|trailing' && echo "  ^ in $f"; done
+```
+
+Read the **output** of the second command, not its exit status: `git diff --no-index` exits
+non-zero whenever the files differ, which against `/dev/null` is always.
 
 ## Adding a New Skill
 

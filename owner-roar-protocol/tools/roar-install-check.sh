@@ -27,8 +27,23 @@
 #                   (default: ../references/owner-roar-protocol.prompt.md next to this script)
 #   --allow-empty   a corpus with zero candidate files is not an error
 #   --quiet         print the summary only
-# Exit: 0 clean · 1 findings (drift, legacy, duplicate, malformed, expected-absent)
-#       2 error (usage, unreadable canonical, missing explicit root, access errors, empty corpus)
+#
+# Receiver mode (exact single file, no corpus, no recursion):
+#   roar-install-check.sh --receiver <absolute path> [--require-capability TOKEN] [--quiet]
+#   --receiver FILE            examine exactly this file — the instruction file the receiving agent
+#                              loads. Mutually exclusive with --check, --verify, --root, --depth,
+#                              --expected and --allow-empty.
+#   --require-capability TOK   additionally require exactly one `Protocol capabilities:` line INSIDE
+#                              the block, carrying the literal token TOK. Only valid with --receiver;
+#                              TOK must match [A-Za-z0-9][A-Za-z0-9._-]{0,63}. --canonical is refused
+#                              in this mode rather than silently ignored.
+#   Requires: the file exists and is readable; exactly one well-formed OWNER_ROAR_PROTOCOL block
+#   (whole-line markers, begin before end, not duplicated); no legacy OWNER_RAR_PROTOCOL block.
+#
+# Exit: 0 clean · 1 findings (drift, legacy, duplicate, malformed, expected-absent; in receiver
+#       mode: the file exists but fails a requirement)
+#       2 error (usage, unreadable canonical, missing explicit root, access errors, empty corpus;
+#       in receiver mode: unreadable file or incompatible options)
 #
 # Markers are matched as whole lines: the block's own prose quotes its markers, so an unanchored
 # range truncates inside the block (a project-side checker once compared 28 of 48 lines that way).
@@ -38,6 +53,7 @@ set -u
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 MODE="check"; DEPTH=2; EXPECTED=""; QUIET=0; ALLOW_EMPTY=0
+RECEIVER=""; REQUIRE_CAP=""; SAW_CORPUS_OPT=0; SAW_CANONICAL=0
 CANONICAL="$SCRIPT_DIR/../references/owner-roar-protocol.prompt.md"
 ROOTS=(); EXPLICIT_ROOTS=0
 FILE_NAMES="CLAUDE.md AGENTS.md"
@@ -46,18 +62,20 @@ ROAR_B='<!-- OWNER_ROAR_PROTOCOL:begin -->'; ROAR_E='<!-- OWNER_ROAR_PROTOCOL:en
 RAR_B='<!-- OWNER_RAR_PROTOCOL:begin -->';   RAR_E='<!-- OWNER_RAR_PROTOCOL:end -->'
 TAB=$'\t'
 
-usage() { sed -n '2,35p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { awk 'NR>1 { if (/^#/) { sub(/^# ?/, ""); print; next } else exit }' "$0"; }
 die() { echo "ERROR: $*" >&2; exit 2; }
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    --check) MODE="check" ;;
-    --verify) MODE="verify" ;;
-    --root) shift; [ $# -gt 0 ] || die "--root needs a DIR"; ROOTS+=("$1"); EXPLICIT_ROOTS=1 ;;
-    --depth) shift; [ $# -gt 0 ] || die "--depth needs N"; DEPTH="$1" ;;
-    --expected) shift; [ $# -gt 0 ] || die "--expected needs FILE"; EXPECTED="$1" ;;
-    --canonical) shift; [ $# -gt 0 ] || die "--canonical needs FILE"; CANONICAL="$1" ;;
-    --allow-empty) ALLOW_EMPTY=1 ;;
+    --check) MODE="check"; SAW_CORPUS_OPT=1 ;;
+    --verify) MODE="verify"; SAW_CORPUS_OPT=1 ;;
+    --root) shift; [ $# -gt 0 ] || die "--root needs a DIR"; ROOTS+=("$1"); EXPLICIT_ROOTS=1; SAW_CORPUS_OPT=1 ;;
+    --depth) shift; [ $# -gt 0 ] || die "--depth needs N"; DEPTH="$1"; SAW_CORPUS_OPT=1 ;;
+    --expected) shift; [ $# -gt 0 ] || die "--expected needs FILE"; EXPECTED="$1"; SAW_CORPUS_OPT=1 ;;
+    --canonical) shift; [ $# -gt 0 ] || die "--canonical needs FILE"; CANONICAL="$1"; SAW_CANONICAL=1 ;;
+    --allow-empty) ALLOW_EMPTY=1; SAW_CORPUS_OPT=1 ;;
+    --receiver) shift; [ $# -gt 0 ] || die "--receiver needs FILE"; RECEIVER="$1" ;;
+    --require-capability) shift; [ $# -gt 0 ] || die "--require-capability needs TOKEN"; REQUIRE_CAP="$1" ;;
     --quiet) QUIET=1 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "unknown arg: $1" >&2; usage >&2; exit 2 ;;
@@ -65,6 +83,49 @@ while [ $# -gt 0 ]; do
   shift
 done
 case "$DEPTH" in ''|*[!0-9]*) die "--depth must be an integer" ;; esac
+
+# ---- receiver mode: exactly one named file, no discovery, no corpus
+extract_roar_block() {
+  awk -v b='<!-- OWNER_ROAR_PROTOCOL:begin -->' -v e='<!-- OWNER_ROAR_PROTOCOL:end -->' \
+      '$0==b{p=1} p{print} $0==e{p=0}' "$1"
+}
+if [ -n "$RECEIVER" ]; then
+  [ "$SAW_CORPUS_OPT" = 0 ] || die "--receiver cannot be combined with --check, --verify, --root, --depth, --expected or --allow-empty"
+  [ "$SAW_CANONICAL" = 0 ] || die "--canonical has no effect in receiver mode; remove it"
+  if [ -n "$REQUIRE_CAP" ]; then
+    printf '%s' "$REQUIRE_CAP" | grep -q -E '^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$' \
+      || die "--require-capability must be a single token matching [A-Za-z0-9][A-Za-z0-9._-]{0,63}: $REQUIRE_CAP"
+  fi
+  case "$RECEIVER" in /*) ;; *) die "--receiver needs an absolute path: $RECEIVER" ;; esac
+  rsay() { [ "$QUIET" = 1 ] || printf '%s\n' "$*"; }
+  rfail() { rsay "receiver: FAIL $RECEIVER"; rsay "  $*"; echo "receiver check failed: $*" >&2; exit 1; }
+  [ -e "$RECEIVER" ] || rfail "file does not exist"
+  { [ -f "$RECEIVER" ] && [ -r "$RECEIVER" ]; } || die "receiver file is not a readable regular file: $RECEIVER"
+  rb=$(grep -c -x -F -- '<!-- OWNER_ROAR_PROTOCOL:begin -->' "$RECEIVER" 2>/dev/null || true)
+  re=$(grep -c -x -F -- '<!-- OWNER_ROAR_PROTOCOL:end -->' "$RECEIVER" 2>/dev/null || true)
+  lb=$(grep -c -x -F -- '<!-- OWNER_RAR_PROTOCOL:begin -->' "$RECEIVER" 2>/dev/null || true)
+  le=$(grep -c -x -F -- '<!-- OWNER_RAR_PROTOCOL:end -->' "$RECEIVER" 2>/dev/null || true)
+  # either marker, orphan or not: a half-migrated file is not a valid receiver
+  [ "$lb" = 0 ] && [ "$le" = 0 ] || rfail "legacy OWNER_RAR_PROTOCOL marker present (begin=$lb end=$le); upgrade with /owner-roar-protocol"
+  [ "$rb" != 0 ] || rfail "no OWNER_ROAR_PROTOCOL block in this file"
+  { [ "$rb" = 1 ] && [ "$re" = 1 ]; } || rfail "markers not well formed (begin=$rb end=$re)"
+  bl=$(grep -n -x -F -- '<!-- OWNER_ROAR_PROTOCOL:begin -->' "$RECEIVER" | head -1 | cut -d: -f1)
+  el=$(grep -n -x -F -- '<!-- OWNER_ROAR_PROTOCOL:end -->' "$RECEIVER" | head -1 | cut -d: -f1)
+  [ "$bl" -lt "$el" ] || rfail "markers out of order (begin at line $bl, end at line $el)"
+  ver=$(extract_roar_block "$RECEIVER" | grep -m1 -o -E 'owner-roar-protocol v[0-9]+' | sed 's/.* //')
+  if [ -n "$REQUIRE_CAP" ]; then
+    ncap=$(extract_roar_block "$RECEIVER" | grep -c -E '^Protocol capabilities:' || true)
+    [ "$ncap" != 0 ] || rfail "no 'Protocol capabilities:' line inside the block (looking for $REQUIRE_CAP)"
+    [ "$ncap" = 1 ] || rfail "$ncap 'Protocol capabilities:' lines inside the block; exactly one is required"
+    capline=$(extract_roar_block "$RECEIVER" | grep -m1 -E '^Protocol capabilities:')
+    printf '%s' " ${capline#Protocol capabilities:} " | tr ',' ' ' | grep -q -F -- " $REQUIRE_CAP " \
+      || rfail "capability '$REQUIRE_CAP' not declared (line reads: $capline)"
+  fi
+  rsay "receiver: OK $RECEIVER"
+  rsay "  block ${ver:-version-unknown}${REQUIRE_CAP:+ · capability $REQUIRE_CAP declared}"
+  exit 0
+fi
+[ -z "$REQUIRE_CAP" ] || die "--require-capability is only valid with --receiver"
 
 if [ ${#ROOTS[@]} -eq 0 ]; then
   if [ -n "${ROAR_CHECK_ROOTS:-}" ]; then
