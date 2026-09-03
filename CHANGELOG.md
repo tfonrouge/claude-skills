@@ -353,6 +353,12 @@ five principles (Incremental Discipline plus the Decision Ledger with falsificat
 > v6 and v7) until an implementer session reported the contradiction. The version number is no
 > longer copied into the wrappers at all — they point at the prompt's `Protocol version:` line, per
 > D5's amended "no duplicated text" rule.
+> `owner-roar-protocol` bumped to **0.1.2** on 2026-09-02: the wrapper gains an **audit mode** —
+> `--check` / `--verify`, routed before the installer, forwarding only recognized CLI options —
+> backed by `tools/roar-install-check.sh` and its harness `tools/tests/run-tests.sh`, whose fixtures
+> are generated from the canonical prompt at run time. The audit modifies neither protocol files nor
+> the audited projects; it only uses a temporary directory that it removes on exit. The wrapper
+> still carries no protocol text (D5, amended 2026-09-02).
 
 ## v8
 

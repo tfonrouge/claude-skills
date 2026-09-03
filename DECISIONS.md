@@ -187,6 +187,20 @@ v5 through v6 and v7) before an implementer session caught the contradiction. Th
 point at the prompt's `Protocol version:` line and name no version at all, which makes the drift
 structurally impossible rather than fixing it once.
 
+**Amendment 2026-09-02 — `owner-roar-protocol` gains a second, audit-only mode.** Invoked with
+`--check` or `--verify` — or asked in plain words to audit / inventory (→ `--check`) or to verify /
+compare (→ `--verify`) the blocks already installed — the skill does not read or apply the
+installer prompt at all: it runs the bundled `tools/roar-install-check.sh`, resolved from the
+skill's own directory and never from the working directory, forwarding only recognized CLI
+options and asking about anything unrecognized or ambiguous rather than inventing or forwarding
+it. The audit modifies neither protocol files nor the audited projects; it only uses a temporary
+directory that it removes on exit. This is the "behavior the prompt can't express" case named in
+the reopen condition above, so the wrapper is no longer only a pointer: it carries a router (audit
+mode before install mode) and a tool, and its packaging version moved to `0.1.2`. Unchanged: the
+install behavior is still expressed only in the `.prompt.md`, no protocol text lives in `SKILL.md`,
+and the paste-able form is intact. The tool's tests generate their fixtures from the canonical
+prompt at run time, so no second copy of the block is checked in.
+
 ## D6 — The blueprint-workflow skills live in this repo, alongside their cathedral adapters
 
 **Status:** decided 2026-07-21 · reverses the eviction in `2c7c792`
